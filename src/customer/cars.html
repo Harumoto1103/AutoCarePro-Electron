@@ -63,7 +63,12 @@
       console.log(json);
 
       if (json["status"] != "failure") {
-        document.querySelector("#no-cars").remove();
+        if (json["vehicles"][0] != undefined) {
+          document.querySelector("#no-cars").remove();
+        } else {
+          document.querySelector("#no-cars").innerHTML =
+            "No registered vehicles.";
+        }
       }
 
       json.vehicles.forEach((vehicle) => {
