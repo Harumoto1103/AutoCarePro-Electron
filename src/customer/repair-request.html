@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" href="../css/universal.css" />
+    <link rel="stylesheet" href="../css/customer-cars.css" />
+    <link rel="stylesheet" href="../css/alert.css" />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AutoCare Pro - My Cars</title>
+  </head>
+  <body>
+    <div class="nav-bar">
+      <div class="nav-logo">AutoCare Pro</div>
+      <div class="nav-user" id="nav-user">
+        <div class="nav-user-avatar"></div>
+        <div class="nav-username" id="username">　　　</div>
+        <div
+          class="nav-dropdown"
+          id="nav-dropdown"
+          style="opacity: 0; display: none"
+        >
+          <div class="nav-dropdown-menu" id="logout">Logout</div>
+        </div>
+      </div>
+    </div>
+    <form class="container">
+      <div class="cancel" id="cancel">✖︎</div>
+      <div class="container-title">
+        <div class="container-title-text">Add Request</div>
+        <div class="container-title-buttons">
+          <!-- <div class="title-button">＋Add</div> -->
+        </div>
+      </div>
+      <div style="height: 20px"></div>
+
+      <div class="input-container">
+        <div class="input-icon">
+          <span class="material-symbols-outlined"> directions_car </span>
+        </div>
+        <select name="vehicle" id="vehicles"></select>
+      </div>
+
+      <div class="input-container">
+        <div class="input-icon" style="height: 214px">
+          <span class="material-symbols-outlined"> description </span>
+        </div>
+        <textarea
+          type="text"
+          id="description"
+          placeholder="Description"
+          name="description"
+          required
+        ></textarea>
+      </div>
+
+      <button type="submit" id="req-btn">Submit Request</button>
+    </form>
+  </body>
+  <script src="../js/alert.js"></script>
+  <script src="../js/sections.js"></script>
+  <script src="../js/config.js"></script>
+  <script>
+    verify_token("../index.html");
+    fetch_profile();
+
+    const user_profile = JSON.parse(localStorage.getItem("user_profile"));
+    document.querySelector("#username").innerHTML = user_profile["username"];
+
+    document.querySelector("form")[0].addEventListener("submit", (event) => {
+      event.preventDefault();
+    });
+
+    const fetch_cars = async () => {
+      const req_url = `${API_HOST}/api/customer/${localStorage.getItem(
+        "user_id"
+      )}/vehicles`;
+      const resp = await fetch(req_url, {
+        method: "GET",
+        headers: {
+          "Content-type": "application/json",
+          Authorization: `bearer ${localStorage.getItem("token")}`,
+        },
+      });
+
+      const status = resp.status;
+      const json = await resp.json();
+      console.log(json);
+
+      if (json["status"] != "success") {
+        alert(
+          "Failed to load vehicles",
+          "Failed to load your registered vehicles, please try again later.",
+          "Confirm",
+          () => {
+            location.href = "index.html";
+          }
+        );
+      } else {
+        json["vehicles"].forEach((vehicle) => {
+          document.querySelector("#vehicles").innerHTML += `
+                <option name="${vehicle.vehicle_id}">${vehicle.license_plate}</option>
+            `;
+        });
+      }
+    };
+
+    fetch_cars();
+
+    document.querySelector("#cancel").addEventListener("click", () => {
+      location.href = "index.html";
+    });
+
+    document.querySelector("#nav-user").addEventListener("click", (event) => {
+      const dropdown = document.querySelector("#nav-dropdown");
+      console.log(dropdown.style);
+      if (dropdown.style.display == "none") {
+        dropdown.style.display = "block";
+        setTimeout(() => {
+          dropdown.style.opacity = "1";
+        }, 100);
+      } else {
+        dropdown.style.opacity = "0";
+        setTimeout(() => {
+          dropdown.style.display = "none";
+        }, 100);
+      }
+    });
+
+    const submit_request = async () => {
+      const vehicle_id = document
+        .querySelector("#vehicles")
+        .options[
+          document.querySelector("#vehicles").selectedIndex
+        ].getAttribute("name");
+      const description = document.querySelector("#description");
+
+      const req_url = `${API_HOST}/api/customer/${localStorage.getItem(
+        "user_id"
+      )}/create-repair-requests`;
+      const resp = await fetch(req_url, {
+        method: "POST",
+        headers: {
+          "Content-type": "application/json",
+          Authorization: `bearer ${localStorage.getItem("token")}`,
+        },
+        body: JSON.stringify({
+          vehicle_id: vehicle_id,
+          description: description.value,
+        }),
+      });
+
+      const status = resp.status;
+      const json = await resp.json();
+
+      if (json["status"] != "success") {
+        alert(
+          "Error",
+          "Failed to submit request, please try again later.",
+          "Confirm",
+          () => {}
+        );
+      } else {
+        alert("Success", "Request submitted.", "Confirm", () => {
+          location.reload();
+        });
+      }
+      console.log(json);
+    };
+
+    document.querySelector("#logout").addEventListener("click", () => {
+      localStorage.clear();
+      location.href = "../index.html";
+    });
+
+    document.querySelector("#req-btn").addEventListener("click", (event) => {
+      event.preventDefault();
+      submit_request();
+    });
+  </script>
+</html>
