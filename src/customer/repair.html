@@ -86,6 +86,9 @@
           document.querySelector("#no-cars").innerHTML =
             "No existing requests or orders.";
         }
+      } else {
+        document.querySelector("#no-cars").innerHTML =
+          "No existing requests or orders.";
       }
       const vehicles = await fetch_cars();
       console.log(vehicles);
