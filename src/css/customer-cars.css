@@ -1,0 +1,268 @@
+body {
+  align-items: center !important;
+  justify-content: start !important;
+}
+
+/* .cars-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  overflow-y: scroll;
+  /* min-height: 500px; */
+/* max-height: 400px; */
+/* } */
+
+.cars-container {
+  width: 100%;
+  max-height: 400px;
+  overflow-y: auto;
+  padding-right: 10px; /* 给滚动条预留空间，防止遮住内容 */
+  margin-top: 10px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  /* 滚动条样式（可选） */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+  border-radius: 10px;
+}
+
+.cars-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.cars-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.cars-container::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 6px;
+}
+
+.vehicle {
+  width: calc(100% - 20px) !important;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: row;
+  background-color: rgba(255, 255, 255, 0.7);
+  border-radius: 10px;
+  box-shadow: 2px 4px 10px rgba(0, 0, 0, 0.08);
+  height: 100px;
+  padding: 10px;
+  margin-bottom: 10px;
+}
+
+.vehicle:first-child {
+  margin-top: 10px;
+}
+
+.vehicle-image {
+  width: 80px;
+  height: 80px;
+  border-radius: 10px;
+  margin-right: 20px;
+  margin-left: 10px;
+}
+
+.vehicle-image > img {
+  width: 100%;
+  height: 100%;
+  border-radius: 10px;
+  box-shadow: 2px 4px 10px rgba(0, 0, 0, 0.08);
+}
+
+.vehicle-info {
+  margin-right: auto;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  align-items: start;
+}
+
+.vehicle-plate {
+  font-size: 20px;
+  font-weight: 600;
+  font-family: monospace;
+  color: rgba(20, 106, 216, 1);
+}
+
+.vehicle-model {
+  font-size: 14px;
+}
+
+.vehicle-remarks {
+  font-size: 13px;
+  color: rgba(0, 0, 0, 0.6);
+}
+
+.cancel {
+  position: absolute;
+  top: -10px;
+  left: -10px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  padding: 5px;
+  background-color: rgba(255, 255, 255, 0.9);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: 0.3s;
+}
+
+.cancel:hover {
+  position: absolute;
+  top: -10px;
+  left: -10px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  padding: 5px;
+  background-color: rgba(255, 255, 255, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: 0.3s;
+}
+
+.container {
+  position: relative;
+  width: 70vw;
+  min-height: 500px;
+  height: 400px;
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 20px;
+  padding: 20px;
+  margin-top: auto;
+  margin-bottom: auto;
+  display: flex;
+  justify-content: start;
+  align-items: center;
+  flex-direction: column;
+}
+
+.input-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: row;
+  width: 100%;
+  margin: 10px;
+}
+
+.input-container > .input-icon {
+  width: 30px;
+  height: 30px;
+  background-color: rgba(0, 0, 0, 0.9);
+  padding: 5px;
+  border-top-left-radius: 10px;
+  border-bottom-left-radius: 10px;
+  box-shadow: 3px 4px 10px rgba(0, 0, 0, 0.1);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.input-container > .input-icon > span {
+  color: white;
+  font-size: 25px;
+  font-weight: 300;
+}
+
+.input-container > input {
+  padding: 5px;
+  height: 30px;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  border: none;
+  border-top-right-radius: 10px;
+  border-bottom-right-radius: 10px;
+  width: 60%;
+  box-shadow: 3px 4px 10px rgba(0, 0, 0, 0.1);
+  appearance: none; /* Hide default arrow */
+  color: #333;
+}
+
+.input-container > input:focus {
+  border: none;
+  outline: none;
+}
+
+.input-container > select:focus {
+  border: none;
+  outline: none;
+}
+
+.input-container > select {
+  padding: 5px 10px;
+  height: 40px;
+  border: none;
+  border-top-right-radius: 10px;
+  border-bottom-right-radius: 10px;
+  width: calc(60% + 10px);
+  appearance: none; /* Hide default arrow */
+  background: white
+    url("data:image/svg+xml;utf8,<svg fill='gray' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>")
+    no-repeat right 10px center;
+  background-size: 16px 16px;
+  box-shadow: 3px 4px 10px rgba(0, 0, 0, 0.1);
+  font-size: 14px;
+  color: #333;
+  cursor: pointer;
+}
+
+.container-title {
+  /* font-size: 24px; */
+  /* font-weight: 600; */
+  display: block;
+  width: 100%;
+  border-bottom: 0.5px solid rgba(0, 0, 0, 0.1);
+  padding: 5px 0px 10px 0px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.container-title-text {
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.container-title-buttons {
+  margin-left: auto;
+}
+
+.title-button {
+  padding: 10px 15px;
+  background: rgba(20, 106, 216, 0.8);
+  color: white;
+  border-radius: 10px;
+  transition: 0.3s;
+}
+
+.title-button:hover {
+  padding: 10px 15px;
+  background: rgba(20, 106, 216, 1);
+  color: white;
+  border-radius: 10px;
+  transition: 0.3s;
+}
+
+.no-cars {
+  padding: 5px;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: auto;
+}
+
+button {
+  width: calc(60% + 50px);
+}

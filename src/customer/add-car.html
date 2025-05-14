@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" href="../css/universal.css" />
+    <link rel="stylesheet" href="../css/customer-cars.css" />
+    <link rel="stylesheet" href="../css/alert.css" />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AutoCare Pro - My Cars</title>
+  </head>
+  <body>
+    <div class="nav-bar">
+      <div class="nav-logo">AutoCare Pro</div>
+      <div class="nav-user" id="nav-user">
+        <div class="nav-user-avatar"></div>
+        <div class="nav-username" id="username">John Doe</div>
+        <div
+          class="nav-dropdown"
+          id="nav-dropdown"
+          style="opacity: 0; display: none"
+        >
+          <div class="nav-dropdown-menu" id="logout">Logout</div>
+        </div>
+      </div>
+    </div>
+    <form class="container">
+      <div class="cancel" id="cancel">✖︎</div>
+      <div class="container-title">
+        <div class="container-title-text">Add Car</div>
+        <div class="container-title-buttons">
+          <!-- <div class="title-button">＋Add</div> -->
+        </div>
+      </div>
+      <div style="height: 20px"></div>
+      <div class="input-container">
+        <div class="input-icon">
+          <span class="material-symbols-outlined"> pin </span>
+        </div>
+        <input
+          type="text"
+          id="number-plate"
+          placeholder="Number Plate"
+          name="number-plate"
+          required
+        />
+      </div>
+      <div class="input-container">
+        <div class="input-icon">
+          <span class="material-symbols-outlined"> directions_car </span>
+        </div>
+        <select name="brand" id="brands"></select>
+      </div>
+
+      <div class="input-container">
+        <div class="input-icon">
+          <span class="material-symbols-outlined"> category </span>
+        </div>
+        <select name="type" id="types"></select>
+      </div>
+
+      <div class="input-container">
+        <div class="input-icon">
+          <span class="material-symbols-outlined"> palette </span>
+        </div>
+        <select name="color" id="colors"></select>
+      </div>
+
+      <div class="input-container">
+        <div class="input-icon">
+          <span class="material-symbols-outlined"> view_in_ar </span>
+        </div>
+        <input
+          type="text"
+          id="model"
+          placeholder="Model"
+          name="model"
+          required
+        />
+      </div>
+
+      <div class="input-container">
+        <div class="input-icon">
+          <span class="material-symbols-outlined"> edit </span>
+        </div>
+        <input
+          type="text"
+          id="remarks"
+          placeholder="Remarks"
+          name="remarks"
+          required
+        />
+      </div>
+
+      <button type="submit" id="add-btn">Add Vehicle</button>
+    </form>
+  </body>
+  <script src="../js/alert.js"></script>
+  <script src="../js/sections.js"></script>
+  <script src="../js/config.js"></script>
+  <script>
+    verify_token("../index.html");
+    fetch_profile();
+
+    const user_profile = JSON.parse(localStorage.getItem("user_profile"));
+    document.querySelector("#username").innerHTML = user_profile["username"];
+
+    const fetch_car_brands = async () => {
+      const req_url = `${API_HOST}/api/customer/vehicle/brands`;
+      const resp = await fetch(req_url, {
+        method: "GET",
+        headers: {
+          "Content-type": "application/json",
+          Authorization: `bearer ${localStorage.getItem("token")}`,
+        },
+      });
+
+      const json = await resp.json();
+      console.log(json);
+
+      const brands_select = document.querySelector("#brands");
+      json["brands"].forEach((brand) => {
+        brands_select.innerHTML += `
+        <option value="${brand.toLowerCase()}">${brand}</option>
+        `;
+      });
+    };
+
+    const fetch_car_types = async () => {
+      const req_url = `${API_HOST}/api/customer/vehicle/types`;
+      const resp = await fetch(req_url, {
+        method: "GET",
+        headers: {
+          "Content-type": "application/json",
+          Authorization: `bearer ${localStorage.getItem("token")}`,
+        },
+      });
+
+      const json = await resp.json();
+      console.log(json);
+
+      const brands_select = document.querySelector("#types");
+      json["types"].forEach((type) => {
+        brands_select.innerHTML += `
+        <option value="${type.toLowerCase()}">${type}</option>
+        `;
+      });
+    };
+
+    const fetch_car_colors = async () => {
+      const req_url = `${API_HOST}/api/customer/vehicle/colors`;
+      const resp = await fetch(req_url, {
+        method: "GET",
+        headers: {
+          "Content-type": "application/json",
+          Authorization: `bearer ${localStorage.getItem("token")}`,
+        },
+      });
+
+      const json = await resp.json();
+      console.log(json);
+
+      const brands_select = document.querySelector("#colors");
+      json["colors"].forEach((color) => {
+        brands_select.innerHTML += `
+        <option value="${color.toLowerCase()}">${color}</option>
+        `;
+      });
+    };
+
+    fetch_car_brands();
+    fetch_car_types();
+    fetch_car_colors();
+
+    document.querySelector("form")[0].addEventListener("submit", (event) => {
+      event.preventDefault();
+    });
+
+    const add_vehicle = async (data) => {
+      const req_url = `${API_HOST}/api/customer/vehicle/add`;
+      const resp = await fetch(req_url, {
+        method: "POST",
+        headers: {
+          "Content-type": "application/json",
+          Authorization: `bearer ${localStorage.getItem("token")}`,
+        },
+        body: JSON.stringify(data),
+      });
+      const status = resp.status;
+      const json = await resp.json();
+
+      if (json["status"] != "success") {
+        alert("Faile to add vehicle!", json["message"], "Confirm", () => {});
+      } else {
+        alert("Success", "Vehicle added!", "Confirm", () => {
+          location.reload();
+        });
+      }
+    };
+
+    document.querySelector("#add-btn").addEventListener("click", (event) => {
+      event.preventDefault();
+
+      const numberPlate = document.querySelector("#number-plate");
+      const brand = document.querySelector("#brands");
+      const type = document.querySelector("#types");
+      const color = document.querySelector("#colors");
+      const model = document.querySelector("#model");
+      const remarks = document.querySelector("#remarks");
+
+      const data = {
+        customer_id: localStorage.getItem("user_id"),
+        number_plate: numberPlate.value,
+        brand: brand.value,
+        type: type.value,
+        color: color.value,
+        model: model.value,
+        remarks: remarks.value,
+      };
+
+      add_vehicle(data);
+    });
+
+    document.querySelector("#cancel").addEventListener("click", () => {
+      location.href = "index.html";
+    });
+
+    document.querySelector("#nav-user").addEventListener("click", (event) => {
+      const dropdown = document.querySelector("#nav-dropdown");
+      console.log(dropdown.style);
+      if (dropdown.style.display == "none") {
+        dropdown.style.display = "block";
+        setTimeout(() => {
+          dropdown.style.opacity = "1";
+        }, 100);
+      } else {
+        dropdown.style.opacity = "0";
+        setTimeout(() => {
+          dropdown.style.display = "none";
+        }, 100);
+      }
+    });
+
+    document.querySelector("#logout").addEventListener("click", () => {
+      localStorage.clear();
+      location.href = "../index.html";
+    });
+  </script>
+</html>

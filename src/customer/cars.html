@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" href="../css/universal.css" />
+    <link rel="stylesheet" href="../css/customer-cars.css" />
+    <link rel="stylesheet" href="../css/alert.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AutoCare Pro - My Cars</title>
+  </head>
+  <body>
+    <div class="nav-bar">
+      <div class="nav-logo">AutoCare Pro</div>
+      <div class="nav-user" id="nav-user">
+        <div class="nav-user-avatar"></div>
+        <div class="nav-username" id="username">John Doe</div>
+        <div
+          class="nav-dropdown"
+          id="nav-dropdown"
+          style="opacity: 0; display: none"
+        >
+          <div class="nav-dropdown-menu" id="logout">Logout</div>
+        </div>
+      </div>
+    </div>
+    <div class="container">
+      <div class="cancel" id="cancel">✖︎</div>
+      <div class="container-title">
+        <div class="container-title-text">My Cars</div>
+        <div class="container-title-buttons">
+          <div class="title-button" id="add-btn">＋Add</div>
+        </div>
+      </div>
+      <div class="cars-container" id="cars-container">
+        <div class="no-cars" id="no-cars">Loading...</div>
+      </div>
+    </div>
+  </body>
+  <script src="../js/alert.js"></script>
+  <script src="../js/sections.js"></script>
+  <script src="../js/config.js"></script>
+  <script>
+    verify_token("../index.html");
+    fetch_profile();
+
+    const user_profile = JSON.parse(localStorage.getItem("user_profile"));
+    document.querySelector("#username").innerHTML = user_profile["username"];
+
+    const fetch_cars = async () => {
+      const req_url = `${API_HOST}/api/customer/${localStorage.getItem(
+        "user_id"
+      )}/vehicles`;
+      const resp = await fetch(req_url, {
+        method: "GET",
+        headers: {
+          "Content-type": "application/json",
+          Authorization: `bearer ${localStorage.getItem("token")}`,
+        },
+      });
+
+      const status = resp.status;
+      const json = await resp.json();
+      console.log(json);
+
+      if (json["status"] != "failure") {
+        document.querySelector("#no-cars").remove();
+      }
+
+      json.vehicles.forEach((vehicle) => {
+        document.querySelector("#cars-container").innerHTML += `
+            <div class="vehicle">
+                <div class="vehicle-image">
+                    <img src="${vehicle.image}" />
+                </div>
+                <div class="vehicle-info">
+                    <div class="vehicle-plate">
+                        ${vehicle.license_plate}
+                    </div>
+                    <div class="vehicle-model">
+                        ${vehicle.brand}, ${vehicle.type} | ${vehicle.color}, ${
+          vehicle.model
+        }
+                    </div>
+                    <div class="vehicle-remarks">
+                        ${
+                          vehicle.remarks != null
+                            ? vehicle.remarks == ""
+                              ? "No remarks."
+                              : vehicle.remarks
+                            : "No remarks."
+                        }
+                    </div>
+                </div>
+            </div>
+        `;
+      });
+    };
+
+    fetch_cars();
+
+    document.querySelector("#add-btn").addEventListener("click", () => {
+      location.href = "add-car.html";
+    });
+
+    document.querySelector("#cancel").addEventListener("click", () => {
+      location.href = "index.html";
+    });
+
+    document.querySelector("#nav-user").addEventListener("click", (event) => {
+      const dropdown = document.querySelector("#nav-dropdown");
+      console.log(dropdown.style);
+      if (dropdown.style.display == "none") {
+        dropdown.style.display = "block";
+        setTimeout(() => {
+          dropdown.style.opacity = "1";
+        }, 100);
+      } else {
+        dropdown.style.opacity = "0";
+        setTimeout(() => {
+          dropdown.style.display = "none";
+        }, 100);
+      }
+    });
+
+    document.querySelector("#logout").addEventListener("click", () => {
+      localStorage.clear();
+      location.href = "../index.html";
+    });
+  </script>
+</html>

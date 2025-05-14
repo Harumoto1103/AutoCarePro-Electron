@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>AutoCare Pro - Login</title>
+    <link rel="stylesheet" href="css/universal.css" />
+    <link rel="stylesheet" href="css/index.css" />
+    <link rel="stylesheet" href="css/alert.css" />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+    />
+  </head>
+  <body>
+    <form class="container">
+      <h1>AutoCare Pro</h1>
+      <p>Your best AutoCare management solution.</p>
+      <div class="username-container">
+        <div class="username-icon">
+          <span class="material-symbols-outlined"> account_circle </span>
+        </div>
+        <input
+          type="text"
+          id="username"
+          placeholder="Username"
+          class="username-input"
+          name="username"
+          required
+        />
+      </div>
+
+      <div class="password-container">
+        <div class="password-icon">
+          <span class="material-symbols-outlined"> lock </span>
+        </div>
+        <input
+          type="password"
+          id="password"
+          placeholder="Password"
+          class="password-input"
+          name="password"
+          required
+        />
+      </div>
+      <div class="role-container">
+        <div class="role-icon">
+          <span class="material-symbols-outlined"> assignment_ind </span>
+        </div>
+        <select name="role" id="roles" class="role-input">
+          <option value="customer">Customer</option>
+          <option value="staff">Staff</option>
+          <option value="admin">Administrator</option>
+        </select>
+      </div>
+      <div class="buttons-container">
+        <button type="submit" class="login-button" id="login-button">
+          Login
+        </button>
+        <button class="register-button" id="register-button">Register</button>
+      </div>
+    </form>
+  </body>
+  <script src="js/alert.js"></script>
+  <script src="js/config.js"></script>
+  <script>
+    const loginButton = document.querySelector("#login-button");
+    const registerButton = document.querySelector("#register-button");
+    const usernameInput = document.querySelector("#username");
+    const passwordInput = document.querySelector("#password");
+    const roleInput = document.querySelector("#roles");
+
+    const form = document.querySelector("form")[0];
+
+    form.addEventListener("submit", (event) => {
+      event.preventDefault(); // Prevent the default form submission
+      alert("Form submitted via JavaScript!");
+    });
+
+    const get_token = async (username, password, role) => {
+      const data = {
+        username: usernameInput.value,
+        password: passwordInput.value,
+        role: roleInput.value,
+      };
+      const response = await fetch(`${API_HOST}/api/auth/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+      const http_status = response.status;
+      const response_data = await response.json();
+
+      if (http_status != 200) {
+        console.log("Login failed");
+        alert(
+          "Login Failed",
+          "Failed to login, please try again later.",
+          "Confirm",
+          () => {}
+        );
+      } else {
+        console.log("Login successful");
+        if (response_data.status === "failure") {
+          alert(
+            "Login failed",
+            `${response_data.message}`,
+            "Confirm",
+            () => {}
+          );
+          return;
+        }
+        try {
+          localStorage.setItem("token", response_data.access_token);
+          localStorage.setItem("user_id", response_data.user_id);
+          console.log(roleInput.value);
+          if (roleInput.value === "customer")
+            location.href = "customer/index.html";
+        } catch (error) {
+          console.error("Error storing token:", error);
+          alert(
+            "Failed to store token",
+            `Please try again later: ${error}`,
+            "Confirm",
+            () => {}
+          );
+        }
+      }
+    };
+
+    loginButton.addEventListener("click", (event) => {
+      event.preventDefault(); // Prevent the default form submission
+      get_token(usernameInput.value, passwordInput.value, roleInput.value).then(
+        () => {
+          console.log("Login button clicked");
+        }
+      );
+    });
+
+    registerButton.addEventListener("click", (event) => {
+      event.preventDefault(); // Prevent the default form submission
+      console.log("Register button clicked");
+      location.href = "register.html";
+    });
+  </script>
+</html>

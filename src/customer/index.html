@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" href="../css/universal.css" />
+    <link rel="stylesheet" href="../css/customer.css" />
+    <link rel="stylesheet" href="../css/alert.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AutoCare Pro - Customer</title>
+  </head>
+  <body>
+    <div class="nav-bar">
+      <div class="nav-logo">AutoCare Pro</div>
+      <div class="nav-user" id="nav-user">
+        <div class="nav-user-avatar"></div>
+        <div class="nav-username" id="username">John Doe</div>
+        <div
+          class="nav-dropdown"
+          id="nav-dropdown"
+          style="opacity: 0; display: none"
+        >
+          <div class="nav-dropdown-menu" id="logout">Logout</div>
+        </div>
+      </div>
+    </div>
+    <div class="section-container" id="section-container"></div>
+  </body>
+  <script src="../js/alert.js"></script>
+  <script src="../js/sections.js"></script>
+  <script src="../js/config.js"></script>
+  <script>
+    verify_token("../index.html");
+
+    const customerSections = [
+      {
+        sectionImage: "../images/car-icon.png",
+        sectionTitle: "My Cars",
+        sectionMessage: "Manage your cars",
+        sectionId: "my-cars",
+        toPage: "cars.html",
+      },
+      {
+        sectionImage: "../images/repair-icon.png",
+        sectionTitle: "Repair Services",
+        sectionMessage: "Mange your repair services",
+        sectionId: "repair-services",
+        toPage: "#",
+      },
+      {
+        sectionImage: "../images/feedback-icon.png",
+        sectionTitle: "Feedback",
+        sectionMessage: "Manage your feedbacks",
+        sectionId: "feedbacks",
+        toPage: "#",
+      },
+      {
+        sectionImage: "../images/cloud-icon.png",
+        sectionTitle: "Cloud Services",
+        sectionMessage: "Coming Soon",
+        sectionId: "cloud-services",
+        toPage: "#",
+      },
+    ];
+    const sectionContainer = document.getElementById("section-container");
+    customerSections.forEach((section) => {
+      appendSection(
+        sectionContainer,
+        section.sectionImage,
+        section.sectionTitle,
+        section.sectionMessage,
+        section.sectionId,
+        section.toPage
+      );
+    });
+
+    document.querySelector("#nav-user").addEventListener("click", (event) => {
+      const dropdown = document.querySelector("#nav-dropdown");
+      console.log(dropdown.style);
+      if (dropdown.style.display == "none") {
+        dropdown.style.display = "block";
+        setTimeout(() => {
+          dropdown.style.opacity = "1";
+        }, 100);
+      } else {
+        dropdown.style.opacity = "0";
+        setTimeout(() => {
+          dropdown.style.display = "none";
+        }, 100);
+      }
+    });
+
+    document.querySelector("#logout").addEventListener("click", () => {
+      localStorage.clear();
+      location.href = "../index.html";
+    });
+
+    fetch_profile();
+    const user_profile = JSON.parse(localStorage.getItem("user_profile"));
+    document.querySelector("#username").innerHTML = user_profile["username"];
+  </script>
+</html>

@@ -1,0 +1,206 @@
+.container {
+  width: 400px;
+  min-height: 400px;
+  background: rgba(255, 255, 255, 0.8);
+  padding: 15px;
+  border-radius: 15px;
+  backdrop-filter: blur(10px);
+  /* transform: translateY(-50px); */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  box-shadow: 10px 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+.container > h1 {
+  margin-bottom: -15px;
+}
+.container > p {
+  font-weight: 300;
+}
+
+.username-container,
+.password-container,
+.role-container,
+.name-container,
+.phone-container,
+.email-container,
+.password-confirm-container,
+.address-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: row;
+  width: 100%;
+  margin: 10px;
+}
+
+.username-container > .username-icon,
+.password-container > .password-icon,
+.role-container > .role-icon,
+.name-container > .name-icon,
+.phone-container > .phone-icon,
+.email-container > .email-icon,
+.email-container > .email-icon,
+.password-confirm-container > .password-confirm-icon,
+.address-container > .address-icon {
+  width: 30px;
+  height: 30px;
+  background-color: rgba(0, 0, 0, 0.9);
+  padding: 5px;
+  border-top-left-radius: 10px;
+  border-bottom-left-radius: 10px;
+  box-shadow: 3px 4px 10px rgba(0, 0, 0, 0.1);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.role-container > .role-icon,
+.password-confirm-container > .password-confirm-icon {
+  background-color: rgba(18, 129, 203, 0.9);
+}
+
+.username-container > .username-icon > span,
+.password-container > .password-icon > span,
+.role-container > .role-icon > span,
+.name-container > .name-icon > span,
+.phone-container > .phone-icon > span,
+.email-container > .email-icon > span,
+.password-confirm-container > .password-confirm-icon > span,
+.address-container > .address-icon > span {
+  color: white;
+  font-size: 25px;
+  font-weight: 300;
+}
+
+.username-container > .username-input,
+.password-container > .password-input,
+.name-container > .name-input,
+.phone-container > .phone-input,
+.email-container > .email-input,
+.password-confirm-container > .password-confirm-input,
+.address-container > .address-input {
+  padding: 5px;
+  height: 30px;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  border: none;
+  border-top-right-radius: 10px;
+  border-bottom-right-radius: 10px;
+  width: 60%;
+  box-shadow: 3px 4px 10px rgba(0, 0, 0, 0.1);
+  appearance: none; /* Hide default arrow */
+  color: #333;
+}
+
+.role-container > .role-input {
+  padding: 5px 10px;
+  height: 40px;
+  border: none;
+  border-top-right-radius: 10px;
+  border-bottom-right-radius: 10px;
+  width: calc(60% + 10px);
+  appearance: none; /* Hide default arrow */
+  background: white
+    url("data:image/svg+xml;utf8,<svg fill='gray' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>")
+    no-repeat right 10px center;
+  background-size: 16px 16px;
+  box-shadow: 3px 4px 10px rgba(0, 0, 0, 0.1);
+  font-size: 14px;
+  color: #333;
+  cursor: pointer;
+}
+
+.username-container > .username-input:focus,
+.password-container > .password-input:focus,
+.role-container > .role-input:focus,
+.name-container > .name-input:focus,
+.phone-container > .phone-input:focus,
+.email-container > .email-input:focus,
+.password-confirm-container > .password-confirm-input:focus,
+.address-container > .address-input:focus {
+  border: none;
+  outline: none;
+}
+
+* {
+  font-family: "Red Hat Display", sans-serif;
+  font-optical-sizing: auto;
+  /* font-weight: 300; */
+  font-style: normal;
+}
+
+.role-input:focus {
+  outline: none;
+  background-color: #f0f8ff;
+}
+
+.buttons-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: row;
+  width: calc(60% + 30px + 20px);
+  margin-top: 10px;
+}
+
+.login-button,
+.cancel-button {
+  padding: 5px 10px;
+  width: 48%;
+  flex-grow: 0.5;
+  height: 40px;
+  background: rgba(0, 0, 0, 0.8);
+  border-radius: 10px;
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: 0.3s;
+  box-shadow: 3px 4px 10px rgba(0, 0, 0, 0.1);
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  border: none;
+  box-sizing: border-box;
+}
+
+.register-button {
+  padding: 5px 10px;
+  width: 48%;
+  flex-grow: 0.5;
+  height: 40px;
+  background: rgba(0, 0, 0, 0.8);
+  border-radius: 10px;
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-left: 10px;
+  transition: 0.3s;
+  box-shadow: 3px 4px 10px rgba(0, 0, 0, 0.1);
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  border: none;
+  box-sizing: border-box;
+}
+
+.login-button:hover,
+.cancel-button:hover {
+  width: 70%;
+  transition: 0.3s;
+  background-color: rgba(0, 0, 0, 0.2);
+  color: black;
+}
+
+.register-button:hover {
+  width: 70%;
+  transition: 0.3s;
+  background-color: rgba(0, 0, 0, 0.2);
+  color: black;
+}
+
+/* form {
+  width: 100%;
+} */
