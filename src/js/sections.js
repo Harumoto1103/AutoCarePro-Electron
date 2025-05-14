@@ -4,10 +4,11 @@ const appendSection = (
   sectionTitle,
   sectionMessage,
   sectionId,
-  toPage
+  toPage,
+  animation = ""
 ) => {
   const sectionHTML = `
-    <div class="section" id="${sectionId}" onclick="(()=>{location.href = '${toPage}'})()">
+    <div class="section ${animation}" id="${sectionId}" onclick="(()=>{location.href = '${toPage}'})()">
         <img src="${sectionImage}" alt="${sectionTitle}" class="section-image">
         <div class="section-content">
             <h2 class="section-title">${sectionTitle}</h2>

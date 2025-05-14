@@ -5,6 +5,10 @@
     <link rel="stylesheet" href="../css/universal.css" />
     <link rel="stylesheet" href="../css/customer.css" />
     <link rel="stylesheet" href="../css/alert.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"
+    />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>AutoCare Pro - Customer</title>
   </head>
@@ -38,6 +42,7 @@
         sectionMessage: "Manage your cars",
         sectionId: "my-cars",
         toPage: "cars.html",
+        animation: "animate__animated animate__fadeInTopLeft",
       },
       {
         sectionImage: "../images/repair-icon.png",
@@ -45,6 +50,7 @@
         sectionMessage: "Mange your repair services",
         sectionId: "repair-services",
         toPage: "repair.html",
+        animation: "animate__animated animate__fadeInTopRight",
       },
       {
         sectionImage: "../images/feedback-icon.png",
@@ -52,6 +58,7 @@
         sectionMessage: "Manage your feedbacks",
         sectionId: "feedbacks",
         toPage: "#",
+        animation: "animate__animated animate__fadeInBottomLeft",
       },
       {
         sectionImage: "../images/cloud-icon.png",
@@ -59,6 +66,7 @@
         sectionMessage: "Coming Soon",
         sectionId: "cloud-services",
         toPage: "#",
+        animation: "animate__animated animate__fadeInBottomRight",
       },
     ];
     const sectionContainer = document.getElementById("section-container");
@@ -69,7 +77,8 @@
         section.sectionTitle,
         section.sectionMessage,
         section.sectionId,
-        section.toPage
+        section.toPage,
+        section.animation
       );
     });
 
