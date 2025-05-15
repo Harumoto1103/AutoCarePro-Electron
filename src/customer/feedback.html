@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" href="../css/universal.css" />
+    <link rel="stylesheet" href="../css/customer-cars.css" />
+    <link rel="stylesheet" href="../css/alert.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AutoCare Pro - Feedbacks</title>
+  </head>
+  <body>
+    <div class="nav-bar">
+      <div class="nav-logo">AutoCare Pro</div>
+      <div class="nav-user" id="nav-user">
+        <div class="nav-user-avatar"></div>
+        <div class="nav-username" id="username">　　　</div>
+        <div
+          class="nav-dropdown"
+          id="nav-dropdown"
+          style="opacity: 0; display: none"
+        >
+          <div class="nav-dropdown-menu" id="logout">Logout</div>
+        </div>
+      </div>
+    </div>
+    <div class="container">
+      <div class="cancel" id="cancel">✖︎</div>
+      <div class="container-title">
+        <div class="container-title-text">My Feedbacks</div>
+        <div class="container-title-buttons">
+          <div class="title-button" id="add-btn">＋New Requests</div>
+        </div>
+      </div>
+      <div class="cars-container" id="cars-container">
+        <div class="no-cars" id="no-cars">Loading...</div>
+      </div>
+    </div>
+  </body>
+  <script src="../js/alert.js"></script>
+  <script src="../js/sections.js"></script>
+  <script src="../js/config.js"></script>
+  <script>
+    verify_token("../index.html");
+    fetch_profile();
+
+    const user_profile = JSON.parse(localStorage.getItem("user_profile"));
+    document.querySelector("#username").innerHTML = user_profile["username"];
+
+    const fetch_cars = async () => {
+      const req_url = `${API_HOST}/api/customer/${localStorage.getItem(
+        "user_id"
+      )}/vehicles`;
+      const resp = await fetch(req_url, {
+        method: "GET",
+        headers: {
+          "Content-type": "application/json",
+          Authorization: `bearer ${localStorage.getItem("token")}`,
+        },
+      });
+
+      const status = resp.status;
+      const json = await resp.json();
+
+      return json;
+    };
+    const fetch_requests = async () => {
+      const req_url = `${API_HOST}/api/customer/${localStorage.getItem(
+        "user_id"
+      )}/repair-requests`;
+      const resp = await fetch(req_url, {
+        method: "GET",
+        headers: {
+          "Content-type": "application/json",
+          Authorization: `bearer ${localStorage.getItem("token")}`,
+        },
+      });
+
+      const status = resp.status;
+      const json = await resp.json();
+      console.log(json);
+
+      if (json["status"] != "failure") {
+        if (json["repair_requests"][0] != undefined) {
+          document.querySelector("#no-cars").remove();
+        } else {
+          document.querySelector("#no-cars").innerHTML =
+            "No existing requests or orders.";
+        }
+      } else {
+        document.querySelector("#no-cars").innerHTML =
+          "No existing requests or orders.";
+      }
+      const vehicles = await fetch_cars();
+      console.log(vehicles);
+
+      json.repair_requests.forEach((repair_request) => {
+        let number_plate = "";
+        vehicles.vehicles.forEach((vehicle) => {
+          if (vehicle.vehicle_id === repair_request.vehicle_id) {
+            console.log(vehicle);
+            number_plate = vehicle.license_plate;
+          }
+        });
+
+        console.log(number_plate);
+        if (repair_request.status === "pending") {
+          document.querySelector("#cars-container").innerHTML += `
+                <div class="vehicle">
+                    <div class="vehicle-image">
+                        <img src="../images/request-icon.png" />
+                    </div>
+                    <div class="vehicle-info">
+                        <div class="vehicle-plate">
+                            ${number_plate}
+                        </div>
+                        <div class="vehicle-model">
+                            ${repair_request.description}
+                        </div>
+                        <div class="vehicle-remarks">
+                            (Pending)
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+      });
+    };
+
+    fetch_requests();
+
+    document.querySelector("#add-btn").addEventListener("click", () => {
+      location.href = "repair-request.html";
+    });
+
+    document.querySelector("#cancel").addEventListener("click", () => {
+      location.href = "index.html";
+    });
+
+    document.querySelector("#nav-user").addEventListener("click", (event) => {
+      const dropdown = document.querySelector("#nav-dropdown");
+      console.log(dropdown.style);
+      if (dropdown.style.display == "none") {
+        dropdown.style.display = "block";
+        setTimeout(() => {
+          dropdown.style.opacity = "1";
+        }, 100);
+      } else {
+        dropdown.style.opacity = "0";
+        setTimeout(() => {
+          dropdown.style.display = "none";
+        }, 100);
+      }
+    });
+
+    document.querySelector("#logout").addEventListener("click", () => {
+      localStorage.clear();
+      location.href = "../index.html";
+    });
+  </script>
+</html>
