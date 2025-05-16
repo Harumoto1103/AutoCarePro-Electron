@@ -152,7 +152,7 @@ const alert_async = ({ title = "", content = "", buttonText = "OK" } = {}) => {
   });
 };
 
-const alert = (title, content, buttonText, callback) => {
+const alert = (title, content, buttonText, callback = () => {}) => {
   (async () => {
     await alert_async({ title, content, buttonText });
     callback();
