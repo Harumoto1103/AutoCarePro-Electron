@@ -172,23 +172,6 @@
           location.href = "feedback.html";
         });
       }
-      /*
-      if (json["status"] != "success") {
-        alert(
-          "Failed to load vehicles",
-          "Failed to load your registered vehicles, please try again later.",
-          "Confirm",
-          () => {
-            location.href = "index.html";
-          }
-        );
-      } else {
-        json["vehicles"].forEach((vehicle) => {
-          document.querySelector("#vehicles").innerHTML += `
-                <option name="${vehicle.vehicle_id}">${vehicle.license_plate}</option>
-            `;
-        });
-      }*/
     };
 
     fetch_repair_orders();
