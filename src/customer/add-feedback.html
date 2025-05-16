@@ -91,20 +91,6 @@
     verify_token("../index.html");
     fetch_profile();
 
-    const getUrlParams = () => {
-      const params = {};
-      const queryString = window.location.search.slice(1); // remove '?'
-      const pairs = queryString.split("&");
-
-      for (const pair of pairs) {
-        if (!pair) continue;
-        const [key, value] = pair.split("=").map(decodeURIComponent);
-        params[key] = value;
-      }
-
-      return params;
-    };
-
     const params = getUrlParams();
     const order_id = params["order_id"];
     const number_plate = params["number_plate"];
@@ -209,7 +195,7 @@
     fetch_repair_logs();
 
     document.querySelector("#cancel").addEventListener("click", () => {
-      location.href = "feedback.html";
+      location.href = "repair.html";
     });
 
     document.querySelector("#nav-user").addEventListener("click", (event) => {

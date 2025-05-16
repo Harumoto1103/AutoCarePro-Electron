@@ -58,3 +58,17 @@ const fetch_profile = async () => {
   console.log(json);
   localStorage.setItem("user_profile", JSON.stringify(json));
 };
+
+const getUrlParams = () => {
+  const params = {};
+  const queryString = window.location.search.slice(1); // remove '?'
+  const pairs = queryString.split("&");
+
+  for (const pair of pairs) {
+    if (!pair) continue;
+    const [key, value] = pair.split("=").map(decodeURIComponent);
+    params[key] = value;
+  }
+
+  return params;
+};

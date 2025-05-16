@@ -37,6 +37,7 @@
     </div>
     <ul class="context-menu" id="context-menu">
       <li id="write-feedback">Write Feedback</li>
+      <li id="view-feedbacks">View Feedbacks</li>
     </ul>
   </body>
   <script src="../js/alert.js"></script>
@@ -46,12 +47,13 @@
     const contextMenu = document.querySelector("#context-menu");
     const targets = document.getElementsByClassName("vehicle");
     let writeFeedback = document.querySelector("#write-feedback");
+    let viewFeedbacks = document.querySelector("#view-feedbacks");
 
     const removeListeners = (element) => {
       const newElement = element.cloneNode(true);
       console.log(newElement, element);
       element.parentNode.replaceChild(newElement, element);
-      writeFeedback = newElement;
+      return newElement;
     };
 
     document.addEventListener("click", (event) => {
@@ -81,8 +83,11 @@
         contextMenu.style.left = `${event.pageX}px`;
         contextMenu.style.top = `${event.pageY}px`;
 
-        removeListeners(writeFeedback);
+        writeFeedback = removeListeners(writeFeedback);
+        viewFeedbacks = removeListeners(viewFeedbacks);
         writeFeedback.addEventListener("click", () => {
+          console.log("Write feedback triggered.");
+          // return;
           console.log(event.target);
           console.log(final_target.getAttribute("ord_id"));
           if (final_target.getAttribute("ord_id") == null) {
@@ -96,6 +101,19 @@
           const number_plate = final_target.getAttribute("number_plate");
           const desc = final_target.getAttribute("desc");
           location.href = `add-feedback.html?order_id=${order_id}&number_plate=${number_plate}&remarks=${desc}`;
+        });
+        viewFeedbacks.addEventListener("click", () => {
+          console.log("View feedbacks triggered");
+          // return;
+          if (final_target.getAttribute("ord_id") == null) {
+            alert(
+              "Attention",
+              "You cannot write a feedback for a pending request."
+            );
+            return;
+          }
+          const order_id = final_target.getAttribute("ord_id");
+          location.href = `feedback.html?order_id=${order_id}`;
         });
       } else {
         contextMenu.style.display = "none";
