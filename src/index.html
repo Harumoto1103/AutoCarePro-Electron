@@ -119,8 +119,11 @@
           localStorage.setItem("token", response_data.access_token);
           localStorage.setItem("user_id", response_data.user_id);
           console.log(roleInput.value);
-          if (roleInput.value === "customer")
+          if (roleInput.value === "customer") {
             location.href = "customer/index.html";
+          } else if (roleInput.value === "staff") {
+            location.href = "staff/index.html";
+          }
         } catch (error) {
           console.error("Error storing token:", error);
           alert(

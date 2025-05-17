@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard</title>
+  </head>
+  <body>
+    <h2>Statistics</h2>
+    <h3>Income Status</h3>
+    <p id="income"></p>
+  </body>
+  <script src="../js/config.js"></script>
+  <script>
+    const user_profile = JSON.parse(localStorage.getItem("user_profile"));
+
+    const get_income = async () => {
+      console.log(user_profile.staff_id);
+      const req_url = `${API_HOST}/api/staff/${user_profile.staff_id}/income`;
+      const resp = await fetch(req_url, {
+        method: "GET",
+        headers: {
+          "Content-type": "application/json",
+          Authorization: `bearer ${localStorage.getItem("token")}`,
+        },
+      });
+
+      const json = await resp.json();
+      console.log(json);
+
+      document.querySelector("#income").innerHTML = json["total_income"];
+    };
+
+    get_income();
+  </script>
+</html>

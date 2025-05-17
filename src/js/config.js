@@ -72,3 +72,24 @@ const getUrlParams = () => {
 
   return params;
 };
+
+const fetch_profile_staff = async () => {
+  const fetch_url = `${API_HOST}/api/staff/${localStorage.getItem(
+    "user_id"
+  )}/profile`;
+  const token = localStorage.getItem("token");
+  const resp = await fetch(fetch_url, {
+    method: "GET",
+    headers: {
+      Authorization: `bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+  });
+
+  const status = resp.status;
+  const json = await resp.json();
+
+  console.log(json);
+  localStorage.setItem("user_profile", JSON.stringify(json));
+  // localStorage.setItem("user")
+};
