@@ -21,6 +21,7 @@ body {
     rgba(66, 202, 214, 0.78) 100%
   );
   margin: 0px;
+  overflow: hidden;
 }
 
 button {
