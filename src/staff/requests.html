@@ -349,6 +349,7 @@ Remarks on the order.
       justify-content: start;
       align-items: center;
       padding: 20px 10px 20px 40px;
+      color: rgba(20, 106, 216, 1);
     }
 
     .requests-container {
@@ -361,10 +362,14 @@ Remarks on the order.
       flex-direction: row;
       border-radius: 15px;
       flex-wrap: wrap;
-      gap: 10px;
+      gap: 20px;
       transform: translateX(-20px);
       overflow-y: scroll;
+      border: 2px solid white;
       padding: 10px 10px;
+      margin-bottom: 10px;
+      box-shadow: 3px 4px 10px inset rgba(0, 0, 0, 0.19);
+      margin-top: -10px;
     }
 
     .request {
@@ -372,7 +377,7 @@ Remarks on the order.
       justify-content: center;
       align-items: center;
       flex-direction: column;
-      width: 200px;
+      width: 170px;
       max-width: 200px;
       background-color: rgba(255, 255, 255, 0.75);
       padding: 20px;
@@ -380,6 +385,7 @@ Remarks on the order.
       box-shadow: 2px 4px 10px rgba(0, 0, 0, 0.09);
       transform: scale(1);
       transition: 0.3s;
+      /*margin: auto;*/
     }
 
     .request:hover {
