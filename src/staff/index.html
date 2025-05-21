@@ -30,6 +30,20 @@
           </div>
           <div class="option-text">Requests</div>
         </div>
+
+        <div class="option" id="my-orders">
+          <div class="option-icon">
+            <span class="material-symbols-outlined"> receipt_long </span>
+          </div>
+          <div class="option-text">My Orders</div>
+        </div>
+
+        <div class="option" id="profile">
+          <div class="option-icon">
+            <span class="material-symbols-outlined"> person </span>
+          </div>
+          <div class="option-text">My Profile</div>
+        </div>
       </div>
     </div>
     <div class="main-content">
@@ -40,54 +54,70 @@
   <!-- <script src="../js/sections.js"></script> -->
   <script src="../js/config.js"></script>
   <script>
-    fetch_profile_staff();
-    document.querySelector("#username").innerHTML = `Welcome, ${
-      JSON.parse(localStorage.getItem("user_profile"))["username"]
-    }!`;
+    async function init() {
+      await fetch_profile_staff(); // Wait for the async function to complete
 
-    let current_page = {
-      active_id: "dashboard",
-      active_page: "dashboard.html",
-    };
+      document.querySelector("#username").innerHTML = `Welcome, ${
+        JSON.parse(localStorage.getItem("user_profile"))["username"]
+      }!`;
 
-    document
-      .querySelector(`#${current_page["active_id"]}`)
-      .classList.add("option-active");
-
-    const pages = {
-      dashboard: {
+      let current_page = {
         active_id: "dashboard",
         active_page: "dashboard.html",
-      },
-      requests: {
-        active_id: "requests",
-        active_page: "requests.html",
-      },
-    };
+      };
 
-    Object.keys(pages).forEach((page) => {
-      const active_id = pages[page]["active_id"];
-      const active_page = pages[page]["active_page"];
-      document.querySelector(`#${active_id}`).addEventListener("click", () => {
-        switchPage(pages[page]);
+      document
+        .querySelector(`#${current_page["active_id"]}`)
+        .classList.add("option-active");
+
+      const pages = {
+        dashboard: {
+          active_id: "dashboard",
+          active_page: "dashboard.html",
+        },
+        requests: {
+          active_id: "requests",
+          active_page: "requests.html",
+        },
+        "my-orders": {
+          active_id: "my-orders",
+          active_page: "my-orders.html",
+        },
+        logout: {
+          active_id: "profile",
+          active_page: "profile.html",
+        },
+      };
+
+      Object.keys(pages).forEach((page) => {
+        const active_id = pages[page]["active_id"];
+        const active_page = pages[page]["active_page"];
+        document
+          .querySelector(`#${active_id}`)
+          .addEventListener("click", () => {
+            switchPage(pages[page]);
+          });
       });
-    });
 
-    const switchPage = (page) => {
-      console.log(`Switchin to ${JSON.stringify(page)}`);
-      const current_page_element = document.querySelector(
-        `#${current_page["active_id"]}`
-      );
-      const iframe = document.getElementsByTagName("iframe")[0];
-      const new_page = document.querySelector(`#${page["active_id"]}`);
+      const switchPage = (page) => {
+        console.log(`Switchin to ${JSON.stringify(page)}`);
+        const current_page_element = document.querySelector(
+          `#${current_page["active_id"]}`
+        );
+        const iframe = document.getElementsByTagName("iframe")[0];
+        const new_page = document.querySelector(`#${page["active_id"]}`);
 
-      console.log(current_page_element);
-      current_page_element.classList.remove("option-active");
-      new_page.classList.add("option-active");
+        console.log(current_page_element);
+        current_page_element.classList.remove("option-active");
+        new_page.classList.add("option-active");
 
-      current_page.active_id = page.active_id;
-      current_page.active_page = page.active_page;
-      iframe.setAttribute("src", page["active_page"]);
-    };
+        current_page.active_id = page.active_id;
+        current_page.active_page = page.active_page;
+        iframe.setAttribute("src", page["active_page"]);
+      };
+    }
+
+    // Call the init function after the DOM is loaded
+    document.addEventListener("DOMContentLoaded", init);
   </script>
 </html>
