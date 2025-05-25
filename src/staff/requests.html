@@ -140,6 +140,30 @@ Remarks on the order.
       location.reload();
     });
 
+    const update_status = async (request_id, update_status) => {
+      console.log(request_id, update_status);
+      const req_url = `${API_HOST}/api/staff/repair-request/${request_id}/update-status`;
+      const resp = await fetch(req_url, {
+        method: "POST",
+        headers: {
+          "Content-type": "application/json",
+          Authorization: `bearer ${localStorage.getItem("token")}`,
+        },
+        body: JSON.stringify({
+          new_status: update_status,
+        }),
+      });
+
+      const json = await resp.json();
+      if (json["status"] != "success") {
+        alert("Error", "Failed to update request!", "Confirm", () => {});
+      } else {
+        alert("Success", "Updated request status!", "Confirm", () => {
+          document.getElementById("cancel-btn").click();
+        });
+      }
+    };
+
     submit_order.addEventListener("click", () => {
       if (Object.keys(required_staff_types).length == 0) {
         alert(
@@ -150,39 +174,46 @@ Remarks on the order.
         );
         return;
       }
-      Object.keys(required_staff_types).forEach(async (type) => {
-        console.log(type);
-        const req_url = `${API_HOST}/api/staff/repair-request/${document
-          .getElementById("order-window")
-          .getAttribute("request_id")}/generate-order`;
-        const resp = await fetch(req_url, {
-          method: "POST",
-          headers: {
-            "Content-type": "application/json",
-            Authorization: `bearer ${localStorage.getItem("token")}`,
-          },
-          body: JSON.stringify({
-            required_staff_type: type,
-            remarks: document.getElementById("order-desc").value,
-          }),
-        });
+      (async () => {
+        let order_id = -1;
+        await Object.keys(required_staff_types).forEach(async (type) => {
+          console.log(type);
+          const req_url = `${API_HOST}/api/staff/repair-request/${document
+            .getElementById("order-window")
+            .getAttribute("request_id")}/generate-order`;
+          const resp = await fetch(req_url, {
+            method: "POST",
+            headers: {
+              "Content-type": "application/json",
+              Authorization: `bearer ${localStorage.getItem("token")}`,
+            },
+            body: JSON.stringify({
+              required_staff_type: type,
+              remarks: document.getElementById("order-desc").value,
+            }),
+          });
 
-        const json = await resp.json();
-        if (json["status"] != "success") {
-          alert(
-            "Error",
-            `Error occurred while generating new orders: ${json["detail"]}; Generating for ${type}`,
-            "Confirm",
-            () => {}
-          );
-          return;
-        } else {
-          update_status(
-            document.getElementById("order-window").getAttribute("request_id"),
-            "order_created"
-          );
-        }
-      });
+          const json = await resp.json();
+          if (json["status"] != "success") {
+            alert(
+              "Error",
+              `Error occurred while generating new orders: ${json["detail"]}; Generating for ${type}`,
+              "Confirm",
+              () => {}
+            );
+            return;
+          } else {
+            console.log(json);
+            update_status(
+              document
+                .getElementById("order-window")
+                .getAttribute("request_id"),
+              "order_created"
+            );
+          }
+        });
+        // const req_url = `${API_HOST}/api/staff/repair-order/${}`
+      })();
     });
 
     const generate_order = async (request_id, required_staff_type, remarks) => {
@@ -211,40 +242,21 @@ Remarks on the order.
         },
       });
 
-      const update_status = async (request_id, update_status) => {
-        const req_url = `${API_HOST}/api/staff/repair-request/${request_id}/update-status`;
-        const resp = await fetch(req_url, {
-          method: "POST",
-          headers: {
-            "Content-type": "application/json",
-            Authorization: `bearer ${localStorage.getItem("token")}`,
-          },
-          body: JSON.stringify({
-            update_status: update_status,
-          }),
-        });
-
-        const json = await resp.json();
-        if (json["status"] != "success") {
-          alert("Error", "Failed to update request!", "Confirm", () => {});
-        } else {
-          alert("Success", "Updated request status!", "Confirm", () => {
-            document.getElementById("cancel-btn").click();
-          });
-        }
-      };
-
       const json = await resp.json();
       console.log(json);
 
-      json.repair_requests.forEach((request) => {
-        console.log(request);
-        if (request.length == 0) {
-          requestsContainer.innerHTML += `
+      if (json.repair_requests.length == 0) {
+        requestsContainer.style =
+          "border: none; box-shadow: none; margin-bottom:auto; padding: none;";
+        requestsContainer.innerHTML += `
           <p>No available requests.</p>
           `;
-          return;
-        }
+        return;
+      }
+      json.repair_requests.forEach((request) => {
+        // console.log(request, request.length);
+        if (request.status == "order_created") return;
+
         requestsContainer.innerHTML += `
             <div class="request">
                 <div class="request-image">
@@ -371,6 +383,7 @@ Remarks on the order.
       margin-bottom: 30px;
       box-shadow: 3px 4px 10px inset rgba(0, 0, 0, 0.19);
       margin-top: -10px;
+      margin-bottom: auto;
     }
 
     .request {
