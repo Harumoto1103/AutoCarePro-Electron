@@ -123,6 +123,15 @@
             location.href = "customer/index.html";
           } else if (roleInput.value === "staff") {
             location.href = "staff/index.html";
+          } else if (roleInput.value === "admin") {
+            location.href = "admin/index.html";
+          } else {
+            alert(
+              "Invalid Role",
+              "Please select a valid role to login.",
+              "Confirm",
+              () => {}
+            );
           }
         } catch (error) {
           console.error("Error storing token:", error);
