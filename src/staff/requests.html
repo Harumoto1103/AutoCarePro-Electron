@@ -10,177 +10,291 @@
     <link rel="stylesheet" href="../css/alert.css" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Requests</title>
+    <style>
+      body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0, 0, 0, 0) !important;
+        margin: 0px;
+        overflow: hidden;
+      }
+
+      body > h2 {
+        color: #2c3e50;
+        border-bottom: 3px solid #3498db;
+        padding-bottom: 10px;
+        margin: 20px 0;
+        font-size: 2em;
+        padding: 20px;
+        width: 100%;
+        margin-bottom: 50px;
+      }
+
+      .modal-backdrop {
+        height: 95% !important;
+        margin: auto;
+        border-radius: 20px;
+      }
+
+      .description {
+        -webkit-appearance: none;
+        border: none;
+        width: calc(100% - 40px);
+        height: 200px;
+        max-height: 200px;
+        min-height: 200px;
+        border-radius: 20px;
+        background-color: rgba(255, 255, 255, 0.6);
+        padding: 20px;
+        font-size: 16px;
+        box-shadow: 2px 5px 15px rgba(0, 0, 0, 0.09);
+      }
+
+      .description:focus {
+        border: none;
+        outline: none;
+      }
+
+      .generate-btn {
+        width: 90%;
+        height: 30px;
+        padding: 10px;
+        background-color: rgba(20, 106, 216, 1);
+        border-radius: 20px;
+        font-size: 16px;
+        color: white;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: auto;
+        margin-top: 20px;
+        transition: 0.3s;
+      }
+
+      .generate-btn:hover {
+        background-color: rgba(20, 106, 216, 0.8);
+      }
+
+      .order-window {
+        display: none;
+        opacity: 0;
+        position: fixed;
+        width: 93%;
+        height: 90%;
+        background: rgba(255, 255, 255, 0.09);
+        backdrop-filter: blur(20px);
+        padding: 20px;
+        border-radius: 20px;
+        box-shadow: 2px 4px 15px rgba(0, 0, 0, 0.09);
+        color: black;
+        transition: opacity 0.3s;
+        border: 3px solid white;
+      }
+
+      .order-window > h2 {
+        font-size: 30px;
+        color: rgba(20, 106, 216, 1);
+      }
+
+      .staffs-container {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+
+      .staff-selector {
+        padding: 10px 15px;
+        color: white;
+        background-color: rgba(20, 106, 216, 0.6);
+        transition: 0.3s;
+        border-radius: 20px;
+        cursor: pointer;
+      }
+
+      .staff-selector-active {
+        background-color: rgba(20, 106, 216, 1);
+      }
+
+      .requests-container {
+        width: 90%;
+        height: auto;
+        margin-bottom: auto;
+        justify-content: start;
+        align-items: start;
+        display: flex;
+        flex-direction: row;
+        border-radius: 15px;
+        flex-wrap: wrap;
+        gap: 20px;
+        overflow-y: auto;
+        border: 2px solid white;
+        padding: 10px;
+        margin-bottom: 30px;
+        box-shadow: 3px 4px 10px inset rgba(0, 0, 0, 0.19);
+        margin-top: -10px;
+        margin-bottom: auto;
+      }
+
+      .request {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        width: 170px;
+        max-width: 200px;
+        background-color: rgba(255, 255, 255, 0.75);
+        padding: 20px;
+        border-radius: 15px;
+        box-shadow: 2px 4px 10px rgba(0, 0, 0, 0.09);
+        transform: scale(1);
+        transition: 0.3s;
+      }
+
+      .request:hover {
+        transform: scale(1.02);
+      }
+
+      .request-image {
+        width: 100px;
+        height: 100px;
+        border-radius: 15px;
+        box-shadow: 2px 4px 15px rgba(0, 0, 0, 0.09);
+      }
+
+      .request-image > img {
+        width: 100px;
+        height: 100px;
+        border-radius: 15px;
+      }
+
+      .request-number-plate {
+        font-size: 24px;
+        color: rgba(20, 106, 216, 1);
+        margin-top: 15px;
+        padding: 5px;
+        margin-bottom: -5px;
+        font-weight: 600;
+      }
+
+      .request-description {
+        width: 180px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        margin: auto;
+        text-align: center;
+        color: rgba(20, 106, 216, 1);
+        font-size: 13px;
+        margin-bottom: 10px;
+      }
+
+      .request-vehicle {
+        font-size: 14px;
+        color: rgba(0, 0, 0, 0.5);
+      }
+
+      .request-time {
+        padding: 2px 10px;
+        border-radius: 10px;
+        background-color: rgba(51, 141, 18, 0.8);
+        margin: 5px;
+        font-size: 12px;
+        color: white;
+        box-shadow: 2px 4px 10px inset rgba(0, 0, 0, 0.1);
+        transform: scale(0.9);
+      }
+
+      .generate-order {
+        padding: 10px 20px;
+        color: white;
+        font-weight: 600;
+        background-color: rgba(20, 106, 216, 1);
+        border-radius: 15px;
+        box-shadow: 2px 4px 10px inset rgba(0, 0, 0, 0.1);
+        transition: 0.3s;
+        cursor: pointer;
+      }
+
+      .generate-order:hover {
+        background-color: rgba(20, 106, 216, 0.8);
+      }
+    </style>
   </head>
   <body>
     <h2>Unprocessed Requests</h2>
     <div class="requests-container" id="requests-container"></div>
-    <div
-      class="order-window"
-      id="order-window"
-      style="display: none; opacity: 0"
-    >
-      <h2 style="color: rgba(20, 106, 216, 1)">Generate Order</h2>
+    <div class="order-window" id="order-window">
+      <h2>Generate Order</h2>
       <h3>This order involves...</h3>
       <div class="staffs-container" id="staffs-container"></div>
       <h3>Remarks</h3>
-
       <textarea
         class="description"
         id="order-desc"
         placeholder="Remarks on the order."
-      >
-Remarks on the order.
-      </textarea>
+      ></textarea>
       <div class="generate-btn" id="generate_btn">Submit Order</div>
       <div class="generate-btn" id="cancel_btn">Cancel</div>
     </div>
-  </body>
-  <style>
-    body {
-      background: none !important;
-    }
+    <script src="../js/config.js"></script>
+    <script src="../js/alert.js"></script>
+    <script>
+      const requestsContainer = document.querySelector("#requests-container");
+      let required_staff_types = {};
 
-    .modal-backdrop {
-      height: 95% !important;
-      margin: auto;
-      border-radius: 20px;
-    }
+      const submit_order = document.getElementById("generate_btn");
+      const cancel_order = document.getElementById("cancel_btn");
 
-    .description {
-      -webkit-appearance: none;
-      border: none;
-      width: calc(100% - 40px);
-      height: 200px;
-      max-height: 200px;
-      min-height: 200px;
-      border-radius: 20px;
-      background-color: rgba(255, 255, 255, 0.6);
-      padding: 20px;
-      font-size: 16px;
-      box-shadow: 2px 5px 15px rgba(0, 0, 0, 0.09);
-    }
-
-    .description:focus {
-      border: none;
-      outline: none;
-    }
-
-    .generate-btn {
-      width: 90%;
-      height: 30px;
-      padding: 10px;
-      background-color: rgba(20, 106, 216, 1);
-
-      border-radius: 20px;
-      font-size: 16px;
-      color: white;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      margin: auto;
-      margin-top: 20px;
-      transition: 0.3s;
-    }
-
-    .generate-btn:hover {
-      background-color: rgba(20, 106, 216, 0.8);
-    }
-    .order-window > h2 {
-      font-size: 30px;
-    }
-
-    .order-window {
-      display: block;
-      position: fixed;
-      width: 93%;
-      height: 90%;
-      background: rgba(255, 255, 255, 0.09);
-      backdrop-filter: blur(20px);
-      padding: 20px;
-      border-radius: 20px;
-      box-shadow: 2px 4px 15px rgba(0, 0, 0, 0.09);
-      color: black;
-      transition: 0.3s;
-      border: 3px solid white;
-      /*text-shadow: 2px 3px 10px rgba(0, 0, 0, 0.09);*/
-    }
-
-    .staffs-container {
-      width: 100%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-
-    .staff-selector {
-      padding: 10px 15px;
-      color: white;
-      background-color: rgba(20, 106, 216, 0.6);
-      transition: 0.3s;
-      border-radius: 20px;
-    }
-
-    .staff-selector-active {
-      background-color: rgba(20, 106, 216, 1);
-      transition: 0.3s;
-    }
-  </style>
-  <script src="../js/config.js"></script>
-  <script src="../js/alert.js"></script>
-  <script>
-    const requestsContainer = document.querySelector("#requests-container");
-    let required_staff_types = {};
-
-    const submit_order = document.getElementById("generate_btn");
-    const cancel_order = document.getElementById("cancel_btn");
-
-    cancel_order.addEventListener("click", () => {
-      location.reload();
-    });
-
-    const update_status = async (request_id, update_status) => {
-      console.log(request_id, update_status);
-      const req_url = `${API_HOST}/api/staff/repair-request/${request_id}/update-status`;
-      const resp = await fetch(req_url, {
-        method: "POST",
-        headers: {
-          "Content-type": "application/json",
-          Authorization: `bearer ${localStorage.getItem("token")}`,
-        },
-        body: JSON.stringify({
-          new_status: update_status,
-        }),
+      cancel_order.addEventListener("click", () => {
+        location.reload();
       });
 
-      const json = await resp.json();
-      if (json["status"] != "success") {
-        alert("Error", "Failed to update request!", "Confirm", () => {});
-      } else {
-        alert("Success", "Updated request status!", "Confirm", () => {
-          document.getElementById("cancel-btn").click();
+      const update_status = async (request_id, update_status) => {
+        const req_url = `${API_HOST}/api/staff/repair-request/${request_id}/update-status`;
+        const resp = await fetch(req_url, {
+          method: "POST",
+          headers: {
+            "Content-type": "application/json",
+            Authorization: `bearer ${localStorage.getItem("token")}`,
+          },
+          body: JSON.stringify({
+            new_status: update_status,
+          }),
         });
-      }
-    };
 
-    submit_order.addEventListener("click", () => {
-      if (Object.keys(required_staff_types).length == 0) {
-        alert(
-          "Attention",
-          "At least one type of worker should involve!",
-          "Confirm",
-          () => {}
-        );
-        return;
-      }
-      (async () => {
-        let order_id = -1;
-        await Object.keys(required_staff_types).forEach(async (type) => {
-          console.log(type);
-          const req_url = `${API_HOST}/api/staff/repair-request/${document
-            .getElementById("order-window")
-            .getAttribute("request_id")}/generate-order`;
+        const json = await resp.json();
+        if (json["status"] !== "success") {
+          alert("Error", "Failed to update request!", "Confirm", () => {});
+        } else {
+          alert("Success", "Updated request status!", "Confirm", () => {
+            document.getElementById("cancel_btn").click();
+          });
+        }
+      };
+
+      submit_order.addEventListener("click", async () => {
+        if (Object.keys(required_staff_types).length === 0) {
+          alert(
+            "Attention",
+            "At least one type of worker should involve!",
+            "Confirm",
+            () => {}
+          );
+          return;
+        }
+        const requestId = document
+          .getElementById("order-window")
+          .getAttribute("request_id");
+        for (const type of Object.keys(required_staff_types)) {
+          if (!required_staff_types[type]) continue; // 跳过未选中的类型
+          const req_url = `${API_HOST}/api/staff/repair-request/${requestId}/generate-order`;
           const resp = await fetch(req_url, {
             method: "POST",
             headers: {
@@ -192,9 +306,8 @@ Remarks on the order.
               remarks: document.getElementById("order-desc").value,
             }),
           });
-
           const json = await resp.json();
-          if (json["status"] != "success") {
+          if (json["status"] !== "success") {
             alert(
               "Error",
               `Error occurred while generating new orders: ${json["detail"]}; Generating for ${type}`,
@@ -202,272 +315,106 @@ Remarks on the order.
               () => {}
             );
             return;
-          } else {
-            console.log(json);
-            update_status(
-              document
-                .getElementById("order-window")
-                .getAttribute("request_id"),
-              "order_created"
-            );
           }
-        });
-        // const req_url = `${API_HOST}/api/staff/repair-order/${}`
-      })();
-    });
-
-    const generate_order = async (request_id, required_staff_type, remarks) => {
-      console.log(request_id, required_staff_type, remarks);
-    };
-
-    const generate_order_form = (request_id, detail) => {
-      console.log(request_id);
-      document.getElementById("order-window").style.display = "block";
-      setTimeout(() => {
-        document.getElementById("order-window").style.opacity = "1";
-      }, 100);
-      document.getElementById("order-desc").innerHTML = detail;
-      document
-        .getElementById("order-window")
-        .setAttribute("request_id", request_id);
-    };
-
-    const fetch_requests = async () => {
-      const req_id = `${API_HOST}/api/staff/repair-requests`;
-      const resp = await fetch(req_id, {
-        method: "GET",
-        headers: {
-          "Content-type": "application/json",
-          Authorization: `bearer ${localStorage.getItem("token")}`,
-        },
+        }
+        update_status(requestId, "order_created");
       });
 
-      const json = await resp.json();
-      console.log(json);
-
-      if (json.repair_requests.length == 0) {
-        requestsContainer.style =
-          "border: none; box-shadow: none; margin-bottom:auto; padding: none;";
-        requestsContainer.innerHTML += `
-          <p>No available requests.</p>
-          `;
-        return;
-      }
-      json.repair_requests.forEach((request) => {
-        // console.log(request, request.length);
-        if (request.status == "order_created") return;
-
-        requestsContainer.innerHTML += `
-            <div class="request">
-                <div class="request-image">
-                    <img src="${request.vehicle.image}" />
-                </div>
-                <div class="request-number-plate">${
-                  request.vehicle.license_plate
-                }</div>
-                <div class="request-time">
-                    ${request.request_time.replace("T", " ").substr(0, 10)}
-                </div>
-                <div class="request-vehicle" style="color: black; font-weight: 600;">
-                    ${request.vehicle.brand}, ${request.vehicle.type}
-                </div>
-                 <div class="request-vehicle">
-                    ${request.vehicle.model}, ${request.vehicle.color}
-                </div>
-                <div class="request-description">
-                    ${request.description}
-                </div>
-
-                <div class="generate-order" onclick="generate_order_form(${
-                  request.request_id
-                }, \`Number Plate: ${request.vehicle.license_plate}\nBrand: ${
-          request.vehicle.brand
-        }\nType: ${request.vehicle.type}\nModel: ${
-          request.vehicle.model
-        }\nColor: ${request.vehicle.color}\nDescription: ${
-          request.description
-        }\n\`)">
-                    Generate Order
-                </div>
-            </div>
-        `;
-      });
-    };
-
-    //requestsContainer.innerHTML += `<div style="flex-grow: 1;"></div>`;
-
-    fetch_requests();
-
-    const fetch_staff_types = async () => {
-      for (const key in required_staff_types) {
-        delete required_staff_types[key];
-      }
-      const req_url = `${API_HOST}/api/staff/staff-types`;
-      const resp = await fetch(req_url, {
-        method: "GET",
-        headers: {
-          "Content-type": "application/json",
-          Authorization: `bearer ${localStorage.getItem("token")}`,
-        },
-      });
-
-      const json = await resp.json();
-      console.log(json);
-
-      json["staff-types"].forEach((staff_type) => {
-        staff_type = staff_type
-          .split("_")
-          .map(
-            (part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase()
-          )
-          .join(" ");
-        document.querySelector("#staffs-container").innerHTML += `
-            <div class="staff-selector" id="${staff_type}">${staff_type}</div>
-        `;
+      const generate_order_form = (request_id, detail) => {
+        document.getElementById("order-window").style.display = "block";
         setTimeout(() => {
-          document
-            .getElementById(`${staff_type}`)
-            .addEventListener("click", () => {
-              console.log("clicked", required_staff_types);
-              if (required_staff_types[staff_type] == undefined)
-                required_staff_types[staff_type] = true;
-              else
-                required_staff_types[staff_type] =
-                  !required_staff_types[staff_type];
-              if (
-                document
-                  .getElementById(`${staff_type}`)
-                  .classList.contains("staff-selector-active")
-              ) {
-                document
-                  .getElementById(`${staff_type}`)
-                  .classList.remove("staff-selector-active");
-              } else {
-                document
-                  .getElementById(`${staff_type}`)
-                  .classList.add("staff-selector-active");
-              }
-            });
-        }, 0);
-      });
-    };
+          document.getElementById("order-window").style.opacity = "1";
+        }, 100);
+        document.getElementById("order-desc").value = detail;
+        document
+          .getElementById("order-window")
+          .setAttribute("request_id", request_id);
+      };
 
-    fetch_staff_types();
-  </script>
+      const fetch_requests = async () => {
+        const req_url = `${API_HOST}/api/staff/repair-requests`;
+        const resp = await fetch(req_url, {
+          method: "GET",
+          headers: {
+            "Content-type": "application/json",
+            Authorization: `bearer ${localStorage.getItem("token")}`,
+          },
+        });
 
-  <style>
-    body > h2 {
-      width: 100%;
-      display: flex;
-      justify-content: start;
-      align-items: center;
-      padding: 20px 10px 20px 40px;
-      color: rgba(20, 106, 216, 1);
-    }
+        const json = await resp.json();
+        if (json.repair_requests.length === 0) {
+          requestsContainer.innerHTML = `<p>No available requests.</p>`;
+          return;
+        }
+        json.repair_requests.forEach((request) => {
+          if (request.status === "order_created") return;
+          const requestTime = new Date(
+            request.request_time
+          ).toLocaleDateString();
+          requestsContainer.innerHTML += `
+            <div class="request">
+              <div class="request-image">
+                <img src="${request.vehicle.image}" />
+              </div>
+              <div class="request-number-plate">${request.vehicle.license_plate}</div>
+              <div class="request-time">${requestTime}</div>
+              <div class="request-vehicle" style="color: black; font-weight: 600;">
+                ${request.vehicle.brand}, ${request.vehicle.type}
+              </div>
+              <div class="request-vehicle">
+                ${request.vehicle.model}, ${request.vehicle.color}
+              </div>
+              <div class="request-description">
+                ${request.description}
+              </div>
+              <div class="generate-order" onclick="generate_order_form(${request.request_id}, 'Number Plate: ${request.vehicle.license_plate}\\nBrand: ${request.vehicle.brand}\\nType: ${request.vehicle.type}\\nModel: ${request.vehicle.model}\\nColor: ${request.vehicle.color}\\nDescription: ${request.description}')">
+                Generate Order
+              </div>
+            </div>
+          `;
+        });
+      };
 
-    .requests-container {
-      width: 90%;
-      height: auto;
-      margin-bottom: auto;
-      justify-content: start;
-      align-items: start;
-      display: flex;
-      flex-direction: row;
-      border-radius: 15px;
-      flex-wrap: wrap;
-      gap: 20px;
-      transform: translateX(-20px);
-      overflow-y: scroll;
-      border: 2px solid white;
-      padding: 10px 10px;
-      margin-bottom: 30px;
-      box-shadow: 3px 4px 10px inset rgba(0, 0, 0, 0.19);
-      margin-top: -10px;
-      margin-bottom: auto;
-    }
+      fetch_requests();
 
-    .request {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      flex-direction: column;
-      width: 170px;
-      max-width: 200px;
-      background-color: rgba(255, 255, 255, 0.75);
-      padding: 20px;
-      border-radius: 15px;
-      box-shadow: 2px 4px 10px rgba(0, 0, 0, 0.09);
-      transform: scale(1);
-      transition: 0.3s;
-      /*margin: auto;*/
-    }
+      const fetch_staff_types = async () => {
+        const req_url = `${API_HOST}/api/staff/staff-types`;
+        const resp = await fetch(req_url, {
+          method: "GET",
+          headers: {
+            "Content-type": "application/json",
+            Authorization: `bearer ${localStorage.getItem("token")}`,
+          },
+        });
 
-    .request:hover {
-      transform: scale(1.02);
-    }
+        const json = await resp.json();
+        const staffsContainer = document.querySelector("#staffs-container");
+        json["staff-types"].forEach((staff_type) => {
+          const formattedType = staff_type
+            .split("_")
+            .map(
+              (part) =>
+                part.charAt(0).toUpperCase() + part.slice(1).toLowerCase()
+            )
+            .join(" ");
+          const staffSelector = document.createElement("div");
+          staffSelector.className = "staff-selector";
+          staffSelector.id = formattedType;
+          staffSelector.textContent = formattedType;
+          staffSelector.addEventListener("click", () => {
+            if (required_staff_types[formattedType] === undefined) {
+              required_staff_types[formattedType] = true;
+            } else {
+              required_staff_types[formattedType] =
+                !required_staff_types[formattedType];
+            }
+            staffSelector.classList.toggle("staff-selector-active");
+          });
+          staffsContainer.appendChild(staffSelector);
+        });
+      };
 
-    .request-image {
-      width: 100px;
-      height: 100px;
-      border-radius: 20px;
-      box-shadow: 2px 4px 15px rgba(0, 0, 0, 0.09);
-      border-radius: 15px;
-    }
-
-    .request-image > img {
-      width: 100px;
-      height: 100px;
-      border-radius: 15px;
-    }
-
-    .request-number-plate {
-      font-size: 24px;
-      color: rgba(20, 106, 216, 1);
-      margin-top: 15px;
-      padding: 5px;
-      margin-bottom: -5px;
-      font-weight: 600;
-    }
-
-    .request-description {
-      width: 180px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      margin: auto;
-      text-align: center;
-      color: rgba(20, 106, 216, 1);
-      font-size: 13px;
-      margin-bottom: 10px;
-    }
-
-    .request-vehicle {
-      font-size: 14px;
-      color: rgba(0, 0, 0, 0.5);
-    }
-
-    .request-time {
-      padding: 2px 10px 2px 10px;
-      border-radius: 10px;
-      background-color: rgba(51, 141, 18, 0.8);
-      margin: 5px;
-      font-size: 12px;
-      color: white;
-      box-shadow: 2px 4px 10px inset rgba(0, 0, 0, 0.1);
-      transform: scale(0.9);
-    }
-
-    .generate-order {
-      padding: 10px 20px 10px 20px;
-      color: white;
-      font-weight: 600;
-      background-color: rgba(20, 106, 216, 1);
-      border-radius: 15px;
-      box-shadow: 2px 4px 10px inset rgba(0, 0, 0, 0.1);
-      transition: 0.3s;
-    }
-    .generate-order:hover {
-      background-color: rgba(20, 106, 216, 0.8);
-    }
-  </style>
+      fetch_staff_types();
+    </script>
+  </body>
 </html>
