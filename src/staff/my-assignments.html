@@ -18,7 +18,6 @@
         font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
         margin: 0;
         padding: 20px;
-        /*background-color: var(--light-bg);*/
       }
 
       h2 {
@@ -26,6 +25,10 @@
         margin-bottom: 30px;
         border-bottom: 2px solid var(--primary-color);
         padding-bottom: 10px;
+      }
+
+      #materialsContainer {
+        overflow-y: scroll;
       }
 
       .assignment-container {
@@ -92,6 +95,11 @@
         color: white;
       }
 
+      .status-accepted {
+        background: #3498db;
+        color: white;
+      }
+
       .action-buttons {
         display: flex;
         gap: 10px;
@@ -122,11 +130,73 @@
         color: white;
       }
 
+      .btn-record {
+        background: #3498db;
+        color: white;
+      }
+
       .remarks {
         background: var(--light-bg);
         padding: 10px;
         border-radius: 5px;
         margin-top: 10px;
+      }
+
+      /* 模态框样式 */
+      .modal {
+        display: none;
+        position: fixed;
+        top: 20px;
+        left: 0;
+        width: 100%;
+        height: calc(100% - 40px);
+        background: rgba(255, 255, 255, 0.1);
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+        margin: auto;
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+      }
+
+      .modal-content {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        width: 90%;
+        max-width: 600px;
+        position: relative;
+        max-height: 80vh;
+        overflow: scroll;
+        box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.3);
+      }
+
+      .close {
+        position: absolute;
+        right: 15px;
+        top: 10px;
+        font-size: 24px;
+        cursor: pointer;
+      }
+
+      .form-group {
+        margin-bottom: 15px;
+      }
+
+      .modal-input {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        box-sizing: border-box;
+      }
+
+      /* 新增材料行样式 */
+      .material-row {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+        margin-bottom: 10px;
       }
 
       @media (max-width: 768px) {
@@ -142,6 +212,10 @@
           width: 100%;
           text-align: center;
         }
+
+        .material-row {
+          grid-template-columns: 1fr;
+        }
       }
     </style>
   </head>
@@ -149,12 +223,69 @@
     <h2>Assignments</h2>
     <div class="assignment-container" id="assignmentContainer"></div>
 
+    <!-- 修改后的进度记录模态框 -->
+    <div id="progressModal" class="modal">
+      <div class="modal-content">
+        <span class="close">&times;</span>
+        <h3>记录工作进度</h3>
+        <form id="progressForm">
+          <div id="materialsContainer">
+            <div class="material-row">
+              <div class="form-group">
+                <input
+                  type="text"
+                  class="modal-input material-name"
+                  placeholder="材料名称"
+                  required
+                />
+              </div>
+              <div class="form-group">
+                <input
+                  type="number"
+                  class="modal-input material-price"
+                  placeholder="单价（元）"
+                  min="0"
+                  step="0.01"
+                  required
+                />
+              </div>
+              <div class="form-group">
+                <input
+                  type="number"
+                  class="modal-input material-quantity"
+                  placeholder="数量"
+                  min="1"
+                  required
+                />
+              </div>
+            </div>
+          </div>
+          <button
+            type="button"
+            id="addMaterial"
+            class="btn btn-accept"
+            style="margin-bottom: 15px"
+          >
+            新增材料
+          </button>
+          <div class="form-group">
+            <label>工作备注：</label>
+            <textarea id="workMessage" class="modal-input" rows="3"></textarea>
+          </div>
+          <button type="submit" class="btn btn-accept">提交记录</button>
+        </form>
+      </div>
+    </div>
+
     <script src="../js/alert.js"></script>
     <script src="../js/config.js"></script>
     <script>
       // 身份验证和基础函数
       verify_token("../index.html", true);
       fetch_profile();
+
+      // 全局变量
+      let currentAssignmentId;
 
       // 获取任务数据
       const fetch_assignments = async () => {
@@ -171,7 +302,6 @@
           });
 
           if (!resp.ok) throw new Error("Failed to fetch assignments");
-
           const json = await resp.json();
           render_assignments(json.assignments);
         } catch (error) {
@@ -185,16 +315,15 @@
       // 渲染任务列表
       const render_assignments = (assignments) => {
         const container = document.getElementById("assignmentContainer");
+        container.innerHTML = "";
 
         if (assignments.length === 0) {
           container.innerHTML = "<p>当前没有待处理的任务</p>";
           return;
         }
 
-        container.innerHTML = "";
         assignments.forEach((assignment) => {
-          const assignmentEl = create_assignment_element(assignment);
-          container.appendChild(assignmentEl);
+          container.appendChild(create_assignment_element(assignment));
         });
       };
 
@@ -204,76 +333,255 @@
         assignmentDiv.className = "assignment";
 
         // 状态样式
-        const statusClass =
-          assignment.status.toLowerCase() === "pending"
-            ? "status-pending"
-            : "status-completed";
+        const status = assignment.status.toLowerCase();
+        const statusClass = `status-${status}`;
 
         // 时间格式化
         const formatTime = (timeString) =>
           timeString ? new Date(timeString).toLocaleString() : "尚未完成";
 
+        // 动态生成操作按钮
+        let actionButtons;
+        if (status === "accepted") {
+          actionButtons = `
+            <div class="action-buttons">
+              <button class="btn btn-record" data-id="${assignment.assignment_id}">
+                记录进度
+              </button>
+            </div>
+          `;
+        } else if (status === "pending") {
+          actionButtons = `
+            <div class="action-buttons">
+              <button class="btn btn-accept" data-id="${assignment.assignment_id}">接受任务</button>
+              <button class="btn btn-decline" data-id="${assignment.assignment_id}">拒绝任务</button>
+            </div>
+          `;
+        }
+
         assignmentDiv.innerHTML = `
-                <div class="assignment-header">
-                    <div>
-                        <h3>
-                            <span>任务编号：${assignment.assignment_id}</span>
-                            <span class="status-badge ${statusClass}">${
+          <div class="assignment-header">
+            <div>
+              <h3>
+                <span>任务编号：${assignment.assignment_id}</span>
+                <span class="status-badge ${statusClass}">${
           assignment.status
         }</span>
-                        </h3>
-                        <p>订单编号：${assignment.order_id}</p>
-                    </div>
-                </div>
-                <div class="assignment-meta">
-                    <div>
-                        <strong>工单状态</strong>
-                        <p>${assignment.status}</p>
-                    </div>
-                    <div>
-                        <strong>已工作时间</strong>
-                        <p>${assignment.time_worked || 0} 小时</p>
-                    </div>
-                    <div>
-                        <strong>最后更新时间</strong>
-                        <p>${formatTime(assignment.updated_at)}</p>
-                    </div>
-                </div>
-                <div class="remarks">
-                    <strong>备注说明</strong>
-                    <p>${assignment.remarks || "暂无备注信息"}</p>
-                </div>
-                <div class="action-buttons">
-                    <button class="btn btn-accept" data-id="${
-                      assignment.assignment_id
-                    }">接受任务</button>
-                    <button class="btn btn-decline" data-id="${
-                      assignment.assignment_id
-                    }">拒绝任务</button>
-                </div>
-            `;
+              </h3>
+              <p>订单编号：${assignment.order_id}</p>
+            </div>
+          </div>
+          <div class="assignment-meta">
+            <div>
+              <strong>工单状态</strong>
+              <p>${assignment.status}</p>
+            </div>
+            <div>
+              <strong>已工作时间</strong>
+              <p>${assignment.time_worked || 0} 小时</p>
+            </div>
+            <div>
+              <strong>最后更新时间</strong>
+              <p>${formatTime(assignment.updated_at)}</p>
+            </div>
+          </div>
+          <div class="remarks">
+            <strong>备注说明</strong>
+            <p>${assignment.remarks || "暂无备注信息"}</p>
+          </div>
+          ${actionButtons}
+        `;
 
-        // 添加按钮事件监听
-        assignmentDiv
-          .querySelector(".btn-accept")
-          .addEventListener("click", handle_accept);
-        assignmentDiv
-          .querySelector(".btn-decline")
-          .addEventListener("click", handle_decline);
+        // 事件监听
+        if (status === "accepted") {
+          assignmentDiv
+            .querySelector(".btn-record")
+            .addEventListener("click", (event) => {
+              handle_record_progress(event, assignment.order_id);
+            });
+        } else if (status === "pending") {
+          assignmentDiv
+            .querySelector(".btn-accept")
+            .addEventListener("click", handle_accept);
+          assignmentDiv
+            .querySelector(".btn-decline")
+            .addEventListener("click", handle_decline);
+        }
 
         return assignmentDiv;
       };
+
+      let global_order_id = -1;
+
+      // 处理记录进度点击
+      const handle_record_progress = (event, order_id) => {
+        currentAssignmentId = event.target.dataset.id;
+        global_order_id = order_id;
+        document.getElementById("progressModal").style.display = "flex";
+      };
+
+      // 处理模态框关闭
+      document.querySelector(".close").addEventListener("click", () => {
+        document.getElementById("progressModal").style.display = "none";
+      });
+
+      // 添加材料行
+      document.getElementById("addMaterial").addEventListener("click", () => {
+        const newRow = document.createElement("div");
+        newRow.className = "material-row";
+        newRow.innerHTML = `
+          <div class="form-group">
+            <input type="text" class="modal-input material-name" placeholder="材料名称" required />
+          </div>
+          <div class="form-group">
+            <input type="number" class="modal-input material-price" placeholder="单价（元）" min="0" step="0.01" required />
+          </div>
+          <div class="form-group">
+            <input type="number" class="modal-input material-quantity" placeholder="数量" min="1" required />
+          </div>
+        `;
+        document.getElementById("materialsContainer").appendChild(newRow);
+      });
+
+      // 处理表单提交
+      document
+        .getElementById("progressForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+
+          // 收集材料数据
+          const materials = [];
+          const rows = document.querySelectorAll(".material-row");
+
+          for (const row of rows) {
+            const name = row.querySelector(".material-name").value;
+            const price = parseFloat(
+              row.querySelector(".material-price").value
+            );
+            const quantity = parseInt(
+              row.querySelector(".material-quantity").value
+            );
+
+            if (!name || isNaN(price) || isNaN(quantity)) {
+              alert("请填写完整的材料信息");
+              return;
+            }
+
+            materials.push({
+              name: name,
+              price: price,
+              quantity: quantity,
+            });
+          }
+
+          // 验证至少一个材料
+          if (materials.length === 0) {
+            // alert("请至少添加一个材料");
+            // return;
+          }
+
+          try {
+            /* const response = await fetch(
+              `${API_HOST}/api/assignments/${currentAssignmentId}/progress`,
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${localStorage.getItem("token")}`,
+                },
+                body: JSON.stringify({
+                  materials: materials,
+                  message: document.getElementById("workMessage").value,
+                }),
+              }
+            );*/
+
+            // Post Remark
+            const error_report = (response_ok) => {
+              if (response_ok) {
+                /*alert("进度记录成功！");
+                document.getElementById("progressModal").style.display = "none";
+                // 清空表单
+                document.getElementById("materialsContainer").innerHTML = `
+                <div class="material-row">
+                  <div class="form-group">
+                    <input type="text" class="modal-input material-name" placeholder="材料名称" required />
+                  </div>
+                  <div class="form-group">
+                    <input type="number" class="modal-input material-price" placeholder="单价（元）" min="0" step="0.01" required />
+                  </div>
+                  <div class="form-group">
+                    <input type="number" class="modal-input material-quantity" placeholder="数量" min="1" required />
+                  </div>
+                </div>
+              `;
+                document.getElementById("workMessage").value = "";
+                fetch_assignments();*/
+              } else {
+                alert("提交失败，请检查数据");
+              }
+            };
+
+            const post_remarks = async () => {
+              const req_url = `${API_HOST}/api/staff/${localStorage.getItem(
+                "user_id"
+              )}/update-repair`;
+              const resp = await fetch(req_url, {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `bearer ${localStorage.getItem("token")}`,
+                },
+                body: JSON.stringify({
+                  order_id: global_order_id,
+                  log_message: document.getElementById("workMessage").value,
+                }),
+              });
+              error_report(resp.ok);
+              return await resp.json();
+            };
+
+            const log_id = (await post_remarks())["log_id"];
+            const post_materials = async (name, quantity, unit_price) => {
+              const req_url = `${API_HOST}/api/staff/${localStorage.getItem(
+                "user_id"
+              )}/repair-log/${log_id}/materials`;
+              const resp = await fetch(req_url, {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `bearer ${localStorage.getItem("token")}`,
+                },
+                body: JSON.stringify({
+                  name: name,
+                  quantity: quantity,
+                  unit_price: unit_price,
+                }),
+              });
+              error_report(resp.ok);
+              return await resp.json();
+            };
+
+            materials.forEach(
+              async (material) =>
+                await post_materials(
+                  material.name,
+                  material.quantity,
+                  material.price
+                )
+            );
+            alert("进度记录成功！");
+          } catch (error) {
+            console.error("提交错误:", error);
+            alert("请求失败");
+          }
+        });
 
       // 处理接受任务
       const handle_accept = async (event) => {
         const assignmentId = event.target.dataset.id;
         if (confirm(`确定要接受任务 #${assignmentId} 吗？`)) {
           try {
-            console.log(
-              `${API_HOST}/api/staff/${localStorage.getItem(
-                "user_id"
-              )}/assignments/${assignmentId}/accept`
-            );
             const response = await fetch(
               `${API_HOST}/api/staff/${localStorage.getItem(
                 "user_id"
@@ -288,7 +596,7 @@
 
             if (response.ok) {
               alert("任务已成功接受！");
-              fetch_assignments(); // 刷新列表
+              fetch_assignments();
             } else {
               alert("操作失败，请稍后重试");
             }
@@ -318,7 +626,7 @@
 
             if (response.ok) {
               alert("任务已成功拒绝！");
-              fetch_assignments(); // 刷新列表
+              fetch_assignments();
             } else {
               alert("操作失败，请稍后重试");
             }
@@ -330,7 +638,9 @@
       };
 
       // 初始化
-      document.addEventListener("DOMContentLoaded", fetch_assignments);
+      document.addEventListener("DOMContentLoaded", () => {
+        fetch_assignments();
+      });
     </script>
   </body>
 </html>
