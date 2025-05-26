@@ -12,25 +12,32 @@
   </body>
   <script src="../js/config.js"></script>
   <script>
-    const user_profile = JSON.parse(localStorage.getItem("user_profile"));
+    const init = async () => {
+      await fetch_profile_staff();
+      await verify_token("../index.html");
 
-    const get_income = async () => {
-      console.log(user_profile.staff_id);
-      const req_url = `${API_HOST}/api/staff/${user_profile.staff_id}/income`;
-      const resp = await fetch(req_url, {
-        method: "GET",
-        headers: {
-          "Content-type": "application/json",
-          Authorization: `bearer ${localStorage.getItem("token")}`,
-        },
-      });
+      const user_profile = JSON.parse(localStorage.getItem("user_profile"));
 
-      const json = await resp.json();
-      console.log(json);
+      const get_income = async () => {
+        console.log(user_profile.staff_id);
+        const req_url = `${API_HOST}/api/staff/${user_profile.staff_id}/income`;
+        const resp = await fetch(req_url, {
+          method: "GET",
+          headers: {
+            "Content-type": "application/json",
+            Authorization: `bearer ${localStorage.getItem("token")}`,
+          },
+        });
 
-      document.querySelector("#income").innerHTML = json["total_income"];
+        const json = await resp.json();
+        console.log(json);
+
+        document.querySelector("#income").innerHTML = json["total_income"];
+      };
+
+      get_income();
     };
 
-    get_income();
+    document.addEventListener("DOMContentLoaded", init);
   </script>
 </html>

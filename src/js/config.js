@@ -1,6 +1,6 @@
 const API_HOST = "http://localhost:8090";
 
-const verify_token = async (logout_href) => {
+const verify_token = async (logout_href, has_parent = false) => {
   try {
     const token = localStorage.getItem("token");
     if (!token) {
@@ -29,12 +29,20 @@ const verify_token = async (logout_href) => {
     console.log(data);
     if (data["status"] == "failure") {
       localStorage.clear();
-      location.href = "index.html";
+      if (has_parent) {
+        parent.location.href = "index.html";
+      } else {
+        location.href = "index.html";
+      }
     }
   } catch (error) {
     console.error("Token verification failed:", error.message);
     localStorage.clear();
-    location.href = "index.html";
+    if (has_parent) {
+      parent.location.href = "index.html";
+    } else {
+      location.href = "index.html";
+    }
     // throw error;
   }
 };

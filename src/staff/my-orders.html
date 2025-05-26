@@ -3,7 +3,139 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="../css/alert.css" />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;600&display=swap"
     <title>AutoCare Pro - My Orders</title>
+    <style>
+      :root {
+        --primary-color: #2c3e50;
+        --success-color: #27ae60;
+        --danger-color: #e74c3c;
+        --warning-color: #f1c40f;
+        --light-bg: #f9f9f9;
+        --border-color: #e0e0e0;
+      }
+
+      body {
+        font-family: "Noto Sans", sans-serif;
+        margin: 0;
+        padding: 20px;
+        background-color: var(--light-bg);
+      }
+
+      h2 {
+        color: var(--primary-color);
+        border-bottom: 3px solid var(--primary-color);
+        padding-bottom: 10px;
+        margin: 20px auto;
+        max-width: 1200px;
+        font-size: 1.8em;
+      }
+
+      .repair-order-container {
+        display: grid;
+        gap: 20px;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 10px 0;
+      }
+
+      .repair-order {
+        background: white;
+        border-radius: 10px;
+        padding: 20px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+        transition: transform 0.2s ease;
+        border-left: 4px solid var(--primary-color);
+      }
+
+      .repair-order:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      }
+
+      .order-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+      }
+
+      .order-header h3 {
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: var(--primary-color);
+      }
+
+      .order-meta {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        margin-bottom: 15px;
+      }
+
+      .order-meta div {
+        background: var(--light-bg);
+        padding: 10px;
+        border-radius: 5px;
+        border: 1px solid var(--border-color);
+      }
+
+      .status-badge {
+        padding: 5px 15px;
+        border-radius: 20px;
+        font-size: 0.85em;
+        font-weight: 600;
+        text-transform: uppercase;
+      }
+
+      .status-pending {
+        background: var(--warning-color);
+        color: #000;
+      }
+
+      .status-completed {
+        background: var(--success-color);
+        color: white;
+      }
+
+      .remarks {
+        background: var(--light-bg);
+        padding: 15px;
+        border-radius: 8px;
+        margin-top: 15px;
+        border: 1px solid var(--border-color);
+      }
+
+      .remarks h4 {
+        margin: 0 0 10px 0;
+        color: var(--primary-color);
+      }
+
+      .remarks-text {
+        white-space: pre-wrap;
+        padding: 10px;
+        background: white;
+        border-radius: 5px;
+        line-height: 1.5;
+      }
+
+      @media (max-width: 768px) {
+        .order-header {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 10px;
+        }
+
+        .order-meta {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
   </head>
   <body>
     <h2>Repair Orders</h2>
@@ -13,234 +145,108 @@
     <script src="../js/config.js"></script>
     <script>
       verify_token("../index.html");
-      fetch_profile();
-
-      const repairOrderContainer = document.getElementById(
-        "repairOrderContainer"
-      );
+      // fetch_profile();
+      fetch_profile_staff();
 
       const fetch_orders = async () => {
-        const req_url = `${API_HOST}/api/staff/${localStorage.getItem(
-          "user_id"
-        )}/repair-orders`;
-        const resp = await fetch(req_url, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `bearer ${localStorage.getItem("token")}`,
-          },
-        });
+        try {
+          const req_url = `${API_HOST}/api/staff/${localStorage.getItem(
+            "user_id"
+          )}/repair-orders`;
+          const resp = await fetch(req_url, {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `bearer ${localStorage.getItem("token")}`,
+            },
+          });
 
-        const json = await resp.json();
-        console.log(json);
+          if (!resp.ok) throw new Error("Failed to fetch orders");
 
-        const repair_orders = json["repair_orders"];
-        if (repair_orders.length === 0) {
-          repairOrderContainer.innerHTML = "<p>No repair orders found.</p>";
+          const json = await resp.json();
+          render_orders(json.repair_orders);
+        } catch (error) {
+          console.error("Error:", error);
+          document.getElementById(
+            "repairOrderContainer"
+          ).innerHTML = `<p class="error-message">无法加载维修工单，请稍后重试</p>`;
+        }
+      };
+
+      const render_orders = (orders) => {
+        const container = document.getElementById("repairOrderContainer");
+
+        if (orders.length === 0) {
+          container.innerHTML = "<p>当前没有待处理的维修工单</p>";
           return;
         }
 
-        repairOrderContainer.innerHTML = ""; // Clear previous content
-        repair_orders.forEach((order) => {
-          const orderDiv = document.createElement("div");
-          orderDiv.className = "repair-order";
-
-          // Format times
-          const orderTime = new Date(order.order_time).toLocaleString();
-          const finishTime = order.finish_time
-            ? new Date(order.finish_time).toLocaleString()
-            : "Not finished yet";
-
-          // Set status class
-          const statusClass =
-            order.status.toLowerCase() === "pending"
-              ? "status-pending"
-              : "status-completed";
-
-          orderDiv.innerHTML = `
-            <div class="order-header">
-                <div>
-                    <h3>
-                        <span>${order.required_staff_type} Service</span>
-                        <span class="status-badge ${statusClass}">${
-            order.status
-          }</span>
-                    </h3>
-                    <p>Order ID: ${order.order_id}</p>
-                </div>
-                <div>
-                    <!-- <p>Customer: ${order.customer_id}</p> -->
-                </div>
-            </div>
-            
-            <div class="order-meta">
-                <div>
-                    <strong>Request ID</strong>
-                    <p>${order.request_id}</p>
-                </div>
-                <div>
-                    <strong>Order Time</strong>
-                    <p>${orderTime}</p>
-                </div>
-                <div>
-                    <strong>Completion Time</strong>
-                    <p>${finishTime}</p>
-                </div>
-                <div>
-                    <strong>Work Duration</strong>
-                    <p>${order.time_worked} hours</p>
-                </div>
-            </div>
-
-            <div class="remarks">
-                <h4>Remarks</h4>
-                <div class="remarks-text">${
-                  order.remarks || "No remarks provided"
-                }</div>
-            </div>
-          `;
-          repairOrderContainer.appendChild(orderDiv);
+        container.innerHTML = "";
+        orders.forEach((order) => {
+          const orderEl = create_order_element(order);
+          container.appendChild(orderEl);
         });
-        repairOrderContainer.style.display = "block"; // Show the container
       };
 
-      fetch_orders();
+      const create_order_element = (order) => {
+        const orderDiv = document.createElement("div");
+        orderDiv.className = "repair-order";
+
+        // 时间格式化
+        const formatTime = (timeString) =>
+          timeString ? new Date(timeString).toLocaleString() : "尚未完成";
+
+        // 状态样式
+        const statusClass =
+          order.status.toLowerCase() === "pending"
+            ? "status-pending"
+            : "status-completed";
+
+        orderDiv.innerHTML = `
+                <div class="order-header">
+                    <div>
+                        <h3>
+                            <span>${order.required_staff_type} 服务</span>
+                            <span class="status-badge ${statusClass}">${
+          order.status
+        }</span>
+                        </h3>
+                        <p>工单编号：${order.order_id}</p>
+                    </div>
+                </div>
+                
+                <div class="order-meta">
+                    <div>
+                        <strong>需求编号</strong>
+                        <p>${order.request_id}</p>
+                    </div>
+                    <div>
+                        <strong>创建时间</strong>
+                        <p>${formatTime(order.order_time)}</p>
+                    </div>
+                    <div>
+                        <strong>完成时间</strong>
+                        <p>${formatTime(order.finish_time)}</p>
+                    </div>
+                    <div>
+                        <strong>服务时长</strong>
+                        <p>${order.time_worked || 0} 小时</p>
+                    </div>
+                </div>
+
+                <div class="remarks">
+                    <h4>备注说明</h4>
+                    <div class="remarks-text">${
+                      order.remarks || "暂无备注信息"
+                    }</div>
+                </div>
+            `;
+
+        return orderDiv;
+      };
+
+      // 初始化加载
+      document.addEventListener("DOMContentLoaded", fetch_orders);
     </script>
   </body>
-  <style>
-    @import url("https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap");
-    * {
-      font-family: "Noto Sans", sans-serif;
-    }
-    .repair-order-container {
-      width: 90%;
-      height: auto;
-      margin-bottom: auto;
-      justify-content: start;
-      align-items: start;
-      display: flex;
-      flex-direction: row;
-      border-radius: 15px;
-      flex-wrap: wrap;
-      gap: 20px;
-      overflow-y: auto;
-      border: 2px solid white;
-      padding: 10px;
-      margin-bottom: 30px;
-      box-shadow: 3px 4px 10px inset rgba(0, 0, 0, 0.19);
-      margin-top: -10px;
-      margin: auto;
-      max-height: 75vh;
-    }
-
-    h2 {
-      color: #2c3e50;
-      border-bottom: 3px solid #3498db;
-      padding-bottom: 10px;
-      margin: 20px 0;
-      font-size: 2em;
-      padding: 20px;
-    }
-
-    .repair-order {
-      background: white;
-      border-radius: 10px;
-      box-shadow: 0 2px 15px rgba(0, 0, 0, 0.08);
-      margin-bottom: 20px;
-      padding: 20px;
-      transition: transform 0.2s, box-shadow 0.2s;
-      border-left: 4px solid #3498db;
-    }
-
-    .repair-order:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
-    }
-
-    .repair-order h3 {
-      color: #2c3e50;
-      margin: 0 0 15px 0;
-      font-size: 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .order-header {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 15px;
-      margin-bottom: 15px;
-    }
-
-    .order-meta {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 15px;
-      margin-bottom: 15px;
-    }
-
-    .order-meta p {
-      margin: 0;
-      color: #7f8c8d;
-      font-size: 0.95em;
-    }
-
-    .order-meta strong {
-      color: #2c3e50;
-      display: block;
-      margin-bottom: 5px;
-      font-size: 1em;
-    }
-
-    .status-badge {
-      display: inline-block;
-      padding: 5px 10px;
-      border-radius: 20px;
-      font-size: 13px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    .status-pending {
-      background: #fff3cd;
-      color: #856404;
-    }
-    .status-completed {
-      background: #d4edda;
-      color: #155724;
-    }
-
-    .remarks {
-      background: #f8f9fa;
-      border-radius: 8px;
-      padding: 15px;
-      margin-top: 15px;
-      border: 1px solid #e9ecef;
-    }
-
-    .remarks-text {
-      white-space: pre-wrap;
-      padding: 10px;
-      background: white;
-      border-radius: 5px;
-      border: 1px solid #eee;
-      font-family: inherit;
-      line-height: 1.5;
-    }
-
-    @media (max-width: 768px) {
-      .order-header,
-      .order-meta {
-        grid-template-columns: 1fr;
-      }
-
-      .repair-order h3 {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 10px;
-      }
-    }
-  </style>
 </html>

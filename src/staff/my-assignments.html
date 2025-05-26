@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="../css/alert.css" />
+    <title>AutoCare Pro - Assignments</title>
+    <style>
+      :root {
+        --primary-color: #2c3e50;
+        --success-color: #27ae60;
+        --danger-color: #e74c3c;
+        --warning-color: #f1c40f;
+        --light-bg: #f9f9f9;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        margin: 0;
+        padding: 20px;
+        /*background-color: var(--light-bg);*/
+      }
+
+      h2 {
+        color: var(--primary-color);
+        margin-bottom: 30px;
+        border-bottom: 2px solid var(--primary-color);
+        padding-bottom: 10px;
+      }
+
+      .assignment-container {
+        display: grid;
+        gap: 20px;
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+
+      .assignment {
+        background: white;
+        border-radius: 10px;
+        padding: 20px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        transition: transform 0.2s ease;
+      }
+
+      .assignment:hover {
+        transform: translateY(-2px);
+      }
+
+      .assignment-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+      }
+
+      .assignment-header h3 {
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: var(--primary-color);
+      }
+
+      .assignment-meta {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        margin-bottom: 15px;
+      }
+
+      .assignment-meta div {
+        background: var(--light-bg);
+        padding: 10px;
+        border-radius: 5px;
+      }
+
+      .status-badge {
+        padding: 5px 10px;
+        border-radius: 20px;
+        font-size: 0.9em;
+        font-weight: bold;
+      }
+
+      .status-pending {
+        background: var(--warning-color);
+        color: #000;
+      }
+
+      .status-completed {
+        background: var(--success-color);
+        color: white;
+      }
+
+      .action-buttons {
+        display: flex;
+        gap: 10px;
+        margin-top: 15px;
+        justify-content: flex-end;
+      }
+
+      .btn {
+        padding: 8px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-weight: bold;
+        transition: opacity 0.2s ease;
+      }
+
+      .btn:hover {
+        opacity: 0.9;
+      }
+
+      .btn-accept {
+        background: var(--success-color);
+        color: white;
+      }
+
+      .btn-decline {
+        background: var(--danger-color);
+        color: white;
+      }
+
+      .remarks {
+        background: var(--light-bg);
+        padding: 10px;
+        border-radius: 5px;
+        margin-top: 10px;
+      }
+
+      @media (max-width: 768px) {
+        .assignment-meta {
+          grid-template-columns: 1fr;
+        }
+
+        .action-buttons {
+          flex-direction: column;
+        }
+
+        .btn {
+          width: 100%;
+          text-align: center;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <h2>Assignments</h2>
+    <div class="assignment-container" id="assignmentContainer"></div>
+
+    <script src="../js/alert.js"></script>
+    <script src="../js/config.js"></script>
+    <script>
+      // 身份验证和基础函数
+      verify_token("../index.html", true);
+      fetch_profile();
+
+      // 获取任务数据
+      const fetch_assignments = async () => {
+        try {
+          const req_url = `${API_HOST}/api/staff/${localStorage.getItem(
+            "user_id"
+          )}/assignments`;
+          const resp = await fetch(req_url, {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `bearer ${localStorage.getItem("token")}`,
+            },
+          });
+
+          if (!resp.ok) throw new Error("Failed to fetch assignments");
+
+          const json = await resp.json();
+          render_assignments(json.assignments);
+        } catch (error) {
+          console.error("Error:", error);
+          document.getElementById(
+            "assignmentContainer"
+          ).innerHTML = `<p class="error-message">无法加载任务数据，请稍后重试</p>`;
+        }
+      };
+
+      // 渲染任务列表
+      const render_assignments = (assignments) => {
+        const container = document.getElementById("assignmentContainer");
+
+        if (assignments.length === 0) {
+          container.innerHTML = "<p>当前没有待处理的任务</p>";
+          return;
+        }
+
+        container.innerHTML = "";
+        assignments.forEach((assignment) => {
+          const assignmentEl = create_assignment_element(assignment);
+          container.appendChild(assignmentEl);
+        });
+      };
+
+      // 创建单个任务元素
+      const create_assignment_element = (assignment) => {
+        const assignmentDiv = document.createElement("div");
+        assignmentDiv.className = "assignment";
+
+        // 状态样式
+        const statusClass =
+          assignment.status.toLowerCase() === "pending"
+            ? "status-pending"
+            : "status-completed";
+
+        // 时间格式化
+        const formatTime = (timeString) =>
+          timeString ? new Date(timeString).toLocaleString() : "尚未完成";
+
+        assignmentDiv.innerHTML = `
+                <div class="assignment-header">
+                    <div>
+                        <h3>
+                            <span>任务编号：${assignment.assignment_id}</span>
+                            <span class="status-badge ${statusClass}">${
+          assignment.status
+        }</span>
+                        </h3>
+                        <p>订单编号：${assignment.order_id}</p>
+                    </div>
+                </div>
+                <div class="assignment-meta">
+                    <div>
+                        <strong>工单状态</strong>
+                        <p>${assignment.status}</p>
+                    </div>
+                    <div>
+                        <strong>已工作时间</strong>
+                        <p>${assignment.time_worked || 0} 小时</p>
+                    </div>
+                    <div>
+                        <strong>最后更新时间</strong>
+                        <p>${formatTime(assignment.updated_at)}</p>
+                    </div>
+                </div>
+                <div class="remarks">
+                    <strong>备注说明</strong>
+                    <p>${assignment.remarks || "暂无备注信息"}</p>
+                </div>
+                <div class="action-buttons">
+                    <button class="btn btn-accept" data-id="${
+                      assignment.assignment_id
+                    }">接受任务</button>
+                    <button class="btn btn-decline" data-id="${
+                      assignment.assignment_id
+                    }">拒绝任务</button>
+                </div>
+            `;
+
+        // 添加按钮事件监听
+        assignmentDiv
+          .querySelector(".btn-accept")
+          .addEventListener("click", handle_accept);
+        assignmentDiv
+          .querySelector(".btn-decline")
+          .addEventListener("click", handle_decline);
+
+        return assignmentDiv;
+      };
+
+      // 处理接受任务
+      const handle_accept = async (event) => {
+        const assignmentId = event.target.dataset.id;
+        if (confirm(`确定要接受任务 #${assignmentId} 吗？`)) {
+          try {
+            console.log(
+              `${API_HOST}/api/staff/${localStorage.getItem(
+                "user_id"
+              )}/assignments/${assignmentId}/accept`
+            );
+            const response = await fetch(
+              `${API_HOST}/api/staff/${localStorage.getItem(
+                "user_id"
+              )}/assignments/${assignmentId}/accept`,
+              {
+                method: "POST",
+                headers: {
+                  Authorization: `Bearer ${localStorage.getItem("token")}`,
+                },
+              }
+            );
+
+            if (response.ok) {
+              alert("任务已成功接受！");
+              fetch_assignments(); // 刷新列表
+            } else {
+              alert("操作失败，请稍后重试");
+            }
+          } catch (error) {
+            console.error("Error:", error);
+            alert("请求处理失败");
+          }
+        }
+      };
+
+      // 处理拒绝任务
+      const handle_decline = async (event) => {
+        const assignmentId = event.target.dataset.id;
+        if (confirm(`确定要拒绝任务 #${assignmentId} 吗？`)) {
+          try {
+            const response = await fetch(
+              `${API_HOST}/api/staff/${localStorage.getItem(
+                "user_id"
+              )}/assignments/${assignmentId}/reject`,
+              {
+                method: "POST",
+                headers: {
+                  Authorization: `Bearer ${localStorage.getItem("token")}`,
+                },
+              }
+            );
+
+            if (response.ok) {
+              alert("任务已成功拒绝！");
+              fetch_assignments(); // 刷新列表
+            } else {
+              alert("操作失败，请稍后重试");
+            }
+          } catch (error) {
+            console.error("Error:", error);
+            alert("请求处理失败");
+          }
+        }
+      };
+
+      // 初始化
+      document.addEventListener("DOMContentLoaded", fetch_assignments);
+    </script>
+  </body>
+</html>
