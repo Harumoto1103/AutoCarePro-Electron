@@ -299,6 +299,42 @@
         border-radius: 16px;
         box-shadow: var(--card-shadow);
       }
+
+      .filter-form {
+        background: white;
+        border-radius: 16px;
+        padding: 20px;
+        box-shadow: var(--card-shadow);
+        margin-bottom: 20px;
+        display: flex;
+        gap: 15px;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+
+      .filter-form label {
+        font-size: 0.95em;
+        color: var(--gray);
+        margin-right: 10px;
+      }
+
+      .filter-form select,
+      .filter-form input[type="date"] {
+        padding: 8px 12px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        font-size: 0.95em;
+        color: var(--dark);
+        background: var(--light);
+        transition: var(--transition);
+      }
+
+      .filter-form select:focus,
+      .filter-form input[type="date"]:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 5px rgba(67, 97, 238, 0.3);
+      }
     </style>
   </head>
   <body>
@@ -364,6 +400,20 @@
       </div>
 
       <h2>Cost Analysis</h2>
+      <div class="filter-form">
+        <label for="period-select">Period:</label>
+        <select id="period-select">
+          <option value="quarter">Quarter</option>
+          <option value="month">Month</option>
+        </select>
+        <label for="start-date">Start Date:</label>
+        <input type="date" id="start-date" />
+        <label for="end-date">End Date:</label>
+        <input type="date" id="end-date" />
+        <button class="btn btn-primary" id="apply-filter-btn">
+          <i class="fas fa-filter"></i> Apply Filter
+        </button>
+      </div>
       <div class="charts-grid">
         <div class="chart-container">
           <canvas id="costStackedBarChart"></canvas>
@@ -486,7 +536,12 @@
         });
       };
 
-      const createCostStackedBarChart = (labels, laborFee, materialFee) => {
+      const createCostStackedBarChart = (
+        labels,
+        laborFee,
+        materialFee,
+        period
+      ) => {
         new Chart(document.getElementById("costStackedBarChart"), {
           type: "bar",
           data: {
@@ -509,7 +564,9 @@
             plugins: {
               title: {
                 display: true,
-                text: "Labor vs Material Cost Composition by Quarter",
+                text: `Labor vs Material Cost Composition by ${
+                  period.charAt(0).toUpperCase() + period.slice(1)
+                }`,
               },
             },
             scales: {
@@ -524,7 +581,12 @@
         });
       };
 
-      const createCostOrderBarChart = (labels, totalCost, orderCount) => {
+      const createCostOrderBarChart = (
+        labels,
+        totalCost,
+        orderCount,
+        period
+      ) => {
         new Chart(document.getElementById("costOrderBarChart"), {
           type: "bar",
           data: {
@@ -549,7 +611,9 @@
             plugins: {
               title: {
                 display: true,
-                text: "Total Cost and Order Count by Quarter",
+                text: `Total Cost and Order Count by ${
+                  period.charAt(0).toUpperCase() + period.slice(1)
+                }`,
               },
             },
             scales: {
@@ -773,8 +837,16 @@
 
       const fetchCostAnalysis = async () => {
         try {
+          const period = document.getElementById("period-select").value;
+          const startDate = document.getElementById("start-date").value;
+          const endDate = document.getElementById("end-date").value;
+
+          const params = new URLSearchParams({ period });
+          if (startDate) params.append("start_date", startDate);
+          if (endDate) params.append("end_date", endDate);
+
           const resp = await fetch(
-            `${API_HOST}/api/admin/statistics/cost-analysis`,
+            `${API_HOST}/api/admin/statistics/cost-analysis?${params.toString()}`,
             {
               method: "GET",
               headers: {
@@ -785,6 +857,13 @@
           );
           if (!resp.ok) throw new Error("Failed to fetch cost analysis");
           const json = await resp.json();
+          if (json.status === "success_no_data") {
+            document.getElementById("total-cost").textContent = "0.00";
+            createCostStackedBarChart([], [], [], period);
+            createCostOrderBarChart([], [], [], period);
+            alert(json.message);
+            return;
+          }
           const costData = json["cost_analysis"];
           const labels = costData.map((d) => d.period);
           const laborFee = costData.map((d) => d.total_labor_fee);
@@ -795,8 +874,8 @@
           document.getElementById("total-cost").textContent = totalCost
             .reduce((a, b) => a + b, 0)
             .toFixed(2);
-          createCostStackedBarChart(labels, laborFee, materialFee);
-          createCostOrderBarChart(labels, totalCost, orderCount);
+          createCostStackedBarChart(labels, laborFee, materialFee, period);
+          createCostOrderBarChart(labels, totalCost, orderCount, period);
         } catch (error) {
           console.error(error);
           alert("Error loading cost analysis");
@@ -916,6 +995,16 @@
       document.getElementById("refresh-btn").addEventListener("click", () => {
         location.reload();
       });
+
+      // Apply filter button functionality
+      document
+        .getElementById("apply-filter-btn")
+        .addEventListener("click", () => {
+          // Destroy existing charts to prevent canvas conflicts
+          Chart.getChart("costStackedBarChart")?.destroy();
+          Chart.getChart("costOrderBarChart")?.destroy();
+          fetchCostAnalysis();
+        });
     </script>
   </body>
 </html>
