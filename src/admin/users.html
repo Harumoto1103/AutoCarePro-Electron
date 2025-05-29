@@ -1012,6 +1012,12 @@
           // Simulate API call
           console.log("Updating user:", userId, updatedUser);
 
+          if (!Object.keys(updatedUser).includes("hourly_rate")) {
+            updatedUser["hourly_rate"] = null;
+          }
+          if (!Object.keys(updatedUser).includes("jobtype")) {
+            updatedUser["jobtype"] = null;
+          }
           const resp = await fetch(req_url, {
             method: "POST",
             headers: {
@@ -1022,6 +1028,9 @@
               ...updatedUser,
             }),
           });
+
+          if (!resp.ok) return false;
+          const json = await resp.json();
           // Find and update the user in the array
           /* const index = users.findIndex((u) => u.user_id == userId);
           if (index !== -1) {
@@ -1118,6 +1127,8 @@
           const success = await updateUser(userId, updatedUser);
           if (success) {
             closeAllModals();
+          } else {
+            alert("Faild to update, please try again later.");
           }
         });
 

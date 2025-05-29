@@ -22,7 +22,11 @@ const verify_token = async (logout_href, has_parent = false) => {
     if (!resp.ok) {
       //   throw new Error(`HTTP error! status: ${resp.status}`);
       localStorage.clear();
-      location.href = logout_href;
+      if (has_parent) {
+        parent.location.href = logout_href;
+      } else {
+        location.href = logout_href;
+      }
     }
 
     const data = await resp.json();

@@ -3,51 +3,91 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="../css/alert.css" />
     <title>AutoCare Pro - Assignments</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link rel="stylesheet" href="../css/alert.css" />
     <style>
       :root {
-        --primary-color: #2c3e50;
-        --success-color: #27ae60;
-        --danger-color: #e74c3c;
-        --warning-color: #f1c40f;
-        --light-bg: #f9f9f9;
+        --primary: #4361ee;
+        --primary-light: #eef2ff;
+        --primary-dark: #3a56d4;
+        --secondary: #7209b7;
+        --light: #f8f9fa;
+        --dark: #212529;
+        --gray: #6c757d;
+        --light-gray: #e9ecef;
+        --border: #dee2e6;
+        --success: #4cc9f0;
+        --danger: #f72585;
+        --warning: #ff9e00;
+        --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        --transition: all 0.3s ease;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
       }
 
       body {
-        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-        margin: 0;
+        background: transparent;
+        color: var(--dark);
+        min-height: 100vh;
         padding: 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .container {
+        max-width: 1400px;
+        width: 100%;
+        margin: 0 auto;
       }
 
       h2 {
-        color: var(--primary-color);
-        margin-bottom: 30px;
-        border-bottom: 2px solid var(--primary-color);
-        padding-bottom: 10px;
-      }
-
-      #materialsContainer {
-        overflow-y: scroll;
+        color: var(--primary);
+        font-size: 28px;
+        font-weight: 700;
+        padding: 15px 0;
+        margin: 20px 0;
+        border-bottom: 2px solid var(--primary-light);
+        width: 100%;
+        text-align: center;
+        display: flex;
+        align-items: center;
+        gap: 10px;
       }
 
       .assignment-container {
         display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        background: rgba(255, 255, 255, 0.5) !important;
         gap: 20px;
-        max-width: 1200px;
-        margin: 0 auto;
+        padding: 20px;
+        background: var(--light);
+        border-radius: 16px;
+        box-shadow: var(--card-shadow);
+        max-height: 70vh;
+        overflow-y: auto;
       }
 
       .assignment {
         background: white;
-        border-radius: 10px;
+        border-radius: 12px;
         padding: 20px;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        transition: transform 0.2s ease;
+        box-shadow: var(--card-shadow);
+        transition: var(--transition);
       }
 
       .assignment:hover {
-        transform: translateY(-2px);
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
       }
 
       .assignment-header {
@@ -58,11 +98,12 @@
       }
 
       .assignment-header h3 {
-        margin: 0;
+        font-size: 20px;
+        color: var(--primary);
         display: flex;
         align-items: center;
         gap: 10px;
-        color: var(--primary-color);
+        margin: 0;
       }
 
       .assignment-meta {
@@ -73,31 +114,38 @@
       }
 
       .assignment-meta div {
-        background: var(--light-bg);
-        padding: 10px;
-        border-radius: 5px;
+        background: var(--primary-light);
+        padding: 12px;
+        border-radius: 8px;
+        font-size: 14px;
+      }
+
+      .assignment-meta div strong {
+        display: block;
+        color: var(--gray);
+        margin-bottom: 5px;
       }
 
       .status-badge {
-        padding: 5px 10px;
+        padding: 6px 12px;
         border-radius: 20px;
-        font-size: 0.9em;
-        font-weight: bold;
+        font-size: 14px;
+        font-weight: 500;
       }
 
       .status-pending {
-        background: var(--warning-color);
-        color: #000;
+        background: rgba(255, 158, 0, 0.15);
+        color: var(--warning);
       }
 
       .status-completed {
-        background: var(--success-color);
-        color: white;
+        background: rgba(76, 201, 240, 0.15);
+        color: var(--success);
       }
 
       .status-accepted {
-        background: #3498db;
-        color: white;
+        background: rgba(67, 97, 238, 0.15);
+        color: var(--primary);
       }
 
       .action-buttons {
@@ -108,99 +156,182 @@
       }
 
       .btn {
-        padding: 8px 20px;
-        border: none;
-        border-radius: 5px;
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-weight: 600;
         cursor: pointer;
-        font-weight: bold;
-        transition: opacity 0.2s ease;
-      }
-
-      .btn:hover {
-        opacity: 0.9;
+        transition: var(--transition);
+        border: none;
+        display: flex;
+        align-items: center;
+        gap: 8px;
       }
 
       .btn-accept {
-        background: var(--success-color);
+        background: var(--success);
         color: white;
+      }
+
+      .btn-accept:hover {
+        background: #3ba8d4;
+        transform: translateY(-2px);
       }
 
       .btn-decline {
-        background: var(--danger-color);
+        background: var(--danger);
         color: white;
+      }
+
+      .btn-decline:hover {
+        background: #d61f75;
+        transform: translateY(-2px);
       }
 
       .btn-record {
-        background: #3498db;
+        background: var(--primary);
         color: white;
       }
 
+      .btn-record:hover {
+        background: var(--primary-dark);
+        transform: translateY(-2px);
+      }
+
       .remarks {
-        background: var(--light-bg);
-        padding: 10px;
-        border-radius: 5px;
+        background: var(--light-gray);
+        padding: 12px;
+        border-radius: 8px;
         margin-top: 10px;
       }
 
-      /* 模态框样式 */
+      .remarks strong {
+        display: block;
+        color: var(--gray);
+        margin-bottom: 5px;
+      }
+
       .modal {
-        display: none;
         position: fixed;
-        top: 20px;
+        top: 0;
         left: 0;
         width: 100%;
-        height: calc(100% - 40px);
-        background: rgba(255, 255, 255, 0.1);
-        justify-content: center;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
         align-items: center;
+        justify-content: center;
         z-index: 1000;
-        margin: auto;
-        backdrop-filter: blur(10px);
-        border-radius: 20px;
+        opacity: 0;
+        visibility: hidden;
+        transition: var(--transition);
+      }
+
+      .modal.visible {
+        opacity: 1;
+        visibility: visible;
       }
 
       .modal-content {
         background: white;
-        padding: 20px;
-        border-radius: 8px;
-        width: 90%;
+        padding: 30px;
+        border-radius: 16px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        width: 100%;
         max-width: 600px;
         position: relative;
+        transform: translateY(20px);
+        transition: var(--transition);
         max-height: 80vh;
-        overflow: scroll;
-        box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.3);
+        overflow-y: auto;
       }
 
-      .close {
+      .modal.visible .modal-content {
+        transform: translateY(0);
+      }
+
+      .close-btn {
         position: absolute;
-        right: 15px;
-        top: 10px;
+        top: 20px;
+        right: 20px;
+        background: none;
+        border: none;
         font-size: 24px;
         cursor: pointer;
+        color: var(--gray);
+        transition: var(--transition);
+      }
+
+      .close-btn:hover {
+        color: var(--dark);
+      }
+
+      .modal-header {
+        margin-bottom: 25px;
+      }
+
+      .modal-header h3 {
+        color: var(--primary);
+        font-size: 24px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
       }
 
       .form-group {
-        margin-bottom: 15px;
+        margin-bottom: 20px;
+      }
+
+      .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 500;
+        color: var(--dark);
       }
 
       .modal-input {
         width: 100%;
-        padding: 8px;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        box-sizing: border-box;
+        padding: 12px 16px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        font-size: 16px;
+        transition: var(--transition);
       }
 
-      /* 新增材料行样式 */
+      .modal-input:focus {
+        border-color: var(--primary);
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+      }
+
       .material-row {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
-        gap: 10px;
-        margin-bottom: 10px;
+        gap: 15px;
+        margin-bottom: 15px;
+      }
+
+      .form-actions {
+        display: flex;
+        gap: 15px;
+        margin-top: 20px;
+        justify-content: flex-end;
+      }
+
+      .btn-cancel {
+        background: var(--light-gray);
+        color: var(--dark);
+      }
+
+      .btn-cancel:hover {
+        background: #dcdcdc;
       }
 
       @media (max-width: 768px) {
-        .assignment-meta {
+        .assignment-container {
+          grid-template-columns: 1fr;
+        }
+
+        .material-row {
           grid-template-columns: 1fr;
         }
 
@@ -210,436 +341,477 @@
 
         .btn {
           width: 100%;
-          text-align: center;
+          justify-content: center;
         }
 
-        .material-row {
-          grid-template-columns: 1fr;
+        .modal-content {
+          width: 90%;
+          padding: 20px;
         }
       }
     </style>
   </head>
   <body>
-    <h2>Assignments</h2>
-    <div class="assignment-container" id="assignmentContainer"></div>
+    <div class="container">
+      <h2><i class="fas fa-tasks"></i> Assignments</h2>
+      <div class="assignment-container" id="assignmentContainer"></div>
 
-    <!-- 修改后的进度记录模态框 -->
-    <div id="progressModal" class="modal">
-      <div class="modal-content">
-        <span class="close">&times;</span>
-        <h3>记录工作进度</h3>
-        <form id="progressForm">
-          <div id="materialsContainer">
-            <div class="material-row">
-              <div class="form-group">
-                <input
-                  type="text"
-                  class="modal-input material-name"
-                  placeholder="材料名称"
-                  required
-                />
-              </div>
-              <div class="form-group">
-                <input
-                  type="number"
-                  class="modal-input material-price"
-                  placeholder="单价（元）"
-                  min="0"
-                  step="0.01"
-                  required
-                />
-              </div>
-              <div class="form-group">
-                <input
-                  type="number"
-                  class="modal-input material-quantity"
-                  placeholder="数量"
-                  min="1"
-                  required
-                />
+      <!-- Progress Recording Modal -->
+      <div id="progressModal" class="modal">
+        <div class="modal-content">
+          <button class="close-btn">×</button>
+          <div class="modal-header">
+            <h3><i class="fas fa-clipboard-check"></i> Record Work Progress</h3>
+          </div>
+          <form id="progressForm">
+            <div id="materialsContainer">
+              <div class="material-row">
+                <div class="form-group">
+                  <input
+                    type="text"
+                    class="modal-input material-name"
+                    placeholder="Material Name"
+                    required
+                  />
+                </div>
+                <div class="form-group">
+                  <input
+                    type="number"
+                    class="modal-input material-price"
+                    placeholder="Unit Price ($)"
+                    min="0"
+                    step="0.01"
+                    required
+                  />
+                </div>
+                <div class="form-group">
+                  <input
+                    type="number"
+                    class="modal-input material-quantity"
+                    placeholder="Quantity"
+                    min="1"
+                    required
+                  />
+                </div>
               </div>
             </div>
-          </div>
-          <button
-            type="button"
-            id="addMaterial"
-            class="btn btn-accept"
-            style="margin-bottom: 15px"
-          >
-            新增材料
-          </button>
-          <div class="form-group">
-            <label>工作备注：</label>
-            <textarea id="workMessage" class="modal-input" rows="3"></textarea>
-          </div>
-          <button type="submit" class="btn btn-accept">提交记录</button>
-        </form>
+            <button
+              type="button"
+              id="addMaterial"
+              class="btn btn-accept"
+              style="margin-bottom: 20px"
+            >
+              <i class="fas fa-plus"></i> Add Material
+            </button>
+            <div class="form-group">
+              <label>Work Remarks:</label>
+              <textarea
+                id="workMessage"
+                class="modal-input"
+                rows="4"
+                placeholder="Enter work remarks"
+              ></textarea>
+            </div>
+            <div class="form-actions">
+              <button type="button" id="cancelProgress" class="btn btn-cancel">
+                <i class="fas fa-times"></i> Cancel
+              </button>
+              <button type="submit" class="btn btn-accept">
+                <i class="fas fa-check"></i> Submit Record
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
 
     <script src="../js/alert.js"></script>
     <script src="../js/config.js"></script>
     <script>
-      // 身份验证和基础函数
-      verify_token("../index.html", true);
-      fetch_profile();
+      const init = async () => {
+        // Authentication and basic functions
+        await verify_token("../index.html", true);
+        await fetch_profile();
 
-      // 全局变量
-      let currentAssignmentId;
+        // Global variables
+        let currentAssignmentId;
+        let global_order_id = -1;
 
-      // 获取任务数据
-      const fetch_assignments = async () => {
-        try {
-          const req_url = `${API_HOST}/api/staff/${localStorage.getItem(
-            "user_id"
-          )}/assignments`;
-          const resp = await fetch(req_url, {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `bearer ${localStorage.getItem("token")}`,
-            },
+        // Fetch assignments data
+        const fetch_assignments = async () => {
+          try {
+            const req_url = `${API_HOST}/api/staff/${localStorage.getItem(
+              "user_id"
+            )}/assignments`;
+            const resp = await fetch(req_url, {
+              method: "GET",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `bearer ${localStorage.getItem("token")}`,
+              },
+            });
+
+            if (!resp.ok) throw new Error("Failed to fetch assignments");
+            const json = await resp.json();
+            render_assignments(json.assignments);
+          } catch (error) {
+            console.error("Error:", error);
+            document.getElementById("assignmentContainer").innerHTML = `
+            <div style="text-align: center; padding: 40px; color: var(--gray);">
+              <i class="fas fa-exclamation-circle" style="font-size: 48px; margin-bottom: 20px;"></i>
+              <h3>Unable to load assignments</h3>
+              <p>Please try again later</p>
+            </div>
+          `;
+          }
+        };
+
+        // Render assignments list
+        const render_assignments = (assignments) => {
+          const container = document.getElementById("assignmentContainer");
+          container.innerHTML = "";
+
+          if (assignments.length === 0) {
+            container.innerHTML = `
+            <div style="text-align: center; padding: 40px; color: var(--gray);">
+              <i class="fas fa-tasks" style="font-size: 48px; margin-bottom: 20px;"></i>
+              <h3>No pending assignments</h3>
+              <p>Check back later for new tasks</p>
+            </div>
+          `;
+            return;
+          }
+
+          assignments.forEach((assignment) => {
+            container.appendChild(create_assignment_element(assignment));
           });
+        };
 
-          if (!resp.ok) throw new Error("Failed to fetch assignments");
-          const json = await resp.json();
-          render_assignments(json.assignments);
-        } catch (error) {
-          console.error("Error:", error);
-          document.getElementById(
-            "assignmentContainer"
-          ).innerHTML = `<p class="error-message">无法加载任务数据，请稍后重试</p>`;
-        }
-      };
+        // Create single assignment element
+        const create_assignment_element = (assignment) => {
+          const assignmentDiv = document.createElement("div");
+          assignmentDiv.className = "assignment";
 
-      // 渲染任务列表
-      const render_assignments = (assignments) => {
-        const container = document.getElementById("assignmentContainer");
-        container.innerHTML = "";
+          // Status styling
+          const status = assignment.status.toLowerCase();
+          const statusClass = `status-${status}`;
 
-        if (assignments.length === 0) {
-          container.innerHTML = "<p>当前没有待处理的任务</p>";
-          return;
-        }
+          // Time formatting
+          const formatTime = (timeString) =>
+            timeString
+              ? new Date(timeString).toLocaleString()
+              : "Not yet completed";
 
-        assignments.forEach((assignment) => {
-          container.appendChild(create_assignment_element(assignment));
-        });
-      };
-
-      // 创建单个任务元素
-      const create_assignment_element = (assignment) => {
-        const assignmentDiv = document.createElement("div");
-        assignmentDiv.className = "assignment";
-
-        // 状态样式
-        const status = assignment.status.toLowerCase();
-        const statusClass = `status-${status}`;
-
-        // 时间格式化
-        const formatTime = (timeString) =>
-          timeString ? new Date(timeString).toLocaleString() : "尚未完成";
-
-        // 动态生成操作按钮
-        let actionButtons;
-        if (status === "accepted") {
-          actionButtons = `
+          // Dynamically generate action buttons
+          let actionButtons;
+          if (status === "accepted") {
+            actionButtons = `
             <div class="action-buttons">
               <button class="btn btn-record" data-id="${assignment.assignment_id}">
-                记录进度
+                <i class="fas fa-clipboard-check"></i> Record Progress
               </button>
             </div>
           `;
-        } else if (status === "pending") {
-          actionButtons = `
+          } else if (status === "pending") {
+            actionButtons = `
             <div class="action-buttons">
-              <button class="btn btn-accept" data-id="${assignment.assignment_id}">接受任务</button>
-              <button class="btn btn-decline" data-id="${assignment.assignment_id}">拒绝任务</button>
+              <button class="btn btn-accept" data-id="${assignment.assignment_id}">
+                <i class="fas fa-check"></i> Accept Assignment
+              </button>
+              <button class="btn btn-decline" data-id="${assignment.assignment_id}">
+                <i class="fas fa-times"></i> Decline Assignment
+              </button>
             </div>
           `;
-        }
+          } else {
+            actionButtons = "";
+          }
 
-        assignmentDiv.innerHTML = `
+          assignmentDiv.innerHTML = `
           <div class="assignment-header">
             <div>
               <h3>
-                <span>任务编号：${assignment.assignment_id}</span>
+                <span>Assignment ID: ${assignment.assignment_id}</span>
                 <span class="status-badge ${statusClass}">${
-          assignment.status
-        }</span>
+            assignment.status
+          }</span>
               </h3>
-              <p>订单编号：${assignment.order_id}</p>
+              <p>Order ID: ${assignment.order_id}</p>
             </div>
           </div>
           <div class="assignment-meta">
             <div>
-              <strong>工单状态</strong>
+              <strong>Status</strong>
               <p>${assignment.status}</p>
             </div>
             <div>
-              <strong>已工作时间</strong>
-              <p>${assignment.time_worked || 0} 小时</p>
+              <strong>Time Worked</strong>
+              <p>${assignment.time_worked || 0} hours</p>
             </div>
             <div>
-              <strong>最后更新时间</strong>
+              <strong>Last Updated</strong>
               <p>${formatTime(assignment.updated_at)}</p>
             </div>
           </div>
           <div class="remarks">
-            <strong>备注说明</strong>
-            <p>${assignment.remarks || "暂无备注信息"}</p>
+            <strong>Remarks</strong>
+            <p>${assignment.remarks || "No remarks available"}</p>
           </div>
           ${actionButtons}
         `;
 
-        // 事件监听
-        if (status === "accepted") {
-          assignmentDiv
-            .querySelector(".btn-record")
-            .addEventListener("click", (event) => {
-              handle_record_progress(event, assignment.order_id);
-            });
-        } else if (status === "pending") {
-          assignmentDiv
-            .querySelector(".btn-accept")
-            .addEventListener("click", handle_accept);
-          assignmentDiv
-            .querySelector(".btn-decline")
-            .addEventListener("click", handle_decline);
-        }
+          // Event listeners
+          if (status === "accepted") {
+            assignmentDiv
+              .querySelector(".btn-record")
+              .addEventListener("click", (event) => {
+                handle_record_progress(event, assignment.order_id);
+              });
+          } else if (status === "pending") {
+            assignmentDiv
+              .querySelector(".btn-accept")
+              .addEventListener("click", handle_accept);
+            assignmentDiv
+              .querySelector(".btn-decline")
+              .addEventListener("click", handle_decline);
+          }
 
-        return assignmentDiv;
-      };
+          return assignmentDiv;
+        };
 
-      let global_order_id = -1;
+        // Handle record progress click
+        const handle_record_progress = (event, order_id) => {
+          currentAssignmentId = event.target.dataset.id;
+          global_order_id = order_id;
+          document.getElementById("progressModal").classList.add("visible");
+        };
 
-      // 处理记录进度点击
-      const handle_record_progress = (event, order_id) => {
-        currentAssignmentId = event.target.dataset.id;
-        global_order_id = order_id;
-        document.getElementById("progressModal").style.display = "flex";
-      };
+        // Handle modal close
+        document.querySelector(".close-btn").addEventListener("click", () => {
+          document.getElementById("progressModal").classList.remove("visible");
+        });
 
-      // 处理模态框关闭
-      document.querySelector(".close").addEventListener("click", () => {
-        document.getElementById("progressModal").style.display = "none";
-      });
+        // Handle cancel button in modal
+        document
+          .getElementById("cancelProgress")
+          .addEventListener("click", () => {
+            document
+              .getElementById("progressModal")
+              .classList.remove("visible");
+          });
 
-      // 添加材料行
-      document.getElementById("addMaterial").addEventListener("click", () => {
-        const newRow = document.createElement("div");
-        newRow.className = "material-row";
-        newRow.innerHTML = `
+        // Add material row
+        document.getElementById("addMaterial").addEventListener("click", () => {
+          const newRow = document.createElement("div");
+          newRow.className = "material-row";
+          newRow.innerHTML = `
           <div class="form-group">
-            <input type="text" class="modal-input material-name" placeholder="材料名称" required />
+            <input type="text" class="modal-input material-name" placeholder="Material Name" required />
           </div>
           <div class="form-group">
-            <input type="number" class="modal-input material-price" placeholder="单价（元）" min="0" step="0.01" required />
+            <input type="number" class="modal-input material-price" placeholder="Unit Price ($)" min="0" step="0.01" required />
           </div>
           <div class="form-group">
-            <input type="number" class="modal-input material-quantity" placeholder="数量" min="1" required />
+            <input type="number" class="modal-input material-quantity" placeholder="Quantity" min="1" required />
           </div>
         `;
-        document.getElementById("materialsContainer").appendChild(newRow);
-      });
+          document.getElementById("materialsContainer").appendChild(newRow);
+        });
 
-      // 处理表单提交
-      document
-        .getElementById("progressForm")
-        .addEventListener("submit", async (e) => {
-          e.preventDefault();
+        // Handle form submission
+        document
+          .getElementById("progressForm")
+          .addEventListener("submit", async (e) => {
+            e.preventDefault();
 
-          // 收集材料数据
-          const materials = [];
-          const rows = document.querySelectorAll(".material-row");
+            // Collect material data
+            const materials = [];
+            const rows = document.querySelectorAll(".material-row");
 
-          for (const row of rows) {
-            const name = row.querySelector(".material-name").value;
-            const price = parseFloat(
-              row.querySelector(".material-price").value
-            );
-            const quantity = parseInt(
-              row.querySelector(".material-quantity").value
-            );
+            for (const row of rows) {
+              const name = row.querySelector(".material-name").value;
+              const price = parseFloat(
+                row.querySelector(".material-price").value
+              );
+              const quantity = parseInt(
+                row.querySelector(".material-quantity").value
+              );
 
-            if (!name || isNaN(price) || isNaN(quantity)) {
-              alert("请填写完整的材料信息");
-              return;
+              if (!name || isNaN(price) || isNaN(quantity)) {
+                alert("Please fill in complete material information");
+                return;
+              }
+
+              materials.push({
+                name: name,
+                price: price,
+                quantity: quantity,
+              });
             }
 
-            materials.push({
-              name: name,
-              price: price,
-              quantity: quantity,
-            });
-          }
-
-          // 验证至少一个材料
-          if (materials.length === 0) {
-            // alert("请至少添加一个材料");
-            // return;
-          }
-
-          try {
-            /* const response = await fetch(
-              `${API_HOST}/api/assignments/${currentAssignmentId}/progress`,
-              {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                  Authorization: `Bearer ${localStorage.getItem("token")}`,
-                },
-                body: JSON.stringify({
-                  materials: materials,
-                  message: document.getElementById("workMessage").value,
-                }),
-              }
-            );*/
-
-            // Post Remark
-            const error_report = (response_ok) => {
-              if (response_ok) {
-                /*alert("进度记录成功！");
-                document.getElementById("progressModal").style.display = "none";
-                // 清空表单
-                document.getElementById("materialsContainer").innerHTML = `
-                <div class="material-row">
-                  <div class="form-group">
-                    <input type="text" class="modal-input material-name" placeholder="材料名称" required />
+            try {
+              // Post Remark
+              const error_report = (response_ok) => {
+                if (response_ok) {
+                  alert("Progress recorded successfully!");
+                  document
+                    .getElementById("progressModal")
+                    .classList.remove("visible");
+                  // Clear form
+                  document.getElementById("materialsContainer").innerHTML = `
+                  <div class="material-row">
+                    <div class="form-group">
+                      <input type="text" class="modal-input material-name" placeholder="Material Name" required />
+                    </div>
+                    <div class="form-group">
+                      <input type="number" class="modal-input material-price" placeholder="Unit Price ($)" min="0" step="0.01" required />
+                    </div>
+                    <div class="form-group">
+                      <input type="number" class="modal-input material-quantity" placeholder="Quantity" min="1" required />
+                    </div>
                   </div>
-                  <div class="form-group">
-                    <input type="number" class="modal-input material-price" placeholder="单价（元）" min="0" step="0.01" required />
-                  </div>
-                  <div class="form-group">
-                    <input type="number" class="modal-input material-quantity" placeholder="数量" min="1" required />
-                  </div>
-                </div>
-              `;
-                document.getElementById("workMessage").value = "";
-                fetch_assignments();*/
-              } else {
-                alert("提交失败，请检查数据");
-              }
-            };
+                `;
+                  document.getElementById("workMessage").value = "";
+                  fetch_assignments();
+                } else {
+                  alert("Submission failed, please check the data");
+                }
+              };
 
-            const post_remarks = async () => {
-              const req_url = `${API_HOST}/api/staff/${localStorage.getItem(
-                "user_id"
-              )}/update-repair`;
-              const resp = await fetch(req_url, {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                  Authorization: `bearer ${localStorage.getItem("token")}`,
-                },
-                body: JSON.stringify({
-                  order_id: global_order_id,
-                  log_message: document.getElementById("workMessage").value,
-                }),
-              });
-              error_report(resp.ok);
-              return await resp.json();
-            };
+              const post_remarks = async () => {
+                const req_url = `${API_HOST}/api/staff/${localStorage.getItem(
+                  "user_id"
+                )}/update-repair`;
+                const resp = await fetch(req_url, {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `bearer ${localStorage.getItem("token")}`,
+                  },
+                  body: JSON.stringify({
+                    order_id: global_order_id,
+                    log_message: document.getElementById("workMessage").value,
+                  }),
+                });
+                error_report(resp.ok);
+                return await resp.json();
+              };
 
-            const log_id = (await post_remarks())["log_id"];
-            const post_materials = async (name, quantity, unit_price) => {
-              const req_url = `${API_HOST}/api/staff/${localStorage.getItem(
-                "user_id"
-              )}/repair-log/${log_id}/materials`;
-              const resp = await fetch(req_url, {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                  Authorization: `bearer ${localStorage.getItem("token")}`,
-                },
-                body: JSON.stringify({
-                  name: name,
-                  quantity: quantity,
-                  unit_price: unit_price,
-                }),
-              });
-              error_report(resp.ok);
-              return await resp.json();
-            };
+              const log_id = (await post_remarks())["log_id"];
+              const post_materials = async (name, quantity, unit_price) => {
+                const req_url = `${API_HOST}/api/staff/${localStorage.getItem(
+                  "user_id"
+                )}/repair-log/${log_id}/materials`;
+                const resp = await fetch(req_url, {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `bearer ${localStorage.getItem("token")}`,
+                  },
+                  body: JSON.stringify({
+                    name: name,
+                    quantity: quantity,
+                    unit_price: unit_price,
+                  }),
+                });
+                error_report(resp.ok);
+                return await resp.json();
+              };
 
-            materials.forEach(
-              async (material) =>
+              for (const material of materials) {
                 await post_materials(
                   material.name,
                   material.quantity,
                   material.price
-                )
-            );
-            alert("进度记录成功！");
-          } catch (error) {
-            console.error("提交错误:", error);
-            alert("请求失败");
+                );
+              }
+            } catch (error) {
+              console.error("Submission error:", error);
+              alert("Request failed");
+            }
+          });
+
+        // Handle accept assignment
+        const handle_accept = async (event) => {
+          const assignmentId = event.target.dataset.id;
+          if (
+            confirm(
+              `Are you sure you want to accept Assignment #${assignmentId}?`
+            )
+          ) {
+            try {
+              const response = await fetch(
+                `${API_HOST}/api/staff/${localStorage.getItem(
+                  "user_id"
+                )}/assignments/${assignmentId}/accept`,
+                {
+                  method: "POST",
+                  headers: {
+                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                  },
+                }
+              );
+
+              if (response.ok) {
+                alert("Assignment accepted successfully!");
+                fetch_assignments();
+              } else {
+                alert("Operation failed, please try again later");
+              }
+            } catch (error) {
+              console.error("Error:", error);
+              alert("Request processing failed");
+            }
+          }
+        };
+
+        // Handle decline assignment
+        const handle_decline = async (event) => {
+          const assignmentId = event.target.dataset.id;
+          if (
+            confirm(
+              `Are you sure you want to decline Assignment #${assignmentId}?`
+            )
+          ) {
+            try {
+              const response = await fetch(
+                `${API_HOST}/api/staff/${localStorage.getItem(
+                  "user_id"
+                )}/assignments/${assignmentId}/reject`,
+                {
+                  method: "POST",
+                  headers: {
+                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                  },
+                }
+              );
+
+              if (response.ok) {
+                alert("Assignment declined successfully!");
+                fetch_assignments();
+              } else {
+                alert("Operation failed, please try again later");
+              }
+            } catch (error) {
+              console.error("Error:", error);
+              alert("Request processing failed");
+            }
+          }
+        };
+        // Close modal when clicking outside
+        window.addEventListener("click", (e) => {
+          if (e.target.classList.contains("modal")) {
+            document
+              .getElementById("progressModal")
+              .classList.remove("visible");
           }
         });
-
-      // 处理接受任务
-      const handle_accept = async (event) => {
-        const assignmentId = event.target.dataset.id;
-        if (confirm(`确定要接受任务 #${assignmentId} 吗？`)) {
-          try {
-            const response = await fetch(
-              `${API_HOST}/api/staff/${localStorage.getItem(
-                "user_id"
-              )}/assignments/${assignmentId}/accept`,
-              {
-                method: "POST",
-                headers: {
-                  Authorization: `Bearer ${localStorage.getItem("token")}`,
-                },
-              }
-            );
-
-            if (response.ok) {
-              alert("任务已成功接受！");
-              fetch_assignments();
-            } else {
-              alert("操作失败，请稍后重试");
-            }
-          } catch (error) {
-            console.error("Error:", error);
-            alert("请求处理失败");
-          }
-        }
+        await fetch_assignments();
       };
 
-      // 处理拒绝任务
-      const handle_decline = async (event) => {
-        const assignmentId = event.target.dataset.id;
-        if (confirm(`确定要拒绝任务 #${assignmentId} 吗？`)) {
-          try {
-            const response = await fetch(
-              `${API_HOST}/api/staff/${localStorage.getItem(
-                "user_id"
-              )}/assignments/${assignmentId}/reject`,
-              {
-                method: "POST",
-                headers: {
-                  Authorization: `Bearer ${localStorage.getItem("token")}`,
-                },
-              }
-            );
-
-            if (response.ok) {
-              alert("任务已成功拒绝！");
-              fetch_assignments();
-            } else {
-              alert("操作失败，请稍后重试");
-            }
-          } catch (error) {
-            console.error("Error:", error);
-            alert("请求处理失败");
-          }
-        }
-      };
-
-      // 初始化
+      // Initialize
       document.addEventListener("DOMContentLoaded", () => {
-        fetch_assignments();
+        init();
       });
     </script>
   </body>
