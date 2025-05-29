@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Repair Shop Statistics Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+      .charts-grid {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 20px;
+        margin: 20px;
+      }
+      .chart-container {
+        flex: 1 1 300px;
+        max-width: 800px;
+        background: #fff;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+      h2 {
+        text-align: center;
+        font-size: 1.5em;
+        margin: 20px 0 10px;
+        color: #333;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>Job Type Statistics</h2>
+    <div class="charts-grid">
+      <div class="chart-container">
+        <canvas id="jobChart"></canvas>
+      </div>
+    </div>
+
+    <h2>Cost Analysis</h2>
+    <div class="charts-grid">
+      <div class="chart-container">
+        <canvas id="costStackedBarChart"></canvas>
+      </div>
+      <div class="chart-container">
+        <canvas id="costOrderBarChart"></canvas>
+      </div>
+    </div>
+
+    <h2>Vehicle Type Statistics</h2>
+    <div class="charts-grid">
+      <div class="chart-container">
+        <canvas id="vehiclePieChart"></canvas>
+      </div>
+      <div class="chart-container">
+        <canvas id="vehicleTotalCostChart"></canvas>
+      </div>
+      <div class="chart-container">
+        <canvas id="vehicleAvgCostChart"></canvas>
+      </div>
+    </div>
+
+    <script src="../js/config.js"></script>
+    <script>
+      // Chart creation functions
+      const createVehiclePieChart = (labels, frequencyPercentages) => {
+        new Chart(document.getElementById("vehiclePieChart"), {
+          type: "pie",
+          data: {
+            labels,
+            datasets: [
+              {
+                data: frequencyPercentages,
+                backgroundColor: ["#4F46E5", "#10B981", "#F59E0B", "#EF4444"],
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              title: { display: true, text: "Repair Frequency (%)" },
+            },
+          },
+        });
+      };
+
+      const createVehicleTotalCostChart = (labels, totalCosts) => {
+        new Chart(document.getElementById("vehicleTotalCostChart"), {
+          type: "bar",
+          data: {
+            labels,
+            datasets: [
+              {
+                label: "Total Repair Cost",
+                data: totalCosts,
+                backgroundColor: "#4F46E5",
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              title: {
+                display: true,
+                text: "Total Repair Cost per Vehicle Type",
+              },
+            },
+            scales: {
+              y: { beginAtZero: true, title: { display: true, text: "Cost" } },
+            },
+          },
+        });
+      };
+
+      const createVehicleAvgCostChart = (labels, avgCosts) => {
+        new Chart(document.getElementById("vehicleAvgCostChart"), {
+          type: "bar",
+          data: {
+            labels,
+            datasets: [
+              {
+                label: "Average Repair Cost",
+                data: avgCosts,
+                backgroundColor: "#10B981",
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              title: {
+                display: true,
+                text: "Average Repair Cost per Vehicle Type",
+              },
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                title: { display: true, text: "Average Cost" },
+              },
+            },
+          },
+        });
+      };
+
+      const createCostStackedBarChart = (labels, laborFee, materialFee) => {
+        new Chart(document.getElementById("costStackedBarChart"), {
+          type: "bar",
+          data: {
+            labels,
+            datasets: [
+              {
+                label: "Labor Fee",
+                data: laborFee,
+                backgroundColor: "#EF4444",
+              },
+              {
+                label: "Material Fee",
+                data: materialFee,
+                backgroundColor: "#F59E0B",
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              title: {
+                display: true,
+                text: "Labor vs Material Cost Composition by Quarter",
+              },
+            },
+            scales: {
+              x: { stacked: true },
+              y: {
+                stacked: true,
+                beginAtZero: true,
+                title: { display: true, text: "Cost" },
+              },
+            },
+          },
+        });
+      };
+
+      const createCostOrderBarChart = (labels, totalCost, orderCount) => {
+        new Chart(document.getElementById("costOrderBarChart"), {
+          type: "bar",
+          data: {
+            labels,
+            datasets: [
+              {
+                label: "Total Cost",
+                data: totalCost,
+                backgroundColor: "#4F46E5",
+                yAxisID: "y",
+              },
+              {
+                label: "Order Count",
+                data: orderCount,
+                backgroundColor: "#10B981",
+                yAxisID: "y1",
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              title: {
+                display: true,
+                text: "Total Cost and Order Count by Quarter",
+              },
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                position: "left",
+                title: { display: true, text: "Total Cost" },
+              },
+              y1: {
+                beginAtZero: true,
+                position: "right",
+                title: { display: true, text: "Order Count" },
+                grid: { drawOnChartArea: false },
+              },
+            },
+          },
+        });
+      };
+
+      const createJobChart = (labels, assignedData, completedData) => {
+        new Chart(document.getElementById("jobChart"), {
+          type: "bar",
+          data: {
+            labels,
+            datasets: [
+              {
+                label: "Assigned (%)",
+                data: assignedData,
+                backgroundColor: "#4F46E5",
+              },
+              {
+                label: "Completed (%)",
+                data: completedData,
+                backgroundColor: "#10B981",
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            indexAxis: "y",
+            scales: {
+              x: {
+                beginAtZero: true,
+                max: 100,
+                title: { display: true, text: "Percentage (%)" },
+              },
+            },
+            plugins: {
+              title: { display: true, text: "Job Type Task Progress" },
+              tooltip: {
+                callbacks: {
+                  label: (context) =>
+                    `${context.dataset.label}: ${context.raw.toFixed(2)}%`,
+                },
+              },
+            },
+          },
+        });
+      };
+
+      // Fetch functions with error handling
+      const fetchVehicleTypeStats = async () => {
+        try {
+          const resp = await fetch(
+            `${API_HOST}/api/admin/statistics/vehicle-types`,
+            {
+              method: "GET",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+              },
+            }
+          );
+          if (!resp.ok) throw new Error("Failed to fetch vehicle type stats");
+          const data = await resp.json();
+          const labels = data.vehicle_type_frequency.map((v) => v.vehicle_type);
+          const frequencyPercentages = data.vehicle_type_frequency.map(
+            (v) => v.frequency_percentage
+          );
+          const totalCosts = data.vehicle_type_statistics.map(
+            (v) => v.total_cost
+          );
+          const avgCosts = data.vehicle_type_statistics.map(
+            (v) => v.average_cost
+          );
+
+          createVehiclePieChart(labels, frequencyPercentages);
+          createVehicleTotalCostChart(labels, totalCosts);
+          createVehicleAvgCostChart(labels, avgCosts);
+        } catch (error) {
+          console.error(error);
+          alert("Error loading vehicle type statistics");
+        }
+      };
+
+      const fetchCostAnalysis = async () => {
+        try {
+          const resp = await fetch(
+            `${API_HOST}/api/admin/statistics/cost-analysis`,
+            {
+              method: "GET",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+              },
+            }
+          );
+          if (!resp.ok) throw new Error("Failed to fetch cost analysis");
+          const json = await resp.json();
+          const costData = json["cost_analysis"];
+          const labels = costData.map((d) => d.period);
+          const laborFee = costData.map((d) => d.total_labor_fee);
+          const materialFee = costData.map((d) => d.total_material_fee);
+          const totalCost = costData.map((d) => d.total_cost);
+          const orderCount = costData.map((d) => d.order_count);
+
+          createCostStackedBarChart(labels, laborFee, materialFee);
+          createCostOrderBarChart(labels, totalCost, orderCount);
+        } catch (error) {
+          console.error(error);
+          alert("Error loading cost analysis");
+        }
+      };
+
+      const fetchJobTypeStatistics = async () => {
+        try {
+          const resp = await fetch(
+            `${API_HOST}/api/admin/statistics/job-types`,
+            {
+              method: "GET",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+              },
+            }
+          );
+          if (!resp.ok) throw new Error("Failed to fetch job type stats");
+          const json = await resp.json();
+          const jobTypes = json.job_type_statistics;
+          const labels = jobTypes.map((item) => item.job_type);
+          const assignedData = jobTypes.map((item) => item.assigned_percentage);
+          const completedData = jobTypes.map(
+            (item) => item.completed_percentage
+          );
+
+          createJobChart(labels, assignedData, completedData);
+        } catch (error) {
+          console.error(error);
+          alert("Error loading job type statistics");
+        }
+      };
+
+      const fetchNegativeFeedback = async () => {
+        try {
+          const resp = await fetch(`${API_HOST}/api/admin/feedback/negative`, {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          });
+          if (!resp.ok) throw new Error("Failed to fetch negative feedback");
+          const json = await resp.json();
+          console.log("Negative Feedback:", json);
+          // Optional: Add visualization here
+        } catch (error) {
+          console.error(error);
+        }
+      };
+
+      const fetchUncompletedTasksStatistics = async () => {
+        try {
+          const resp = await fetch(
+            `${API_HOST}/api/admin/statistics/uncompleted-tasks`,
+            {
+              method: "GET",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+              },
+            }
+          );
+          if (!resp.ok) throw new Error("Failed to fetch uncompleted tasks");
+          const json = await resp.json();
+          console.log("Uncompleted Tasks:", json);
+          // Optional: Add visualization here
+        } catch (error) {
+          console.error(error);
+        }
+      };
+
+      // Execute fetches
+      fetchJobTypeStatistics();
+      fetchNegativeFeedback();
+      fetchCostAnalysis();
+      fetchVehicleTypeStats();
+      fetchUncompletedTasksStatistics();
+    </script>
+  </body>
+</html>

@@ -2,8 +2,89 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+    />
+    <link rel="stylesheet" href="../css/universal.css" />
+    <link rel="stylesheet" href="../css/staff.css" />
+    <link rel="stylesheet" href="../css/alert.css" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>AutoCare Pro - Admin</title>
+    <title>AutoCare Pro - Administrator</title>
   </head>
-  <body></body>
+  <body>
+    <div class="sidebar">
+      <div class="logo">AutoCare Pro</div>
+      <div class="username" id="username"></div>
+      <div class="option-container">
+        <div class="option" id="statistics">
+          <div class="option-icon">
+            <span class="material-symbols-outlined"> dashboard </span>
+          </div>
+          <div class="option-text">Statistics</div>
+        </div>
+      </div>
+    </div>
+    <div class="main-content">
+      <iframe src="statistics.html" id="iframe"></iframe>
+    </div>
+  </body>
+  <script src="../js/alert.js"></script>
+  <!-- <script src="../js/sections.js"></script> -->
+  <script src="../js/config.js"></script>
+  <script>
+    async function init() {
+      await fetch_profile_staff(); // Wait for the async function to complete
+
+      document.querySelector("#username").innerHTML = `Welcome, ${
+        JSON.parse(localStorage.getItem("user_profile"))["username"]
+      }!`;
+
+      let current_page = {
+        active_id: "statistics",
+        active_page: "statistics.html",
+      };
+
+      document
+        .querySelector(`#${current_page["active_id"]}`)
+        .classList.add("option-active");
+
+      const pages = {
+        statistics: {
+          active_id: "statistics",
+          active_page: "statistics.html",
+        },
+      };
+
+      Object.keys(pages).forEach((page) => {
+        const active_id = pages[page]["active_id"];
+        const active_page = pages[page]["active_page"];
+        document
+          .querySelector(`#${active_id}`)
+          .addEventListener("click", () => {
+            switchPage(pages[page]);
+          });
+      });
+
+      const switchPage = (page) => {
+        console.log(`Switchin to ${JSON.stringify(page)}`);
+        const current_page_element = document.querySelector(
+          `#${current_page["active_id"]}`
+        );
+        const iframe = document.getElementsByTagName("iframe")[0];
+        const new_page = document.querySelector(`#${page["active_id"]}`);
+
+        console.log(current_page_element);
+        current_page_element.classList.remove("option-active");
+        new_page.classList.add("option-active");
+
+        current_page.active_id = page.active_id;
+        current_page.active_page = page.active_page;
+        iframe.setAttribute("src", page["active_page"]);
+      };
+    }
+
+    // Call the init function after the DOM is loaded
+    document.addEventListener("DOMContentLoaded", init);
+  </script>
 </html>
