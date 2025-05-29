@@ -219,11 +219,15 @@
               document.querySelector("#logs").selectedIndex
             ].getAttribute("name"),
           comments: document.querySelector("#description").value,
-          rating: document
-            .querySelector("#ratings")
-            .options[
-              document.querySelector("#ratings").selectedIndex
-            ].getAttribute("name"),
+          rating: String(
+            Number(
+              document
+                .querySelector("#ratings")
+                .options[
+                  document.querySelector("#ratings").selectedIndex
+                ].getAttribute("name")
+            ) + 1
+          ),
         }),
       });
       /*

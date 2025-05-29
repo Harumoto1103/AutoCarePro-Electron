@@ -252,7 +252,7 @@
         });
 
         console.log(number_plate);
-        if (repair_order.status === "Pending") {
+        if (repair_order.status === "Pending" || true) {
           document.querySelector("#cars-container").innerHTML += `
                 <div class="vehicle" style="cursor: context-menu" ord_id="${repair_order.order_id}" number_plate="${number_plate}" desc="${repair_order.remarks}">
                     <div class="vehicle-image">
