@@ -365,14 +365,24 @@
         background: rgba(247, 37, 133, 0.2);
       }
 
+      .inspect-btn {
+        background: rgba(76, 201, 240, 0.1);
+        color: var(--success);
+      }
+
+      .inspect-btn:hover {
+        background: rgba(76, 201, 240, 0.2);
+      }
+
       /* Modal Styles */
       .modal {
         position: fixed;
-        top: 0;
+        top: 20px;
         left: 0;
         width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.5);
+        height: calc(100vh - 40px);
+        margin: auto;
+        background: rgba(255, 255, 255, 0.1);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -380,6 +390,8 @@
         opacity: 0;
         visibility: hidden;
         transition: var(--transition);
+        border-radius: 20px;
+        backdrop-filter: blur(10px);
       }
 
       .modal.visible {
@@ -397,6 +409,8 @@
         position: relative;
         transform: translateY(20px);
         transition: var(--transition);
+        height: 75vh !important;
+        overflow: scroll;
       }
 
       .modal.visible .modal-content {
@@ -527,6 +541,14 @@
           flex-direction: column;
         }
       }
+
+      .staff-fields {
+        display: none;
+      }
+
+      .staff-fields.visible {
+        display: block;
+      }
     </style>
   </head>
   <body>
@@ -604,6 +626,8 @@
                 Username <i class="fas fa-sort"></i>
               </th>
               <th data-column="discriminator">Role</th>
+              <th data-column="jobtype">Job Type</th>
+              <th data-column="hourly_rate">Hourly Rate</th>
               <th data-column="email">Email <i class="fas fa-sort"></i></th>
               <th data-column="phone">Phone <i class="fas fa-sort"></i></th>
               <th data-column="address">Address</th>
@@ -620,7 +644,7 @@
     <!-- Edit User Modal -->
     <div id="edit-modal" class="modal">
       <div class="modal-content">
-        <button class="close-btn">&times;</button>
+        <button class="close-btn">×</button>
         <div class="modal-header">
           <h2><i class="fas fa-user-edit"></i> Edit User</h2>
         </div>
@@ -644,11 +668,22 @@
           <div class="form-group">
             <label for="edit-discriminator">Role</label>
             <select id="edit-discriminator" class="role-select">
-              <option value="user">User</option>
               <option value="customer">Customer</option>
               <option value="staff">Staff</option>
               <option value="admin">Administrator</option>
             </select>
+          </div>
+
+          <div class="form-group staff-fields" id="edit-staff-fields">
+            <label for="edit-jobtype">Job Type</label>
+            <select id="edit-jobtype" class="role-select"></select>
+            <label for="edit-hourly-rate">Hourly Rate</label>
+            <input
+              type="number"
+              id="edit-hourly-rate"
+              placeholder="Enter hourly rate"
+              step="0.01"
+            />
           </div>
 
           <div class="form-group">
@@ -683,7 +718,7 @@
     <!-- Add User Modal -->
     <div id="add-modal" class="modal">
       <div class="modal-content">
-        <button class="close-btn">&times;</button>
+        <button class="close-btn">×</button>
         <div class="modal-header">
           <h2><i class="fas fa-user-plus"></i> Add New User</h2>
         </div>
@@ -711,11 +746,23 @@
           <div class="form-group">
             <label for="add-discriminator">Role</label>
             <select id="add-discriminator" class="role-select" required>
-              <option value="user">User</option>
               <option value="customer">Customer</option>
               <option value="staff">Staff</option>
               <option value="admin">Administrator</option>
             </select>
+          </div>
+
+          <div class="form-group staff-fields" id="add-staff-fields">
+            <label for="add-jobtype">Job Type</label>
+            <select id="add-jobtype" class="role-select" required></select>
+            <label for="add-hourly-rate">Hourly Rate</label>
+            <input
+              type="number"
+              id="add-hourly-rate"
+              placeholder="Enter hourly rate"
+              step="0.01"
+              required
+            />
           </div>
 
           <div class="form-group">
@@ -765,7 +812,7 @@
     <!-- Delete Confirmation Modal -->
     <div id="delete-modal" class="modal confirmation-modal">
       <div class="modal-content">
-        <button class="close-btn">&times;</button>
+        <button class="close-btn">×</button>
         <div class="confirmation-icon">
           <i class="fas fa-exclamation-circle"></i>
         </div>
@@ -803,12 +850,53 @@
       const searchBtn = document.getElementById("search-btn");
       const newUserBtn = document.getElementById("new-user-btn");
       const refreshBtn = document.getElementById("refresh-btn");
+      const editDiscriminator = document.getElementById("edit-discriminator");
+      const addDiscriminator = document.getElementById("add-discriminator");
+      const editStaffFields = document.getElementById("edit-staff-fields");
+      const addStaffFields = document.getElementById("add-staff-fields");
 
       // Statistics elements
       const totalUsersEl = document.getElementById("total-users");
       const customerUsersEl = document.getElementById("customer-users");
       const staffUsersEl = document.getElementById("staff-users");
       const adminUsersEl = document.getElementById("admin-users");
+
+      // Fetch staff types from API
+      const fetchStaffTypes = async () => {
+        const req_url = `${API_HOST}/api/staff/staff-types`;
+        try {
+          const resp = await fetch(req_url, {
+            method: "GET",
+            headers: {
+              "Content-type": "application/json",
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          });
+          const json = await resp.json();
+          const job_types = await json["staff-types"];
+
+          // Populate job type selects
+          document.getElementById("add-jobtype").innerHTML =
+            '<option value="">Select Job Type</option>';
+          document.getElementById("edit-jobtype").innerHTML =
+            '<option value="">Select Job Type</option>';
+
+          job_types.forEach((type) => {
+            const formattedType = type
+              .split("_")
+              .map((k) => k.charAt(0).toUpperCase() + k.slice(1))
+              .join(" ");
+            document.getElementById("add-jobtype").innerHTML += `
+              <option value="${type}">${formattedType}</option>
+            `;
+            document.getElementById("edit-jobtype").innerHTML += `
+              <option value="${type}">${formattedType}</option>
+            `;
+          });
+        } catch (error) {
+          console.error("Failed to fetch staff types:", error);
+        }
+      };
 
       // Fetch users from API
       const fetch_users = async () => {
@@ -854,6 +942,43 @@
         adminUsersEl.textContent = adminCount;
       }
 
+      // Inspect user function
+      async function inspectUser(user) {
+        try {
+          const response = await fetch(
+            `${API_HOST}/api/admin/get-token/${user.user_id}`,
+            {
+              method: "GET",
+              headers: {
+                "Content-type": "application/json",
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+              },
+            }
+          );
+
+          if (!response.ok) {
+            throw new Error("Failed to get user token");
+          }
+
+          const data = await response.json();
+          if (data.status === "success") {
+            localStorage.setItem("token", data.access_token);
+            localStorage.setItem("user_id", data.user_id);
+
+            if (data.role === "customer") {
+              parent.location.href = "../customer/index.html";
+            } else if (data.role === "staff") {
+              parent.location.href = "../staff/index.html";
+            }
+          } else {
+            alert("Failed to get user token");
+          }
+        } catch (error) {
+          console.error("Error inspecting user:", error);
+          alert("An error occurred while inspecting the user");
+        }
+      }
+
       // Refresh table with current data
       function refreshTable() {
         usersTableBody.innerHTML = "";
@@ -861,7 +986,7 @@
         if (filteredUsers.length === 0) {
           usersTableBody.innerHTML = `
             <tr>
-              <td colspan="8" style="text-align: center; padding: 40px; color: var(--gray);">
+              <td colspan="10" style="text-align: center; padding: 40px; color: var(--gray);">
                 <i class="fas fa-user-slash" style="font-size: 48px; margin-bottom: 20px;"></i>
                 <h3>No users found</h3>
                 <p>Try adjusting your search criteria</p>
@@ -881,6 +1006,15 @@
             user.discriminator.charAt(0).toUpperCase() +
             user.discriminator.slice(1)
           }</span></td>
+            <td>${
+              user.jobtype
+                ? user.jobtype
+                    .split("_")
+                    .map((k) => k.charAt(0).toUpperCase() + k.slice(1))
+                    .join(" ")
+                : "-"
+            }</td>
+            <td>${user.hourly_rate || "-"}</td>
             <td>${user.email || "-"}</td>
             <td>${user.phone || "-"}</td>
             <td>${user.address || "-"}</td>
@@ -895,6 +1029,13 @@
               }">
                 <i class="fas fa-trash-alt"></i> Delete
               </button>
+              ${
+                user.discriminator !== "admin"
+                  ? `<button class="action-btn inspect-btn" data-user-id="${user.user_id}">
+                      <i class="fas fa-eye"></i> Inspect
+                    </button>`
+                  : ""
+              }
             </td>
           `;
           usersTableBody.appendChild(row);
@@ -917,6 +1058,15 @@
             openDeleteModal(user);
           });
         });
+
+        // Add event listeners to inspect buttons
+        document.querySelectorAll(".inspect-btn").forEach((button) => {
+          button.addEventListener("click", (e) => {
+            const userId = e.target.closest(".inspect-btn").dataset.userId;
+            const user = users.find((u) => u.user_id == userId);
+            inspectUser(user);
+          });
+        });
       }
 
       // Open edit modal with user data
@@ -929,12 +1079,28 @@
         document.querySelector("#edit-email").value = user.email || "";
         document.querySelector("#edit-phone").value = user.phone || "";
         document.querySelector("#edit-address").value = user.address || "";
+        document.querySelector("#edit-jobtype").value =
+          user.jobtype
+            .split(" ")
+            .map((k, i) =>
+              i === 0 ? k : k.charAt(0).toLowerCase() + k.slice(1)
+            )
+            .join("_") || "";
+        document.querySelector("#edit-hourly-rate").value =
+          user.hourly_rate || "";
+
+        // Show/hide staff fields based on role
+        editStaffFields.classList.toggle(
+          "visible",
+          user.discriminator === "staff"
+        );
         editModal.classList.add("visible");
       }
 
       // Open add user modal
       function openAddModal() {
         addForm.reset();
+        addStaffFields.classList.remove("visible");
         addModal.classList.add("visible");
       }
 
@@ -969,7 +1135,8 @@
               user.username.toLowerCase().includes(searchTerm)) ||
             (user.email && user.email.toLowerCase().includes(searchTerm)) ||
             (user.phone && user.phone.includes(searchTerm)) ||
-            (user.address && user.address.toLowerCase().includes(searchTerm))
+            (user.address && user.address.toLowerCase().includes(searchTerm)) ||
+            (user.jobtype && user.jobtype.toLowerCase().includes(searchTerm))
         );
 
         refreshTable();
@@ -1007,17 +1174,17 @@
 
       // Update user
       async function updateUser(userId, updatedUser) {
+        if (
+          updatedUser["jobtype"] != null &&
+          updatedUser["jobtype"] != undefined
+        ) {
+          updatedUser["jobtype"] = updatedUser["jobtype"]
+            .split("_")
+            .map((k) => k.charAt(0).toUpperCase() + k.slice(1))
+            .join(" ");
+        }
         const req_url = `${API_HOST}/api/admin/update-user-profile/${userId}`;
         try {
-          // Simulate API call
-          console.log("Updating user:", userId, updatedUser);
-
-          if (!Object.keys(updatedUser).includes("hourly_rate")) {
-            updatedUser["hourly_rate"] = null;
-          }
-          if (!Object.keys(updatedUser).includes("jobtype")) {
-            updatedUser["jobtype"] = null;
-          }
           const resp = await fetch(req_url, {
             method: "POST",
             headers: {
@@ -1030,18 +1197,8 @@
           });
 
           if (!resp.ok) return false;
-          const json = await resp.json();
-          // Find and update the user in the array
-          /* const index = users.findIndex((u) => u.user_id == userId);
-          if (index !== -1) {
-            users[index] = { ...users[index], ...updatedUser };
-            updateStatistics();
-            refreshTable();
-          }*/
-
-          updateStatistics();
-          refreshTable();
-
+          await resp.json();
+          await fetch_users(); // Refresh user data after update
           return true;
         } catch (error) {
           console.error("Error updating user:", error);
@@ -1053,8 +1210,6 @@
       async function createUser(newUser) {
         const req_url = `${API_HOST}/api/admin/create-user`;
         try {
-          // Simulate API call
-          console.log("Creating user:", newUser);
           const resp = await fetch(req_url, {
             method: "POST",
             headers: {
@@ -1065,9 +1220,9 @@
               ...newUser,
             }),
           });
-          updateStatistics();
-          refreshTable();
 
+          if (!resp.ok) return false;
+          await fetch_users(); // Refresh user data after creation
           return true;
         } catch (error) {
           console.error("Error creating user:", error);
@@ -1079,18 +1234,15 @@
       async function deleteUser(userId) {
         const req_url = `${API_HOST}/api/admin/users/${userId}`;
         try {
-          // Simulate API call
-          console.log("Deleting user:", userId);
-          await new Promise((resolve) => setTimeout(resolve, 800));
+          const resp = await fetch(req_url, {
+            method: "DELETE",
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          });
 
-          // Remove the user from the array
-          const index = users.findIndex((u) => u.user_id == userId);
-          if (index !== -1) {
-            users.splice(index, 1);
-            updateStatistics();
-            refreshTable();
-          }
-
+          if (!resp.ok) return false;
+          await fetch_users(); // Refresh user data after deletion
           return true;
         } catch (error) {
           console.error("Error deleting user:", error);
@@ -1101,6 +1253,7 @@
       // Event Listeners
       document.addEventListener("DOMContentLoaded", () => {
         fetch_users();
+        fetchStaffTypes();
 
         // Modal close events
         document.querySelectorAll(".close-btn").forEach((btn) => {
@@ -1109,6 +1262,25 @@
 
         document.querySelectorAll(".btn-cancel").forEach((btn) => {
           btn.addEventListener("click", closeAllModals);
+        });
+
+        // Toggle staff fields based on role selection
+        addDiscriminator.addEventListener("change", (e) => {
+          addStaffFields.classList.toggle(
+            "visible",
+            e.target.value === "staff"
+          );
+          const jobTypeSelect = document.getElementById("add-jobtype");
+          const hourlyRateInput = document.getElementById("add-hourly-rate");
+          jobTypeSelect.required = e.target.value === "staff";
+          hourlyRateInput.required = e.target.value === "staff";
+        });
+
+        editDiscriminator.addEventListener("change", (e) => {
+          editStaffFields.classList.toggle(
+            "visible",
+            e.target.value === "staff"
+          );
         });
 
         // Edit form submission
@@ -1124,11 +1296,20 @@
             address: document.querySelector("#edit-address").value,
           };
 
+          if (updatedUser.discriminator === "staff") {
+            updatedUser.jobtype = document.querySelector("#edit-jobtype").value;
+            updatedUser.hourly_rate =
+              document.querySelector("#edit-hourly-rate").value;
+          } else {
+            updatedUser.jobtype = null;
+            updatedUser.hourly_rate = null;
+          }
+
           const success = await updateUser(userId, updatedUser);
           if (success) {
             closeAllModals();
           } else {
-            alert("Faild to update, please try again later.");
+            alert("Failed to update, please try again later.");
           }
         });
 
@@ -1145,9 +1326,17 @@
             address: document.querySelector("#add-address").value,
           };
 
+          if (newUser.discriminator === "staff") {
+            newUser.jobtype = document.querySelector("#add-jobtype").value;
+            newUser.hourly_rate =
+              document.querySelector("#add-hourly-rate").value;
+          }
+
           const success = await createUser(newUser);
           if (success) {
             closeAllModals();
+          } else {
+            alert("Failed to create user, please try again later.");
           }
         });
 

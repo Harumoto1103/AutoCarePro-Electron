@@ -643,7 +643,7 @@
           </div>
 
           <div class="form-group">
-            <label for="edit-discriminator">Role</label>
+            <label for="edit-discriminator">Job Type</label>
             <select id="edit-discriminator" class="role-select">
               <option value="user">User</option>
               <option value="customer">Customer</option>
@@ -821,6 +821,37 @@
       const staffUsersEl = document.getElementById("staff-users");
       const adminUsersEl = document.getElementById("admin-users");
 
+      const fetch_staff_types = async () => {
+        const req_url = `${API_HOST}/api/staff/staff-types`;
+        const resp = await fetch(req_url, {
+          method: "GET",
+          headers: {
+            "Content-type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        });
+        const json = await resp.json();
+        const job_types = await json["staff-types"];
+        document.getElementById("add-discriminator").innerHTML = "";
+        document.getElementById("edit-discriminator").innerHTML = "";
+        job_types.forEach((type) => {
+          document.getElementById("add-discriminator").innerHTML += `
+                        <option value="${type}">${type
+            .split("_")
+            .map((k) => k.charAt(0).toUpperCase() + k.slice(1))
+            .join(" ")}</option>
+                    `;
+          document.getElementById("edit-discriminator").innerHTML += `
+                    <option value="${type}">${type
+            .split("_")
+            .map((k) => k.charAt(0).toUpperCase() + k.slice(1))
+            .join(" ")}</option>
+                    `;
+        });
+      };
+
+      fetch_staff_types();
+
       // Fetch users from API
       const fetch_users = async () => {
         const req_url = `${API_HOST}/api/admin/staff`;
@@ -850,20 +881,20 @@
         // totalUsersEl.textContent = users.length;
 
         /* const customerCount = users.filter(
-          (u) => u.discriminator.toLowerCase() === "customer"
-        ).length;
-        customerUsersEl.textContent = customerCount; */
+                  (u) => u.discriminator.toLowerCase() === "customer"
+                ).length;
+                customerUsersEl.textContent = customerCount; */
 
         /* const staffCount = users.filter(
-          (u) => u.discriminator.toLowerCase() === "staff"
-        ).length; */
+                  (u) => u.discriminator.toLowerCase() === "staff"
+                ).length; */
         staffUsersEl.textContent = users.length;
         console.log(staffUsersEl.textContent);
 
         /* const adminCount = users.filter(
-          (u) => u.discriminator.toLowerCase() === "admin"
-        ).length;
-        adminUsersEl.textContent = adminCount;*/
+                  (u) => u.discriminator.toLowerCase() === "admin"
+                ).length;
+                adminUsersEl.textContent = adminCount;*/
       }
 
       // Refresh table with current data
@@ -872,41 +903,41 @@
 
         if (filteredUsers.length === 0) {
           usersTableBody.innerHTML = `
-            <tr>
-              <td colspan="8" style="text-align: center; padding: 40px; color: var(--gray);">
-                <i class="fas fa-user-slash" style="font-size: 48px; margin-bottom: 20px;"></i>
-                <h3>No users found</h3>
-                <p>Try adjusting your search criteria</p>
-              </td>
-            </tr>
-          `;
+                    <tr>
+                      <td colspan="8" style="text-align: center; padding: 40px; color: var(--gray);">
+                        <i class="fas fa-user-slash" style="font-size: 48px; margin-bottom: 20px;"></i>
+                        <h3>No users found</h3>
+                        <p>Try adjusting your search criteria</p>
+                      </td>
+                    </tr>
+                  `;
           return;
         }
 
         filteredUsers.forEach((user) => {
           const row = document.createElement("tr");
           row.innerHTML = `
-            <td>${user.staff_id}</td>
-            <td>${user.name || "-"}</td>
-            <td>${user.username}</td>
-            <td><span class="role ${"user"}">${user.jobtype}</span></td>
-            <td>${user.hourly_rate}</td>
-            <td>${user.email || "-"}</td>
-            <td>${user.phone || "-"}</td>
-            <td>${user.address || "-"}</td>
-            <td class="action-cell">
-              <button class="action-btn edit-btn" data-user-id="${
-                user.staff_id
-              }">
-                <i class="fas fa-edit"></i> Edit
-              </button>
-              <button class="action-btn delete-btn" data-user-id="${
-                user.staff_id
-              }">
-                <i class="fas fa-trash-alt"></i> Delete
-              </button>
-            </td>
-          `;
+                    <td>${user.staff_id}</td>
+                    <td>${user.name || "-"}</td>
+                    <td>${user.username}</td>
+                    <td><span class="role ${"user"}">${user.jobtype}</span></td>
+                    <td>${user.hourly_rate}</td>
+                    <td>${user.email || "-"}</td>
+                    <td>${user.phone || "-"}</td>
+                    <td>${user.address || "-"}</td>
+                    <td class="action-cell">
+                      <button class="action-btn edit-btn" data-user-id="${
+                        user.staff_id
+                      }">
+                        <i class="fas fa-edit"></i> Edit
+                      </button>
+                      <button class="action-btn delete-btn" data-user-id="${
+                        user.staff_id
+                      }">
+                        <i class="fas fa-trash-alt"></i> Delete
+                      </button>
+                    </td>
+                  `;
           usersTableBody.appendChild(row);
         });
 
@@ -931,11 +962,17 @@
 
       // Open edit modal with user data
       function openEditModal(user) {
+        console.log(user);
         document.querySelector("#edit-user-id").value = user.staff_id;
         document.querySelector("#edit-name").value = user.name || "";
         document.querySelector("#edit-username").value = user.username || "";
         document.querySelector("#edit-discriminator").value =
-          user.discriminator || "";
+          user.jobtype
+            .split(" ")
+            .map((k, i) =>
+              i === 0 ? k : k.charAt(0).toLowerCase() + k.slice(1)
+            )
+            .join("_") || "";
         document.querySelector("#edit-paid").value = user.hourly_rate || "";
         document.querySelector("#edit-email").value = user.email || "";
         document.querySelector("#edit-phone").value = user.phone || "";
