@@ -908,13 +908,13 @@
       function updateStatistics() {
         totalOrdersEl.textContent = orders.length;
         pendingOrdersEl.textContent = orders.filter(
-          (o) => o.status === "pending"
+          (o) => o.status === "Pending"
         ).length;
         inProgressOrdersEl.textContent = orders.filter(
-          (o) => o.status === "in_progress"
+          (o) => o.status === "In Progress"
         ).length;
         completedOrdersEl.textContent = orders.filter(
-          (o) => o.status === "completed"
+          (o) => o.status === "Completed"
         ).length;
       }
 
