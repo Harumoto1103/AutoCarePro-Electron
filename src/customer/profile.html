@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" href="../css/universal.css" />
+    <link rel="stylesheet" href="../css/customer-cars.css" />
+    <link rel="stylesheet" href="../css/alert.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AutoCare Pro - My Profile</title>
+  </head>
+  <body>
+    <div class="nav-bar">
+      <div class="nav-logo">AutoCare Pro</div>
+      <div class="nav-user" id="nav-user">
+        <div class="nav-user-avatar"></div>
+        <div class="nav-username" id="username">　　　</div>
+        <div
+          class="nav-dropdown"
+          id="nav-dropdown"
+          style="opacity: 0; display: none"
+        >
+          <div class="nav-dropdown-menu" id="logout">Logout</div>
+          <div class="nav-dropdown-menu" id="profile">Profile</div>
+        </div>
+      </div>
+    </div>
+    <form class="container">
+      <div class="cancel" id="cancel">✖︎</div>
+      <div class="container-title">
+        <div class="container-title-text">My Profile</div>
+        <div class="container-title-buttons">
+          <!-- <div class="title-button">＋Add</div> -->
+        </div>
+      </div>
+      <div style="height: 20px"></div>
+
+      <div class="input-container">
+        <div class="input-icon">
+          <span class="material-symbols-outlined"> account_circle </span>
+        </div>
+        <input
+          type="text"
+          id="username-i"
+          placeholder="Username"
+          class="username-input"
+          name="username"
+          required
+        />
+      </div>
+
+      <div class="input-container">
+        <div class="input-icon">
+          <span class="material-symbols-outlined"> id_card </span>
+        </div>
+        <input
+          type="text"
+          id="name"
+          placeholder="Full Name"
+          class="name-input"
+          name="name"
+          required
+        />
+      </div>
+
+      <div class="input-container">
+        <div class="input-icon">
+          <span class="material-symbols-outlined"> home </span>
+        </div>
+        <input
+          type="text"
+          id="address"
+          placeholder="Address"
+          class="address-input"
+          name="address"
+          required
+        />
+      </div>
+
+      <div class="input-container">
+        <div class="input-icon">
+          <span class="material-symbols-outlined"> phone </span>
+        </div>
+        <input
+          type="tel"
+          id="phone"
+          placeholder="Mobile Number"
+          class="phone-input"
+          name="phone"
+          required
+          maxlength="11"
+          pattern="[0-9]{11}"
+          title="Please enter a valid 11-digit mobile number."
+        />
+      </div>
+
+      <div class="input-container">
+        <div class="input-icon">
+          <span class="material-symbols-outlined"> email </span>
+        </div>
+        <input
+          type="email"
+          id="email"
+          placeholder="Email Address"
+          class="email-input"
+          name="email"
+          required
+        />
+      </div>
+
+      <div class="input-container">
+        <div class="input-icon">
+          <span class="material-symbols-outlined"> password </span>
+        </div>
+        <input
+          type="password"
+          id="password"
+          placeholder="Password"
+          class="password-input"
+          name="password"
+        />
+      </div>
+
+      <div class="input-container">
+        <div class="input-icon">
+          <span class="material-symbols-outlined"> password_2 </span>
+        </div>
+        <input
+          type="password"
+          id="password-confirm"
+          placeholder="Confirm Password"
+          class="password-confirm-input"
+          name="password-confirm"
+        />
+      </div>
+
+      <button type="submit" id="req-btn">Update Profile</button>
+    </form>
+  </body>
+  <script src="../js/alert.js"></script>
+  <script src="../js/sections.js"></script>
+  <script src="../js/config.js"></script>
+  <script>
+    const update_profile = async () => {
+      if (document.getElementById("password").value.trim() === "") {
+        document.getElementById("password").value = null;
+      }
+
+      if (
+        document.getElementById("password").value !=
+          document.getElementById("passowrd-confirm") &&
+        (document.getElementById("password").value.trim() != "" ||
+          document.getElementById("password-confirm").value.trim() != "")
+      ) {
+        alert("Attention", "Passwords should match.", "Confirm", () => {});
+        return;
+      }
+
+      const req_url = `${API_HOST}/api/customer/${localStorage.getItem(
+        "user_id"
+      )}/update-profile`;
+      const resp = await fetch(req_url, {
+        method: "POST",
+        headers: {
+          "Content-type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+
+        body: JSON.stringify({
+          name: document.getElementById("name").value,
+          email: document.getElementById("email").value,
+          address: document.getElementById("address").value,
+          phone: document.getElementById("phone").value,
+          username: document.getElementById("username-i").value,
+          password: document.getElementById("password").value,
+        }),
+      });
+
+      if (resp.ok) {
+        alert("Success", "Profile updated!", "Confirm", () => {
+          location.reload();
+        });
+      } else {
+        alert(
+          "Error",
+          "Failed to update profile, please try again later.",
+          "Confirm",
+          () => {}
+        );
+      }
+    };
+
+    const init = async () => {
+      await verify_token("../index.html");
+      await fetch_profile();
+
+      document.getElementById("req-btn").addEventListener("click", (event) => {
+        event.preventDefault();
+        update_profile();
+      });
+
+      const user_profile = await JSON.parse(
+        localStorage.getItem("user_profile")
+      );
+      document.querySelector("#username").innerHTML = user_profile["username"];
+
+      Object.keys(user_profile).forEach((key) => {
+        console.log(key);
+      });
+
+      console.log(
+        document.getElementById("username").value,
+        user_profile["username"]
+      );
+      document.getElementById("username-i").value = user_profile["username"];
+      document.getElementById("name").value = user_profile["name"];
+      document.getElementById("address").value = user_profile["address"];
+      document.getElementById("phone").value = user_profile["phone"];
+      document.getElementById("email").value = user_profile["email"];
+
+      // fetch_cars();
+
+      /* document.querySelector("#add-btn").addEventListener("click", () => {
+        location.href = "add-car.html";
+      }); */
+
+      document.querySelector("#cancel").addEventListener("click", () => {
+        location.href = "index.html";
+      });
+
+      document.querySelector("#nav-user").addEventListener("click", (event) => {
+        const dropdown = document.querySelector("#nav-dropdown");
+        console.log(dropdown.style);
+        if (dropdown.style.display == "none") {
+          dropdown.style.display = "block";
+          setTimeout(() => {
+            dropdown.style.opacity = "1";
+          }, 100);
+        } else {
+          dropdown.style.opacity = "0";
+          setTimeout(() => {
+            dropdown.style.display = "none";
+          }, 100);
+        }
+      });
+
+      document.querySelector("#logout").addEventListener("click", () => {
+        localStorage.clear();
+        location.href = "../index.html";
+      });
+    };
+
+    document.querySelector("#profile").addEventListener("click", () => {
+      location.href = "profile.html";
+    });
+
+    document.addEventListener("DOMContentLoaded", init);
+  </script>
+</html>

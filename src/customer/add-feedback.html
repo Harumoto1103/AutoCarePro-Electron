@@ -24,6 +24,7 @@
           style="opacity: 0; display: none"
         >
           <div class="nav-dropdown-menu" id="logout">Logout</div>
+          <div class="nav-dropdown-menu" id="profile">Profile</div>
         </div>
       </div>
     </div>
@@ -260,6 +261,10 @@ Query: INSERT INTO feedback (customer_id, order_id, log_id, rating, comments) VA
     document.querySelector("#req-btn").addEventListener("click", (event) => {
       event.preventDefault();
       submit_request();
+    });
+
+    document.querySelector("#profile").addEventListener("click", () => {
+      location.href = "profile.html";
     });
   </script>
 </html>

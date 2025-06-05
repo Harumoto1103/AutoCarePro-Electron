@@ -24,6 +24,7 @@
           style="opacity: 0; display: none"
         >
           <div class="nav-dropdown-menu" id="logout">Logout</div>
+          <div class="nav-dropdown-menu" id="profile">Profile</div>
         </div>
       </div>
     </div>
@@ -101,6 +102,10 @@
     document.querySelector("#logout").addEventListener("click", () => {
       localStorage.clear();
       location.href = "../index.html";
+    });
+
+    document.querySelector("#profile").addEventListener("click", () => {
+      location.href = "profile.html";
     });
 
     fetch_profile();
