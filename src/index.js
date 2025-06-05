@@ -109,7 +109,8 @@ const startDockerCompose = () => {
             `Docker Compose 错误: ${data}`
           );
         }
-        if (data.indexOf("Started") != -1) resolve();
+        if (data.indexOf("Started") != -1 || data.indexOf("Running") != -1)
+          resolve();
       });
 
       dockerComposeProcess.on("error", (err) => {
@@ -135,7 +136,10 @@ const startFastAPI = () => {
         loadingWindow.webContents.send("backend-log", `FastAPI: ${output}`);
       }
       console.log(output.indexOf("Application startup complete"));
-      if (output.indexOf("Application startup complete") != -1) {
+      if (
+        output.indexOf("Application startup complete") != -1 ||
+        output.indexOf("Address already in use") != -1
+      ) {
         console.log("Calling resolve();");
         resolve();
       }

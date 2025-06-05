@@ -171,7 +171,7 @@
       table {
         width: 100%;
         border-collapse: collapse;
-        min-width: 1000px;
+        min-width: 100%;
       }
 
       thead {
@@ -311,11 +311,35 @@
         gap: 10px;
       }
 
-      pre {
-        background: var(--light);
-        padding: 15px;
-        border-radius: 8px;
-        overflow-x: auto;
+      #json-table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      #json-table th,
+      #json-table td {
+        padding: 8px;
+        border: 1px solid #dee2e6;
+        text-align: left;
+      }
+
+      #json-table th {
+        background-color: #f8f9fa;
+        font-weight: bold;
+      }
+
+      .json-key {
+        color: #4361ee;
+      }
+
+      .json-value {
+        color: #212529;
+      }
+
+      .json-object,
+      .json-array {
+        color: #7209b7;
+        cursor: pointer;
       }
 
       .chart-container {
@@ -442,15 +466,13 @@
         <div class="modal-header">
           <h2><i class="fas fa-code"></i> Data Details</h2>
         </div>
-        <pre id="json-content"></pre>
+        <table id="json-table"></table>
       </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="../js/config.js"></script>
     <script>
-      // const API_HOST = "http://localhost:8000"; // Replace with your actual API host
-
       // State variables
       let logs = [];
       let currentPage = 1;
@@ -470,7 +492,63 @@
       const nextPageBtn = document.getElementById("next-page-btn");
       const pageInfo = document.getElementById("page-info");
       const jsonModal = document.getElementById("json-modal");
-      const jsonContent = document.getElementById("json-content");
+      const jsonTable = document.getElementById("json-table");
+
+      // Function to render JSON as a table
+      function renderJsonTable(json, level = 0) {
+        json = JSON.parse(json);
+        let html = "<thead><tr><th>Key</th><th>Value</th></tr></thead><tbody>";
+
+        if (Array.isArray(json)) {
+          console.log(json);
+          json.forEach((item, index) => {
+            html += `<tr><td class="json-key">${index}</td><td class="json-value">${formatValue(
+              item,
+              level + 1
+            )}</td></tr>`;
+          });
+        } else if (typeof json === "object" && json !== null) {
+          console.log(json);
+          Object.keys(json).forEach((key) => {
+            html += `<tr><td class="json-key">${key}</td><td class="json-value">${formatValue(
+              json[key],
+              level + 1
+            )}</td></tr>`;
+          });
+        } else {
+          console.log(json);
+          html += `<tr><td colspan="2" class="json-value">${formatValue(
+            json,
+            level
+          )}</td></tr>`;
+        }
+
+        html += "</tbody>";
+        return html;
+      }
+
+      // Function to format JSON values
+      function formatValue(value, level = 0) {
+        if (value === null) {
+          return '<span class="json-null">null</span>';
+        }
+        if (typeof value === "string") {
+          return `<span class="json-string">"${value}"</span>`;
+        }
+        if (typeof value === "number") {
+          return `<span class="json-number">${value}</span>`;
+        }
+        if (typeof value === "boolean") {
+          return `<span class="json-boolean">${value}</span>`;
+        }
+        if (Array.isArray(value)) {
+          return `<span class="json-array" data-level="${level}">[Array]</span>`;
+        }
+        if (typeof value === "object") {
+          return `<span class="json-object" data-level="${level}">[Object]</span>`;
+        }
+        return String(value);
+      }
 
       // Fetch logs from API
       async function fetchLogs() {
@@ -509,43 +587,6 @@
           logs = data.logs || [];
           totalPages = Math.ceil(data.total / limit) || 1;
 
-          // Parse old_data and new_data if they are strings
-          console.log(logs);
-          logs = logs.map((log) => {
-            // Function to preprocess and fix invalid JSON strings
-            const preprocessJson = (jsonString) => {
-              if (typeof jsonString !== "string" || !jsonString) {
-                return jsonString; // Return as-is if not a string or null
-              }
-              // Replace unescaped Unicode sequences like u308f with \u308f
-              return jsonString.replace(/u([0-9a-fA-F]{4})/g, "\\u$1");
-            };
-
-            // Function to safely parse JSON
-            const safeParse = (data) => {
-              if (typeof data !== "string" || !data) {
-                return data; // Return as-is if not a string or null
-              }
-              try {
-                return JSON.parse(preprocessJson(data));
-              } catch (error) {
-                console.error(
-                  `Failed to parse JSON for log_id ${log.log_id}:`,
-                  data,
-                  error
-                );
-                // Return the original string or a fallback object to avoid breaking the map
-                return data;
-              }
-            };
-
-            return {
-              ...log,
-              old_data: safeParse(log.old_data),
-              new_data: safeParse(log.new_data),
-            };
-          });
-
           refreshTable();
           updateCharts();
           updatePagination();
@@ -568,33 +609,22 @@
         });
       }
 
-      // Generate human-readable summary from JSON data
-      function generateSummary(data) {
-        if (!data || typeof data !== "object") return "-";
-        const { name, username, email } = data;
-        return `Name: ${name || "-"}, Username: ${username || "-"}, Email: ${
-          email || "-"
-        }`;
-      }
-
       // Refresh table with current logs
       function refreshTable() {
         logsTableBody.innerHTML = "";
         logs.forEach((log) => {
           const row = document.createElement("tr");
-          const oldDataSummary = generateSummary(log.old_data);
-          const newDataSummary = generateSummary(log.new_data);
           row.innerHTML = `
             <td>${log.log_id || "-"}</td>
             <td>${log.table_name || "-"}</td>
             <td>${log.record_id || "-"}</td>
             <td>${log.operation || "-"}</td>
-            <td class="json-data" data-json='${JSON.stringify(
-              log.old_data || {}
-            )}'>${oldDataSummary}</td>
-            <td class="json-data" data-json='${JSON.stringify(
-              log.new_data || {}
-            )}'>${newDataSummary}</td>
+            <td><button class="btn btn-secondary json-btn" data-json='${
+              log.old_data ? JSON.stringify(log.old_data) : "{}"
+            }'>View Old Data</button></td>
+            <td><button class="btn btn-secondary json-btn" data-json='${
+              log.new_data ? JSON.stringify(log.new_data) : "{}"
+            }'>View New Data</button></td>
             <td>${
               log.operated_at ? new Date(log.operated_at).toLocaleString() : "-"
             }</td>
@@ -602,14 +632,20 @@
           logsTableBody.appendChild(row);
         });
 
-        document.querySelectorAll(".json-data").forEach((cell) => {
-          cell.addEventListener("click", () => {
-            jsonContent.textContent = JSON.stringify(
-              JSON.parse(cell.dataset.json),
-              null,
-              2
-            );
-            jsonModal.classList.add("visible");
+        document.querySelectorAll(".json-btn").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            try {
+              const jsonData =
+                btn.dataset.json === "{}" ? {} : JSON.parse(btn.dataset.json);
+              const tableHtml = renderJsonTable(jsonData);
+              jsonTable.innerHTML = tableHtml;
+              jsonModal.classList.add("visible");
+            } catch (error) {
+              console.error("Error parsing JSON:", error);
+              jsonTable.innerHTML =
+                '<tr><td colspan="2">Invalid JSON data</td></tr>';
+              jsonModal.classList.add("visible");
+            }
           });
         });
       }
