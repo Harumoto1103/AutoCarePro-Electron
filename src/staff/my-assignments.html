@@ -207,6 +207,16 @@
         transform: translateY(-2px);
       }
 
+      .btn-update-time {
+        background: #17a2b8;
+        color: white;
+      }
+
+      .btn-update-time:hover {
+        background: #138496;
+        transform: translateY(-2px);
+      }
+
       .btn-remove {
         background: var(--danger);
         color: white;
@@ -236,7 +246,7 @@
         left: 0;
         width: 100%;
         height: 100%;
-        background: rgba(0, anon, 0, 0.5);
+        background: rgba(0, 0, 0, 0.5);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -477,6 +487,42 @@
           </form>
         </div>
       </div>
+
+      <!-- Update Time Modal -->
+      <div id="updateTimeModal" class="modal">
+        <div class="modal-content">
+          <button class="close-btn">×</button>
+          <div class="modal-header">
+            <h3><i class="fas fa-clock"></i> Update Assignment Time</h3>
+          </div>
+          <form id="updateTimeForm">
+            <div class="form-group">
+              <label>Time Worked (hours):</label>
+              <input
+                type="number"
+                id="assignmentTime"
+                class="modal-input"
+                placeholder="Enter time worked"
+                min="0"
+                step="0.1"
+                required
+              />
+            </div>
+            <div class="form-actions">
+              <button
+                type="button"
+                id="cancelUpdateTime"
+                class="btn btn-cancel"
+              >
+                <i class="fas fa-times"></i> Cancel
+              </button>
+              <button type="submit" class="btn btn-accept">
+                <i class="fas fa-check"></i> Update Time
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
     </div>
 
     <script src="../js/alert.js"></script>
@@ -566,6 +612,9 @@
               <button class="btn btn-record" data-id="${assignment.assignment_id}">
                 <i class="fas fa-clipboard-check"></i> Record Progress
               </button>
+              <button class="btn btn-update-time" data-id="${assignment.assignment_id}">
+                <i class="fas fa-clock"></i> Update Time
+              </button>
               <button class="btn btn-complete" data-id="${assignment.assignment_id}" data-order-id="${assignment.order_id}">
                 <i class="fas fa-check-circle"></i> Complete Order
               </button>
@@ -627,6 +676,11 @@
                 handle_record_progress(event, assignment.order_id);
               });
             assignmentDiv
+              .querySelector(".btn-update-time")
+              .addEventListener("click", (event) => {
+                handle_update_time(event);
+              });
+            assignmentDiv
               .querySelector(".btn-complete")
               .addEventListener("click", (event) => {
                 handle_complete_order(event, assignment.order_id);
@@ -649,6 +703,13 @@
           global_order_id = order_id;
           document.getElementById("progressModal").classList.add("visible");
           updateRemoveButtons();
+        };
+
+        // Handle update time click
+        const handle_update_time = (event) => {
+          currentAssignmentId = event.target.dataset.id;
+          document.getElementById("updateTimeModal").classList.add("visible");
+          document.getElementById("assignmentTime").value = "";
         };
 
         // Handle complete order click
@@ -694,6 +755,9 @@
             document
               .getElementById("completeModal")
               .classList.remove("visible");
+            document
+              .getElementById("updateTimeModal")
+              .classList.remove("visible");
           });
         });
 
@@ -711,6 +775,14 @@
           .addEventListener("click", () => {
             document
               .getElementById("completeModal")
+              .classList.remove("visible");
+          });
+
+        document
+          .getElementById("cancelUpdateTime")
+          .addEventListener("click", () => {
+            document
+              .getElementById("updateTimeModal")
               .classList.remove("visible");
           });
 
@@ -868,6 +940,57 @@
             }
           });
 
+        // Handle update time form submission
+        document
+          .getElementById("updateTimeForm")
+          .addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            const timeWorked = parseFloat(
+              document.getElementById("assignmentTime").value
+            );
+
+            if (isNaN(timeWorked) || timeWorked < 0) {
+              alert("Please enter a valid time worked");
+              return;
+            }
+
+            try {
+              const response = await fetch(
+                `${API_HOST}/api/staff/assignments/${currentAssignmentId}/update-time`,
+                {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                  },
+                  body: JSON.stringify({ time_worked: timeWorked }),
+                }
+              );
+
+              if (response.ok) {
+                alert(
+                  "Success",
+                  "Assignment time updated successfully!",
+                  "Confirm"
+                );
+                document
+                  .getElementById("updateTimeModal")
+                  .classList.remove("visible");
+                fetch_assignments();
+              } else {
+                const errorData = await response.json();
+                alert(
+                  errorData.detail ||
+                    "Failed to update assignment time, please try again"
+                );
+              }
+            } catch (error) {
+              console.error("Update time error:", error);
+              alert("Error", "Request failed", "Confirm");
+            }
+          });
+
         // Handle complete form submission
         document
           .getElementById("completeForm")
@@ -898,7 +1021,7 @@
 
             try {
               const response = await fetch(
-                `${API_HOST}/api/staff/repair-order/${global_order_id}/finish`,
+                `${API_HOST}/api/repair-order/${global_order_id}/finish`,
                 {
                   method: "POST",
                   headers: {
@@ -910,11 +1033,7 @@
               );
 
               if (response.ok) {
-                alert(
-                  "Success",
-                  "Repair order completed successfully!",
-                  "Confirm"
-                );
+                alert("Repair order completed successfully!");
                 document
                   .getElementById("completeModal")
                   .classList.remove("visible");
@@ -928,7 +1047,7 @@
               }
             } catch (error) {
               console.error("Completion error:", error);
-              alert("Error", "Request failed", "Confirm");
+              alert("Request failed");
             }
           });
 
@@ -954,10 +1073,18 @@
               );
 
               if (response.ok) {
-                alert("Assignment accepted successfully!");
+                alert(
+                  "Success",
+                  "Assignment accepted successfully!",
+                  "Confirm"
+                );
                 fetch_assignments();
               } else {
-                alert("Operation failed, please try again later");
+                alert(
+                  "Error",
+                  "Operation failed, please try again later",
+                  "Confirm"
+                );
               }
             } catch (error) {
               console.error("Error:", error);
@@ -1008,6 +1135,9 @@
               .classList.remove("visible");
             document
               .getElementById("completeModal")
+              .classList.remove("visible");
+            document
+              .getElementById("updateTimeModal")
               .classList.remove("visible");
           }
         });
