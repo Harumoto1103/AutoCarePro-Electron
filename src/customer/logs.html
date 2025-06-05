@@ -49,6 +49,7 @@
         background: #f8f9fa;
         border-radius: 4px;
         border-left: 4px solid #3498db;
+        white-space: pre-wrap; /* 保留换行符 */
       }
 
       .log-staff {
@@ -83,6 +84,9 @@
         margin: 0;
         color: #7f8c8d;
       }
+      .order-info {
+        display: none !important;
+      }
     </style>
   </head>
   <body>
@@ -106,7 +110,7 @@
       <div class="container-title">
         <div class="container-title-text">Repair Logs</div>
         <div class="container-title-buttons">
-          <div class="title-button" id="back-btn">← Back to Records</div>
+          <!-- <div class="title-button" id="back-btn">← Back to Records</div> -->
         </div>
       </div>
 
@@ -187,8 +191,13 @@
             noLogsElement.remove();
           }
 
+          // 按时间倒序排列（最新的日志排在最前面）
+          const sortedLogs = json["repair_logs"].sort((a, b) => {
+            return new Date(b.log_time) - new Date(a.log_time);
+          });
+
           // Display logs
-          json["repair_logs"].forEach((log) => {
+          sortedLogs.forEach((log) => {
             const logElement = document.createElement("div");
             logElement.className = "log-item";
 
@@ -232,9 +241,9 @@
     fetch_repair_logs();
 
     // Event listeners
-    document.querySelector("#back-btn").addEventListener("click", () => {
+    /* document.querySelector("#back-btn").addEventListener("click", () => {
       location.href = "customer-cars.html";
-    });
+    }); */
 
     document.querySelector("#cancel").addEventListener("click", () => {
       location.href = "index.html";
