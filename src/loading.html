@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Loading</title>
+    <style>
+      body {
+        margin: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background-color: #f0f0f0;
+        font-family: Arial, sans-serif;
+      }
+      .loader {
+        font-size: 24px;
+        color: #333;
+      }
+      #log {
+        position: absolute;
+        bottom: 20px;
+        font-size: 12px;
+        color: #666;
+        max-height: 100px;
+        overflow-y: auto;
+        width: 80%;
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="loader">Loading Backend...</div>
+    <div id="log"></div>
+    <script>
+      const { ipcRenderer } = require("electron");
+      ipcRenderer.on("backend-log", (event, message) => {
+        const logDiv = document.getElementById("log");
+        logDiv.innerHTML += `<p>${message}</p>`;
+        logDiv.scrollTop = logDiv.scrollHeight;
+      });
+    </script>
+  </body>
+</html>
