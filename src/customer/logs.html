@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" href="../css/universal.css" />
+    <link rel="stylesheet" href="../css/customer-cars.css" />
+    <link rel="stylesheet" href="../css/alert.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AutoCare Pro - Repair Logs</title>
+    <style>
+      .log-item {
+        background: #fff;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 15px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        transition: box-shadow 0.3s ease;
+      }
+
+      .log-item:hover {
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+      }
+
+      .log-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 10px;
+      }
+
+      .log-id {
+        font-weight: bold;
+        color: #2c3e50;
+        font-size: 16px;
+      }
+
+      .log-time {
+        color: #7f8c8d;
+        font-size: 14px;
+        text-align: right;
+      }
+
+      .log-message {
+        color: #34495e;
+        line-height: 1.5;
+        margin-top: 10px;
+        padding: 10px;
+        background: #f8f9fa;
+        border-radius: 4px;
+        border-left: 4px solid #3498db;
+      }
+
+      .log-staff {
+        color: #27ae60;
+        font-size: 14px;
+        font-weight: 500;
+        margin-top: 8px;
+      }
+
+      .no-logs {
+        text-align: center;
+        color: #7f8c8d;
+        font-size: 18px;
+        margin-top: 50px;
+        padding: 40px;
+      }
+
+      .order-info {
+        background: #ecf0f1;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        border-left: 4px solid #3498db;
+      }
+
+      .order-info h3 {
+        margin: 0 0 5px 0;
+        color: #2c3e50;
+      }
+
+      .order-info p {
+        margin: 0;
+        color: #7f8c8d;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="nav-bar">
+      <div class="nav-logo">AutoCare Pro</div>
+      <div class="nav-user" id="nav-user">
+        <div class="nav-user-avatar"></div>
+        <div class="nav-username" id="username">　　　</div>
+        <div
+          class="nav-dropdown"
+          id="nav-dropdown"
+          style="opacity: 0; display: none"
+        >
+          <div class="nav-dropdown-menu" id="logout">Logout</div>
+          <div class="nav-dropdown-menu" id="profile">Profile</div>
+        </div>
+      </div>
+    </div>
+    <div class="container">
+      <div class="cancel" id="cancel">✖︎</div>
+      <div class="container-title">
+        <div class="container-title-text">Repair Logs</div>
+        <div class="container-title-buttons">
+          <div class="title-button" id="back-btn">← Back to Records</div>
+        </div>
+      </div>
+
+      <div class="order-info" id="order-info" style="display: none">
+        <h3>Order #<span id="order-id-display"></span></h3>
+        <p>Viewing repair logs for this order</p>
+      </div>
+
+      <div class="cars-container" id="logs-container">
+        <div class="no-logs" id="no-logs">Loading logs...</div>
+      </div>
+    </div>
+  </body>
+  <script src="../js/alert.js"></script>
+  <script src="../js/sections.js"></script>
+  <script src="../js/config.js"></script>
+  <script>
+    // Get order_id from URL parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    const orderId = urlParams.get("order_id");
+
+    if (!orderId) {
+      alert("Error", "No order ID provided");
+      location.href = "customer-cars.html";
+    }
+
+    // Display order ID
+    document.querySelector("#order-id-display").textContent = orderId;
+    document.querySelector("#order-info").style.display = "block";
+
+    verify_token("../index.html");
+    fetch_profile();
+
+    const user_profile = JSON.parse(localStorage.getItem("user_profile"));
+    document.querySelector("#username").innerHTML = user_profile["username"];
+
+    const formatDateTime = (dateTimeString) => {
+      const date = new Date(dateTimeString);
+      const options = {
+        year: "numeric",
+        month: "short",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: true,
+      };
+      return date.toLocaleDateString("en-US", options);
+    };
+
+    const fetch_repair_logs = async () => {
+      const req_url = `${API_HOST}/api/customer/${localStorage.getItem(
+        "user_id"
+      )}/repair-order/${orderId}/repair-logs`;
+
+      try {
+        const resp = await fetch(req_url, {
+          method: "GET",
+          headers: {
+            "Content-type": "application/json",
+            Authorization: `bearer ${localStorage.getItem("token")}`,
+          },
+        });
+
+        const status = resp.status;
+        const json = await resp.json();
+        console.log("Repair logs response:", json);
+
+        const logsContainer = document.querySelector("#logs-container");
+        const noLogsElement = document.querySelector("#no-logs");
+
+        if (
+          json["status"] === "success" &&
+          json["repair_logs"] &&
+          json["repair_logs"].length > 0
+        ) {
+          // Remove loading message
+          if (noLogsElement) {
+            noLogsElement.remove();
+          }
+
+          // Display logs
+          json["repair_logs"].forEach((log) => {
+            const logElement = document.createElement("div");
+            logElement.className = "log-item";
+
+            logElement.innerHTML = `
+              <div class="log-header">
+                <div class="log-id">Log #${log.log_id}</div>
+                <div class="log-time">${formatDateTime(log.log_time)}</div>
+              </div>
+              <div class="log-staff">Staff ID: ${log.staff_id}</div>
+              ${
+                log.log_message
+                  ? `<div class="log-message">${log.log_message}</div>`
+                  : '<div class="log-message"><em>No message provided</em></div>'
+              }
+            `;
+
+            logsContainer.appendChild(logElement);
+          });
+        } else {
+          // No logs found or error
+          if (noLogsElement) {
+            if (json["status"] === "failure") {
+              noLogsElement.innerHTML =
+                json["message"] || "Failed to load repair logs.";
+            } else {
+              noLogsElement.innerHTML = "No repair logs found for this order.";
+            }
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching repair logs:", error);
+        const noLogsElement = document.querySelector("#no-logs");
+        if (noLogsElement) {
+          noLogsElement.innerHTML =
+            "Error loading repair logs. Please try again.";
+        }
+      }
+    };
+
+    // Fetch logs when page loads
+    fetch_repair_logs();
+
+    // Event listeners
+    document.querySelector("#back-btn").addEventListener("click", () => {
+      location.href = "customer-cars.html";
+    });
+
+    document.querySelector("#cancel").addEventListener("click", () => {
+      location.href = "index.html";
+    });
+
+    document.querySelector("#nav-user").addEventListener("click", (event) => {
+      const dropdown = document.querySelector("#nav-dropdown");
+      console.log(dropdown.style);
+      if (dropdown.style.display == "none") {
+        dropdown.style.display = "block";
+        setTimeout(() => {
+          dropdown.style.opacity = "1";
+        }, 100);
+      } else {
+        dropdown.style.opacity = "0";
+        setTimeout(() => {
+          dropdown.style.display = "none";
+        }, 100);
+      }
+    });
+
+    document.querySelector("#logout").addEventListener("click", () => {
+      localStorage.clear();
+      location.href = "../index.html";
+    });
+
+    document.querySelector("#profile").addEventListener("click", () => {
+      location.href = "profile.html";
+    });
+  </script>
+</html>

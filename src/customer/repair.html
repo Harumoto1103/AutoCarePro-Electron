@@ -39,6 +39,7 @@
     <ul class="context-menu" id="context-menu">
       <li id="write-feedback">Write Feedback</li>
       <li id="view-feedbacks">View Feedbacks</li>
+      <li id="view-logs">View Logs</li>
     </ul>
   </body>
   <script src="../js/alert.js"></script>
@@ -49,6 +50,7 @@
     const targets = document.getElementsByClassName("vehicle");
     let writeFeedback = document.querySelector("#write-feedback");
     let viewFeedbacks = document.querySelector("#view-feedbacks");
+    let viewLogs = document.querySelector("#view-logs");
 
     const removeListeners = (element) => {
       const newElement = element.cloneNode(true);
@@ -86,6 +88,8 @@
 
         writeFeedback = removeListeners(writeFeedback);
         viewFeedbacks = removeListeners(viewFeedbacks);
+        viewLogs = removeListeners(viewLogs);
+
         writeFeedback.addEventListener("click", () => {
           console.log("Write feedback triggered.");
           // return;
@@ -103,18 +107,29 @@
           const desc = final_target.getAttribute("desc");
           location.href = `add-feedback.html?order_id=${order_id}&number_plate=${number_plate}&remarks=${desc}`;
         });
+
         viewFeedbacks.addEventListener("click", () => {
           console.log("View feedbacks triggered");
           // return;
           if (final_target.getAttribute("ord_id") == null) {
             alert(
               "Attention",
-              "You cannot write a feedback for a pending request."
+              "You cannot view feedbacks for a pending request."
             );
             return;
           }
           const order_id = final_target.getAttribute("ord_id");
           location.href = `feedback.html?order_id=${order_id}`;
+        });
+
+        viewLogs.addEventListener("click", () => {
+          console.log("View logs triggered");
+          if (final_target.getAttribute("ord_id") == null) {
+            alert("Attention", "You cannot view logs for a pending request.");
+            return;
+          }
+          const order_id = final_target.getAttribute("ord_id");
+          location.href = `repair-logs.html?order_id=${order_id}`;
         });
       } else {
         contextMenu.style.display = "none";

@@ -337,9 +337,6 @@
     <script src="../js/config.js"></script>
     <script src="../js/alert.js"></script>
     <script>
-      verify_token("../index.html");
-      fetch_profile_staff();
-
       // Load profile data
       function loadProfile() {
         const user_profile = JSON.parse(localStorage.getItem("user_profile"));
@@ -397,8 +394,10 @@
       }
 
       // Event Listeners
-      document.addEventListener("DOMContentLoaded", () => {
-        loadProfile();
+      document.addEventListener("DOMContentLoaded", async () => {
+        await verify_token("../index.html");
+        await fetch_profile_staff();
+        await loadProfile();
 
         // Logout
         const logoutBtn = document.querySelector("#logout-btn");
