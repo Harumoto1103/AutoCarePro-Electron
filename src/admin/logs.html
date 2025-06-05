@@ -510,17 +510,41 @@
           totalPages = Math.ceil(data.total / limit) || 1;
 
           // Parse old_data and new_data if they are strings
-          logs = logs.map((log) => ({
-            ...log,
-            old_data:
-              typeof log.old_data === "string"
-                ? JSON.parse(log.old_data)
-                : log.old_data,
-            new_data:
-              typeof log.new_data === "string"
-                ? JSON.parse(log.new_data)
-                : log.new_data,
-          }));
+          console.log(logs);
+          logs = logs.map((log) => {
+            // Function to preprocess and fix invalid JSON strings
+            const preprocessJson = (jsonString) => {
+              if (typeof jsonString !== "string" || !jsonString) {
+                return jsonString; // Return as-is if not a string or null
+              }
+              // Replace unescaped Unicode sequences like u308f with \u308f
+              return jsonString.replace(/u([0-9a-fA-F]{4})/g, "\\u$1");
+            };
+
+            // Function to safely parse JSON
+            const safeParse = (data) => {
+              if (typeof data !== "string" || !data) {
+                return data; // Return as-is if not a string or null
+              }
+              try {
+                return JSON.parse(preprocessJson(data));
+              } catch (error) {
+                console.error(
+                  `Failed to parse JSON for log_id ${log.log_id}:`,
+                  data,
+                  error
+                );
+                // Return the original string or a fallback object to avoid breaking the map
+                return data;
+              }
+            };
+
+            return {
+              ...log,
+              old_data: safeParse(log.old_data),
+              new_data: safeParse(log.new_data),
+            };
+          });
 
           refreshTable();
           updateCharts();
