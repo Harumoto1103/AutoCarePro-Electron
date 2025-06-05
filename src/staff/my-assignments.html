@@ -197,6 +197,26 @@
         transform: translateY(-2px);
       }
 
+      .btn-complete {
+        background: var(--secondary);
+        color: white;
+      }
+
+      .btn-complete:hover {
+        background: #5e07a0;
+        transform: translateY(-2px);
+      }
+
+      .btn-remove {
+        background: var(--danger);
+        color: white;
+      }
+
+      .btn-remove:hover {
+        background: #d61f75;
+        transform: translateY(-2px);
+      }
+
       .remarks {
         background: var(--light-gray);
         padding: 12px;
@@ -216,7 +236,7 @@
         left: 0;
         width: 100%;
         height: 100%;
-        background: rgba(0, 0, 0, 0.5);
+        background: rgba(0, anon, 0, 0.5);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -305,9 +325,18 @@
 
       .material-row {
         display: grid;
-        grid-template-columns: repeat(3, 1fr);
+        grid-template-columns: repeat(3, 1fr) auto;
         gap: 15px;
         margin-bottom: 15px;
+        align-items: center;
+      }
+
+      .time-row {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 15px;
+        margin-bottom: 15px;
+        align-items: center;
       }
 
       .form-actions {
@@ -332,6 +361,10 @@
         }
 
         .material-row {
+          grid-template-columns: 1fr;
+        }
+
+        .time-row {
           grid-template-columns: 1fr;
         }
 
@@ -423,6 +456,27 @@
           </form>
         </div>
       </div>
+
+      <!-- Complete Order Modal -->
+      <div id="completeModal" class="modal">
+        <div class="modal-content">
+          <button class="close-btn">×</button>
+          <div class="modal-header">
+            <h3><i class="fas fa-check-circle"></i> Complete Repair Order</h3>
+          </div>
+          <form id="completeForm">
+            <div id="timeContainer"></div>
+            <div class="form-actions">
+              <button type="button" id="cancelComplete" class="btn btn-cancel">
+                <i class="fas fa-times"></i> Cancel
+              </button>
+              <button type="submit" class="btn btn-accept">
+                <i class="fas fa-check"></i> Complete Order
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
     </div>
 
     <script src="../js/alert.js"></script>
@@ -436,6 +490,7 @@
         // Global variables
         let currentAssignmentId;
         let global_order_id = -1;
+        let assignments = [];
 
         // Fetch assignments data
         const fetch_assignments = async () => {
@@ -453,7 +508,8 @@
 
             if (!resp.ok) throw new Error("Failed to fetch assignments");
             const json = await resp.json();
-            render_assignments(json.assignments);
+            assignments = json.assignments;
+            render_assignments(assignments);
           } catch (error) {
             console.error("Error:", error);
             document.getElementById("assignmentContainer").innerHTML = `
@@ -509,6 +565,9 @@
             <div class="action-buttons">
               <button class="btn btn-record" data-id="${assignment.assignment_id}">
                 <i class="fas fa-clipboard-check"></i> Record Progress
+              </button>
+              <button class="btn btn-complete" data-id="${assignment.assignment_id}" data-order-id="${assignment.order_id}">
+                <i class="fas fa-check-circle"></i> Complete Order
               </button>
             </div>
           `;
@@ -567,6 +626,11 @@
               .addEventListener("click", (event) => {
                 handle_record_progress(event, assignment.order_id);
               });
+            assignmentDiv
+              .querySelector(".btn-complete")
+              .addEventListener("click", (event) => {
+                handle_complete_order(event, assignment.order_id);
+              });
           } else if (status === "pending") {
             assignmentDiv
               .querySelector(".btn-accept")
@@ -584,14 +648,56 @@
           currentAssignmentId = event.target.dataset.id;
           global_order_id = order_id;
           document.getElementById("progressModal").classList.add("visible");
+          updateRemoveButtons();
+        };
+
+        // Handle complete order click
+        const handle_complete_order = (event, order_id) => {
+          global_order_id = order_id;
+          const relatedAssignments = assignments.filter(
+            (assignment) =>
+              assignment.order_id === order_id &&
+              assignment.status.toLowerCase() === "accepted"
+          );
+          const timeContainer = document.getElementById("timeContainer");
+          timeContainer.innerHTML = relatedAssignments
+            .map(
+              (assignment) => `
+            <div class="time-row">
+              <div class="form-group">
+                <label>Assignment ID: ${assignment.assignment_id}</label>
+              </div>
+              <div class="form-group">
+                <input
+                  type="number"
+                  class="modal-input time-worked"
+                  data-id="${assignment.assignment_id}"
+                  placeholder="Time Worked (hours)"
+                  min="0"
+                  step="0.1"
+                  required
+                />
+              </div>
+            </div>
+          `
+            )
+            .join("");
+          document.getElementById("completeModal").classList.add("visible");
         };
 
         // Handle modal close
-        document.querySelector(".close-btn").addEventListener("click", () => {
-          document.getElementById("progressModal").classList.remove("visible");
+        document.querySelectorAll(".close-btn").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            document
+              .getElementById("progressModal")
+              .classList.remove("visible");
+            document
+              .getElementById("completeModal")
+              .classList.remove("visible");
+          });
         });
 
-        // Handle cancel button in modal
+        // Handle cancel button in modals
         document
           .getElementById("cancelProgress")
           .addEventListener("click", () => {
@@ -599,6 +705,36 @@
               .getElementById("progressModal")
               .classList.remove("visible");
           });
+
+        document
+          .getElementById("cancelComplete")
+          .addEventListener("click", () => {
+            document
+              .getElementById("completeModal")
+              .classList.remove("visible");
+          });
+
+        // Update visibility of remove buttons
+        const updateRemoveButtons = () => {
+          const materialRows = document.querySelectorAll(".material-row");
+          materialRows.forEach((row, index) => {
+            const removeBtn = row.querySelector(".btn-remove");
+            if (materialRows.length > 1) {
+              if (!removeBtn) {
+                const removeButton = document.createElement("button");
+                removeButton.className = "btn btn-remove";
+                removeButton.innerHTML = '<i class="fas fa-minus"></i>';
+                removeButton.addEventListener("click", () => {
+                  row.remove();
+                  updateRemoveButtons();
+                });
+                row.appendChild(removeButton);
+              }
+            } else if (removeBtn) {
+              removeBtn.remove();
+            }
+          });
+        };
 
         // Add material row
         document.getElementById("addMaterial").addEventListener("click", () => {
@@ -616,9 +752,10 @@
           </div>
         `;
           document.getElementById("materialsContainer").appendChild(newRow);
+          updateRemoveButtons();
         });
 
-        // Handle form submission
+        // Handle progress form submission
         document
           .getElementById("progressForm")
           .addEventListener("submit", async (e) => {
@@ -731,6 +868,70 @@
             }
           });
 
+        // Handle complete form submission
+        document
+          .getElementById("completeForm")
+          .addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            const timeList = [];
+            const rows = document.querySelectorAll(".time-row");
+
+            for (const row of rows) {
+              const assignmentId = parseInt(
+                row.querySelector(".time-worked").dataset.id
+              );
+              const timeWorked = parseFloat(
+                row.querySelector(".time-worked").value
+              );
+
+              if (isNaN(timeWorked) || timeWorked < 0) {
+                alert("Please enter valid time worked for all assignments");
+                return;
+              }
+
+              timeList.push({
+                assignment_id: assignmentId,
+                time_worked: timeWorked,
+              });
+            }
+
+            try {
+              const response = await fetch(
+                `${API_HOST}/api/staff/repair-order/${global_order_id}/finish`,
+                {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                  },
+                  body: JSON.stringify({ time_list: timeList }),
+                }
+              );
+
+              if (response.ok) {
+                alert(
+                  "Success",
+                  "Repair order completed successfully!",
+                  "Confirm"
+                );
+                document
+                  .getElementById("completeModal")
+                  .classList.remove("visible");
+                fetch_assignments();
+              } else {
+                const errorData = await response.json();
+                alert(
+                  errorData.detail ||
+                    "Failed to complete order, please try again"
+                );
+              }
+            } catch (error) {
+              console.error("Completion error:", error);
+              alert("Error", "Request failed", "Confirm");
+            }
+          });
+
         // Handle accept assignment
         const handle_accept = async (event) => {
           const assignmentId = event.target.dataset.id;
@@ -798,14 +999,19 @@
             }
           }
         };
+
         // Close modal when clicking outside
         window.addEventListener("click", (e) => {
           if (e.target.classList.contains("modal")) {
             document
               .getElementById("progressModal")
               .classList.remove("visible");
+            document
+              .getElementById("completeModal")
+              .classList.remove("visible");
           }
         });
+
         await fetch_assignments();
       };
 

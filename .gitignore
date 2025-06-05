@@ -90,3 +90,13 @@ typings/
 
 # Electron-Forge
 out/
+
+*.pyc
+*tmp
+*.sdi
+*.ibd
+*.pem
+*.[0-9]*
+*.dblwr
+*.sock
+*.index
