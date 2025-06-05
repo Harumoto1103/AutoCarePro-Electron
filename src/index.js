@@ -7,11 +7,15 @@ if (require("electron-squirrel-startup")) {
   app.quit();
 }
 
+let dockerComposeProcess = null;
+let fastApiProcess = null;
+
 const createWindow = () => {
-  // Create the browser window.
+  // Create the browser window with fixed size
   const mainWindow = new BrowserWindow({
     width: 1200,
     height: 800,
+    resizable: false, // Make window non-resizable
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
       nodeIntegration: false,
@@ -22,11 +26,8 @@ const createWindow = () => {
   // Load the index.html of the app.
   mainWindow.loadFile(path.join(__dirname, "index.html"));
 
-  // Open the DevTools (optional, uncomment for debugging).
-  // mainWindow.webContents.openDevTools();
-
-  // 启动 Docker Compose
-  const dockerComposeUp = spawn(
+  // Start Docker Compose
+  dockerComposeProcess = spawn(
     "docker-compose",
     ["-f", path.join(__dirname, "docker/docker-compose.yml"), "up"],
     {
@@ -34,18 +35,17 @@ const createWindow = () => {
     }
   );
 
-  dockerComposeUp.stdout.on("data", (data) => {
+  dockerComposeProcess.stdout.on("data", (data) => {
     console.log(`Docker Compose 输出: ${data}`);
-    // 可选：通过 IPC 将日志发送到前端
     mainWindow.webContents.send("backend-log", `Docker Compose: ${data}`);
   });
 
-  dockerComposeUp.stderr.on("data", (data) => {
+  dockerComposeProcess.stderr.on("data", (data) => {
     console.error(`Docker Compose 错误: ${data}`);
     mainWindow.webContents.send("backend-log", `Docker Compose 错误: ${data}`);
   });
 
-  dockerComposeUp.on("close", (code) => {
+  dockerComposeProcess.on("close", (code) => {
     console.log(`Docker Compose 退出，退出码: ${code}`);
     mainWindow.webContents.send(
       "backend-log",
@@ -53,9 +53,9 @@ const createWindow = () => {
     );
   });
 
-  // 延迟启动 FastAPI，确保 MySQL 容器准备好
+  // Delay starting FastAPI to ensure MySQL container is ready
   setTimeout(() => {
-    const fastApiProcess = spawn("python", ["-m", "app.main"], {
+    fastApiProcess = spawn("python", ["-m", "app.main"], {
       cwd: path.join(__dirname, "backend"),
       env: { ...process.env, PYTHONPATH: path.join(__dirname, "backend") },
     });
@@ -77,10 +77,10 @@ const createWindow = () => {
         `FastAPI 退出，退出码: ${code}`
       );
     });
-  }, 10000); // 等待 10 秒，确保 MySQL 启动
+  }, 10000); // Wait 10 seconds to ensure MySQL starts
 };
 
-// IPC 事件：切换窗口大小
+// IPC event: Handle window size switch (optional, kept for compatibility)
 ipcMain.on("switch-to-bigger", () => {
   const mainWindow = BrowserWindow.getFocusedWindow();
   if (mainWindow) {
@@ -88,21 +88,27 @@ ipcMain.on("switch-to-bigger", () => {
   }
 });
 
-// 应用初始化完成时创建窗口
+// Create window when app is ready
 app.whenReady().then(() => {
   createWindow();
 
-  // macOS 下点击 Dock 图标重新创建窗口
+  // macOS: Recreate window when clicking Dock icon
   app.on("activate", () => {
-    if (BrowserWindow.getAll窗户().length === 0) {
+    if (BrowserWindow.getAllWindows().length === 0) {
       createWindow();
     }
   });
 });
 
-// 所有窗口关闭时，清理 Docker 容器并退出（macOS 除外）
+// Clean up all processes when all windows are closed
 app.on("window-all-closed", () => {
-  // 停止 Docker Compose
+  // Stop FastAPI process if running
+  if (fastApiProcess) {
+    fastApiProcess.kill();
+    console.log("FastAPI process terminated");
+  }
+
+  // Stop Docker Compose
   exec(
     `docker-compose -f ${path.join(
       __dirname,
@@ -115,9 +121,22 @@ app.on("window-all-closed", () => {
       } else {
         console.log(`Docker Compose 已停止: ${stdout}`);
       }
+      // Quit app (except on macOS)
       if (process.platform !== "darwin") {
         app.quit();
       }
     }
   );
+});
+
+// Ensure processes are killed when app is quitting
+app.on("before-quit", () => {
+  if (fastApiProcess) {
+    fastApiProcess.kill();
+    console.log("FastAPI process terminated before quit");
+  }
+  if (dockerComposeProcess) {
+    dockerComposeProcess.kill();
+    console.log("Docker Compose process terminated before quit");
+  }
 });
