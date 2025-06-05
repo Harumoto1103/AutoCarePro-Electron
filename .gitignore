@@ -100,3 +100,5 @@ out/
 *.dblwr
 *.sock
 *.index
+src/docker/docker/data/*
+dist
