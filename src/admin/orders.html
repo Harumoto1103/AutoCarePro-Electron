@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>User Management Dashboard</title>
+    <title>Repair Order Management Dashboard</title>
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
@@ -115,13 +115,13 @@
         background: var(--light);
       }
 
-      .btn-warning {
-        background: var(--warning);
+      .btn-danger {
+        background: var(--danger);
         color: white;
       }
 
-      .btn-warning:hover {
-        background: #e08e00;
+      .btn-danger:hover {
+        background: #d62073;
         transform: translateY(-2px);
       }
 
@@ -164,24 +164,24 @@
         font-size: 24px;
       }
 
-      .stat-icon.users {
+      .stat-icon.total {
         background: rgba(67, 97, 238, 0.15);
         color: var(--primary);
       }
 
-      .stat-icon.customers {
-        background: rgba(76, 201, 240, 0.15);
-        color: var(--success);
-      }
-
-      .stat-icon.staff {
-        background: rgba(114, 9, 183, 0.15);
-        color: var(--secondary);
-      }
-
-      .stat-icon.admin {
+      .stat-icon.pending {
         background: rgba(247, 37, 133, 0.15);
         color: var(--danger);
+      }
+
+      .stat-icon.in-progress {
+        background: rgba(255, 158, 0, 0.15);
+        color: var(--warning);
+      }
+
+      .stat-icon.completed {
+        background: rgba(76, 201, 240, 0.15);
+        color: var(--success);
       }
 
       .stat-value {
@@ -302,7 +302,7 @@
         color: var(--dark);
       }
 
-      .role {
+      .status {
         display: inline-block;
         padding: 6px 12px;
         border-radius: 20px;
@@ -310,24 +310,19 @@
         font-weight: 500;
       }
 
-      .role.user {
-        background: rgba(108, 117, 125, 0.15);
-        color: var(--gray);
-      }
-
-      .role.customer {
-        background: rgba(76, 201, 240, 0.15);
-        color: var(--success);
-      }
-
-      .role.staff {
-        background: rgba(114, 9, 183, 0.15);
-        color: var(--secondary);
-      }
-
-      .role.admin {
+      .status.pending {
         background: rgba(247, 37, 133, 0.15);
         color: var(--danger);
+      }
+
+      .status.in_progress {
+        background: rgba(255, 158, 0, 0.15);
+        color: var(--warning);
+      }
+
+      .status.completed {
+        background: rgba(76, 201, 240, 0.15);
+        color: var(--success);
       }
 
       .action-cell {
@@ -365,15 +360,6 @@
         background: rgba(247, 37, 133, 0.2);
       }
 
-      .inspect-btn {
-        background: rgba(76, 201, 240, 0.1);
-        color: var(--success);
-      }
-
-      .inspect-btn:hover {
-        background: rgba(76, 201, 240, 0.2);
-      }
-
       /* Modal Styles */
       .modal {
         position: fixed;
@@ -409,7 +395,7 @@
         position: relative;
         transform: translateY(20px);
         transition: var(--transition);
-        height: 75vh !important;
+        height: 75vh;
         overflow: scroll;
       }
 
@@ -456,7 +442,8 @@
         color: var(--dark);
       }
 
-      .form-group input {
+      .form-group input,
+      .form-group textarea {
         width: 100%;
         padding: 12px 16px;
         border: 1px solid var(--border);
@@ -465,7 +452,8 @@
         transition: var(--transition);
       }
 
-      .form-group input:focus {
+      .form-group input:focus,
+      .form-group textarea:focus {
         border-color: var(--primary);
         outline: none;
         box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
@@ -541,14 +529,6 @@
           flex-direction: column;
         }
       }
-
-      .staff-fields {
-        display: none;
-      }
-
-      .staff-fields.visible {
-        display: block;
-      }
     </style>
   </head>
   <body>
@@ -556,16 +536,16 @@
       <header>
         <div class="logo">
           <div class="logo-icon">
-            <i class="fas fa-users"></i>
+            <i class="fas fa-wrench"></i>
           </div>
-          <div class="logo-text">User Management</div>
+          <div class="logo-text">Repair Order Management</div>
         </div>
         <div class="user-actions">
           <button class="btn btn-secondary" id="refresh-btn">
             <i class="fas fa-sync-alt"></i> Refresh
           </button>
-          <button class="btn btn-primary" id="new-user-btn">
-            <i class="fas fa-plus"></i> New User
+          <button class="btn btn-primary" id="new-order-btn">
+            <i class="fas fa-plus"></i> New Order
           </button>
         </div>
       </header>
@@ -573,136 +553,151 @@
       <div class="dashboard-stats">
         <div class="stat-card">
           <div class="stat-header">
-            <div class="stat-icon users">
-              <i class="fas fa-users"></i>
+            <div class="stat-icon total">
+              <i class="fas fa-list"></i>
             </div>
           </div>
-          <div class="stat-value" id="total-users">0</div>
-          <div class="stat-title">Total Users</div>
+          <div class="stat-value" id="total-orders">0</div>
+          <div class="stat-title">Total Orders</div>
         </div>
         <div class="stat-card">
           <div class="stat-header">
-            <div class="stat-icon customers">
-              <i class="fas fa-shopping-cart"></i>
+            <div class="stat-icon pending">
+              <i class="fas fa-hourglass-half"></i>
             </div>
           </div>
-          <div class="stat-value" id="customer-users">0</div>
-          <div class="stat-title">Customers</div>
+          <div class="stat-value" id="pending-orders">0</div>
+          <div class="stat-title">Pending Orders</div>
         </div>
         <div class="stat-card">
           <div class="stat-header">
-            <div class="stat-icon staff">
-              <i class="fas fa-user-tie"></i>
+            <div class="stat-icon in-progress">
+              <i class="fas fa-cogs"></i>
             </div>
           </div>
-          <div class="stat-value" id="staff-users">0</div>
-          <div class="stat-title">Staff Members</div>
+          <div class="stat-value" id="in-progress-orders">0</div>
+          <div class="stat-title">In Progress</div>
         </div>
         <div class="stat-card">
           <div class="stat-header">
-            <div class="stat-icon admin">
-              <i class="fas fa-user-shield"></i>
+            <div class="stat-icon completed">
+              <i class="fas fa-check-circle"></i>
             </div>
           </div>
-          <div class="stat-value" id="admin-users">0</div>
-          <div class="stat-title">Administrators</div>
+          <div class="stat-value" id="completed-orders">0</div>
+          <div class="stat-title">Completed</div>
         </div>
       </div>
 
       <div class="actions-bar">
         <div class="search-box">
-          <input type="text" id="search-input" placeholder="Search users..." />
+          <input type="text" id="search-input" placeholder="Search orders..." />
           <button id="search-btn"><i class="fas fa-search"></i></button>
         </div>
       </div>
 
       <div class="user-table-container">
-        <table id="users-table">
+        <table id="orders-table">
           <thead>
             <tr>
-              <th data-column="user_id">User ID <i class="fas fa-sort"></i></th>
-              <th data-column="name">Name <i class="fas fa-sort"></i></th>
-              <th data-column="username">
-                Username <i class="fas fa-sort"></i>
+              <th data-column="order_id">
+                Order ID <i class="fas fa-sort"></i>
               </th>
-              <th data-column="discriminator">Role</th>
-              <th data-column="jobtype">Job Type</th>
-              <th data-column="hourly_rate">Hourly Rate</th>
-              <th data-column="email">Email <i class="fas fa-sort"></i></th>
-              <th data-column="phone">Phone <i class="fas fa-sort"></i></th>
-              <th data-column="address">Address</th>
+              <th data-column="vehicle_id">
+                Vehicle ID <i class="fas fa-sort"></i>
+              </th>
+              <th data-column="customer_id">
+                Customer ID <i class="fas fa-sort"></i>
+              </th>
+              <th data-column="request_id">
+                Request ID <i class="fas fa-sort"></i>
+              </th>
+              <th data-column="required_staff_type">Staff Type</th>
+              <th data-column="status">Status</th>
+              <th data-column="order_time">
+                Order Time <i class="fas fa-sort"></i>
+              </th>
+              <th data-column="finish_time">
+                Finish Time <i class="fas fa-sort"></i>
+              </th>
+              <th data-column="remarks">Remarks</th>
               <th>Actions</th>
             </tr>
           </thead>
-          <tbody id="users-table-body">
-            <!-- User data will be populated here -->
+          <tbody id="orders-table-body">
+            <!-- Order data will be populated here -->
           </tbody>
         </table>
       </div>
     </div>
 
-    <!-- Edit User Modal -->
+    <!-- Edit Order Modal -->
     <div id="edit-modal" class="modal">
       <div class="modal-content">
         <button class="close-btn">×</button>
         <div class="modal-header">
-          <h2><i class="fas fa-user-edit"></i> Edit User</h2>
+          <h2><i class="fas fa-edit"></i> Edit Order</h2>
         </div>
         <form id="edit-form">
-          <input type="hidden" id="edit-user-id" />
+          <input type="hidden" id="edit-order-id" />
 
           <div class="form-group">
-            <label for="edit-name">Full Name</label>
-            <input type="text" id="edit-name" placeholder="Enter full name" />
-          </div>
-
-          <div class="form-group">
-            <label for="edit-username">Username</label>
+            <label for="edit-vehicle-id">Vehicle ID</label>
             <input
-              type="text"
-              id="edit-username"
-              placeholder="Enter username"
+              type="number"
+              id="edit-vehicle-id"
+              placeholder="Enter vehicle ID"
+              required
             />
           </div>
 
           <div class="form-group">
-            <label for="edit-discriminator">Role</label>
-            <select id="edit-discriminator" class="role-select">
-              <option value="customer">Customer</option>
-              <option value="staff">Staff</option>
-              <option value="admin">Administrator</option>
+            <label for="edit-customer-id">Customer ID</label>
+            <input
+              type="number"
+              id="edit-customer-id"
+              placeholder="Enter customer ID"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="edit-request-id">Request ID</label>
+            <input
+              type="number"
+              id="edit-request-id"
+              placeholder="Enter request ID"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="edit-required-staff-type">Required Staff Type</label>
+            <select id="edit-required-staff-type" class="role-select"></select>
+          </div>
+
+          <div class="form-group">
+            <label for="edit-status">Status</label>
+            <select id="edit-status" class="role-select">
+              <option value="pending">Pending</option>
+              <option value="in_progress">In Progress</option>
+              <option value="completed">Completed</option>
             </select>
           </div>
 
-          <div class="form-group staff-fields" id="edit-staff-fields">
-            <label for="edit-jobtype">Job Type</label>
-            <select id="edit-jobtype" class="role-select"></select>
-            <label for="edit-hourly-rate">Hourly Rate</label>
-            <input
-              type="number"
-              id="edit-hourly-rate"
-              placeholder="Enter hourly rate"
-              step="0.01"
-            />
+          <div class="form-group">
+            <label for="edit-order-time">Order Time</label>
+            <input type="datetime-local" id="edit-order-time" />
           </div>
 
           <div class="form-group">
-            <label for="edit-email">Email Address</label>
-            <input type="email" id="edit-email" placeholder="Enter email" />
+            <label for="edit-finish-time">Finish Time</label>
+            <input type="datetime-local" id="edit-finish-time" />
           </div>
 
           <div class="form-group">
-            <label for="edit-phone">Phone Number</label>
-            <input
-              type="text"
-              id="edit-phone"
-              placeholder="Enter phone number"
-            />
-          </div>
-
-          <div class="form-group">
-            <label for="edit-address">Address</label>
-            <input type="text" id="edit-address" placeholder="Enter address" />
+            <label for="edit-remarks">Remarks</label>
+            <textarea id="edit-remarks" placeholder="Enter remarks"></textarea>
           </div>
 
           <div class="form-actions">
@@ -715,95 +710,82 @@
       </div>
     </div>
 
-    <!-- Add User Modal -->
+    <!-- Add Order Modal -->
     <div id="add-modal" class="modal">
       <div class="modal-content">
         <button class="close-btn">×</button>
         <div class="modal-header">
-          <h2><i class="fas fa-user-plus"></i> Add New User</h2>
+          <h2><i class="fas fa-plus"></i> Add New Order</h2>
         </div>
         <form id="add-form">
           <div class="form-group">
-            <label for="add-name">Full Name</label>
+            <label for="add-vehicle-id">Vehicle ID</label>
             <input
-              type="text"
-              id="add-name"
-              placeholder="Enter full name"
+              type="number"
+              id="add-vehicle-id"
+              placeholder="Enter vehicle ID"
               required
             />
           </div>
 
           <div class="form-group">
-            <label for="add-username">Username</label>
+            <label for="add-customer-id">Customer ID</label>
             <input
-              type="text"
-              id="add-username"
-              placeholder="Enter username"
+              type="number"
+              id="add-customer-id"
+              placeholder="Enter customer ID"
               required
             />
           </div>
 
           <div class="form-group">
-            <label for="add-discriminator">Role</label>
-            <select id="add-discriminator" class="role-select" required>
-              <option value="customer">Customer</option>
-              <option value="staff">Staff</option>
-              <option value="admin">Administrator</option>
+            <label for="add-request-id">Request ID</label>
+            <input
+              type="number"
+              id="add-request-id"
+              placeholder="Enter request ID"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="add-required-staff-type">Required Staff Type</label>
+            <select
+              id="add-required-staff-type"
+              class="role-select"
+              required
+            ></select>
+          </div>
+
+          <div class="form-group">
+            <label for="add-status">Status</label>
+            <select id="add-status" class="role-select" required>
+              <option value="pending">Pending</option>
+              <option value="in_progress">In Progress</option>
+              <option value="completed">Completed</option>
             </select>
           </div>
 
-          <div class="form-group staff-fields" id="add-staff-fields">
-            <label for="add-jobtype">Job Type</label>
-            <select id="add-jobtype" class="role-select" required></select>
-            <label for="add-hourly-rate">Hourly Rate</label>
-            <input
-              type="number"
-              id="add-hourly-rate"
-              placeholder="Enter hourly rate"
-              step="0.01"
-              required
-            />
+          <div class="form-group">
+            <label for="add-order-time">Order Time</label>
+            <input type="datetime-local" id="add-order-time" required />
           </div>
 
           <div class="form-group">
-            <label for="add-email">Email Address</label>
-            <input
-              type="email"
-              id="add-email"
-              placeholder="Enter email"
-              required
-            />
+            <label for="add-finish-time">Finish Time</label>
+            <input type="datetime-local" id="add-finish-time" />
           </div>
 
           <div class="form-group">
-            <label for="add-password">Password</label>
-            <input
-              type="password"
-              id="add-password"
-              placeholder="Enter password"
-              required
-            />
-          </div>
-
-          <div class="form-group">
-            <label for="add-phone">Phone Number</label>
-            <input
-              type="text"
-              id="add-phone"
-              placeholder="Enter phone number"
-            />
-          </div>
-
-          <div class="form-group">
-            <label for="add-address">Address</label>
-            <input type="text" id="add-address" placeholder="Enter address" />
+            <label for="add-remarks">Remarks</label>
+            <textarea id="add-remarks" placeholder="Enter remarks"></textarea>
           </div>
 
           <div class="form-actions">
             <button type="button" id="cancel-add-btn" class="btn btn-cancel">
               Cancel
             </button>
-            <button type="submit" class="btn btn-primary">Create User</button>
+            <button type="submit" class="btn btn-primary">Create Order</button>
           </div>
         </form>
       </div>
@@ -817,7 +799,7 @@
           <i class="fas fa-exclamation-circle"></i>
         </div>
         <div class="confirmation-message">
-          Are you sure you want to delete this user? This action cannot be
+          Are you sure you want to delete this order? This action cannot be
           undone.
         </div>
         <div class="form-actions">
@@ -825,22 +807,22 @@
             Cancel
           </button>
           <button type="button" id="confirm-delete-btn" class="btn btn-danger">
-            <i class="fas fa-trash-alt"></i> Delete User
+            <i class="fas fa-trash-alt"></i> Delete Order
           </button>
         </div>
       </div>
     </div>
+
     <script src="../js/config.js"></script>
     <script>
-      // Sample data structure (will be replaced by API call)
-      let users = [];
-      let filteredUsers = [];
+      let orders = [];
+      let filteredOrders = [];
       let sortColumn = null;
       let sortOrder = "asc";
-      let userToDelete = null;
+      let orderToDelete = null;
 
       // DOM Elements
-      const usersTableBody = document.getElementById("users-table-body");
+      const ordersTableBody = document.getElementById("orders-table-body");
       const editModal = document.getElementById("edit-modal");
       const addModal = document.getElementById("add-modal");
       const deleteModal = document.getElementById("delete-modal");
@@ -848,20 +830,16 @@
       const addForm = document.getElementById("add-form");
       const searchInput = document.getElementById("search-input");
       const searchBtn = document.getElementById("search-btn");
-      const newUserBtn = document.getElementById("new-user-btn");
+      const newOrderBtn = document.getElementById("new-order-btn");
       const refreshBtn = document.getElementById("refresh-btn");
-      const editDiscriminator = document.getElementById("edit-discriminator");
-      const addDiscriminator = document.getElementById("add-discriminator");
-      const editStaffFields = document.getElementById("edit-staff-fields");
-      const addStaffFields = document.getElementById("add-staff-fields");
 
       // Statistics elements
-      const totalUsersEl = document.getElementById("total-users");
-      const customerUsersEl = document.getElementById("customer-users");
-      const staffUsersEl = document.getElementById("staff-users");
-      const adminUsersEl = document.getElementById("admin-users");
+      const totalOrdersEl = document.getElementById("total-orders");
+      const pendingOrdersEl = document.getElementById("pending-orders");
+      const inProgressOrdersEl = document.getElementById("in-progress-orders");
+      const completedOrdersEl = document.getElementById("completed-orders");
 
-      // Fetch staff types from API
+      // Fetch staff types from API (assuming an endpoint exists)
       const fetchStaffTypes = async () => {
         const req_url = `${API_HOST}/api/staff/staff-types`;
         try {
@@ -873,34 +851,31 @@
             },
           });
           const json = await resp.json();
-          const job_types = await json["staff-types"];
-
-          // Populate job type selects
-          document.getElementById("add-jobtype").innerHTML =
-            '<option value="">Select Job Type</option>';
-          document.getElementById("edit-jobtype").innerHTML =
-            '<option value="">Select Job Type</option>';
-
-          job_types.forEach((type) => {
-            const formattedType = type
-              .split("_")
-              .map((k) => k.charAt(0).toUpperCase() + k.slice(1))
-              .join(" ");
-            document.getElementById("add-jobtype").innerHTML += `
-              <option value="${type}">${formattedType}</option>
-            `;
-            document.getElementById("edit-jobtype").innerHTML += `
-              <option value="${type}">${formattedType}</option>
-            `;
-          });
+          const staffTypes = json["staff-types"] || [];
+          populateSelectOptions("add-required-staff-type", staffTypes);
+          populateSelectOptions("edit-required-staff-type", staffTypes);
         } catch (error) {
           console.error("Failed to fetch staff types:", error);
         }
       };
 
-      // Fetch users from API
-      const fetch_users = async () => {
-        const req_url = `${API_HOST}/api/admin/users`;
+      function populateSelectOptions(selectId, options) {
+        const select = document.getElementById(selectId);
+        select.innerHTML = '<option value="">Select Staff Type</option>';
+        options.forEach((option) => {
+          const formattedOption = option
+            .split("_")
+            .map((k) => k.charAt(0).toUpperCase() + k.slice(1))
+            .join(" ");
+          select.innerHTML += `
+            <option value="${option}">${formattedOption}</option>
+          `;
+        });
+      }
+
+      // Fetch orders from API
+      const fetchOrders = async () => {
+        const req_url = `${API_HOST}/api/admin/repair-orders`;
         try {
           const resp = await fetch(req_url, {
             method: "GET",
@@ -911,84 +886,48 @@
           });
 
           const json = await resp.json();
-          if (json.status === "success") {
-            users = json.users;
-            filteredUsers = [...users];
+          if (json.status === "success" && json.repair_orders) {
+            orders = json.repair_orders;
+            filteredOrders = [...orders];
+            refreshTable();
+            updateStatistics();
+          } else {
+            alert(json.message || "Failed to fetch repair orders");
+            orders = [];
+            filteredOrders = [];
             refreshTable();
             updateStatistics();
           }
         } catch (error) {
-          console.error("Failed to fetch users:", error);
+          console.error("Failed to fetch orders:", error);
+          alert("An error occurred while fetching orders");
         }
       };
 
       // Update statistics
       function updateStatistics() {
-        totalUsersEl.textContent = users.length;
-
-        const customerCount = users.filter(
-          (u) => u.discriminator.toLowerCase() === "customer"
+        totalOrdersEl.textContent = orders.length;
+        pendingOrdersEl.textContent = orders.filter(
+          (o) => o.status === "pending"
         ).length;
-        customerUsersEl.textContent = customerCount;
-
-        const staffCount = users.filter(
-          (u) => u.discriminator.toLowerCase() === "staff"
+        inProgressOrdersEl.textContent = orders.filter(
+          (o) => o.status === "in_progress"
         ).length;
-        staffUsersEl.textContent = staffCount;
-
-        const adminCount = users.filter(
-          (u) => u.discriminator.toLowerCase() === "admin"
+        completedOrdersEl.textContent = orders.filter(
+          (o) => o.status === "completed"
         ).length;
-        adminUsersEl.textContent = adminCount;
-      }
-
-      // Inspect user function
-      async function inspectUser(user) {
-        try {
-          const response = await fetch(
-            `${API_HOST}/api/admin/get-token/${user.user_id}`,
-            {
-              method: "GET",
-              headers: {
-                "Content-type": "application/json",
-                Authorization: `Bearer ${localStorage.getItem("token")}`,
-              },
-            }
-          );
-
-          if (!response.ok) {
-            throw new Error("Failed to get user token");
-          }
-
-          const data = await response.json();
-          if (data.status === "success") {
-            localStorage.setItem("token", data.access_token);
-            localStorage.setItem("user_id", data.user_id);
-
-            if (data.role === "customer") {
-              parent.location.href = "../customer/index.html";
-            } else if (data.role === "staff") {
-              parent.location.href = "../staff/index.html";
-            }
-          } else {
-            alert("Failed to get user token");
-          }
-        } catch (error) {
-          console.error("Error inspecting user:", error);
-          alert("An error occurred while inspecting the user");
-        }
       }
 
       // Refresh table with current data
       function refreshTable() {
-        usersTableBody.innerHTML = "";
+        ordersTableBody.innerHTML = "";
 
-        if (filteredUsers.length === 0) {
-          usersTableBody.innerHTML = `
+        if (filteredOrders.length === 0) {
+          ordersTableBody.innerHTML = `
             <tr>
               <td colspan="10" style="text-align: center; padding: 40px; color: var(--gray);">
-                <i class="fas fa-user-slash" style="font-size: 48px; margin-bottom: 20px;"></i>
-                <h3>No users found</h3>
+                <i class="fas fa-wrench" style="font-size: 48px; margin-bottom: 20px;"></i>
+                <h3>No orders found</h3>
                 <p>Try adjusting your search criteria</p>
               </td>
             </tr>
@@ -996,117 +935,82 @@
           return;
         }
 
-        filteredUsers.forEach((user) => {
+        filteredOrders.forEach((order) => {
           const row = document.createElement("tr");
           row.innerHTML = `
-            <td>${user.user_id}</td>
-            <td>${user.name || "-"}</td>
-            <td>${user.username}</td>
-            <td><span class="role ${user.discriminator || "user"}">${
-            user.discriminator.charAt(0).toUpperCase() +
-            user.discriminator.slice(1)
-          }</span></td>
-            <td>${
-              user.jobtype
-                ? user.jobtype
-                    .split("_")
-                    .map((k) => k.charAt(0).toUpperCase() + k.slice(1))
-                    .join(" ")
-                : "-"
-            }</td>
-            <td>${user.hourly_rate || "-"}</td>
-            <td>${user.email || "-"}</td>
-            <td>${user.phone || "-"}</td>
-            <td>${user.address || "-"}</td>
+            <td>${order.order_id}</td>
+            <td>${order.vehicle_id}</td>
+            <td>${order.customer_id}</td>
+            <td>${order.request_id}</td>
+            <td>${order.required_staff_type || "-"}</td>
+            <td><span class="status ${order.status}">${order.status.replace(
+            "_",
+            " "
+          )}</span></td>
+            <td>${order.order_time || "-"}</td>
+            <td>${order.finish_time || "-"}</td>
+            <td>${order.remarks || "-"}</td>
             <td class="action-cell">
-              <button class="action-btn edit-btn" data-user-id="${
-                user.user_id
+              <button class="action-btn edit-btn" data-order-id="${
+                order.order_id
               }">
                 <i class="fas fa-edit"></i> Edit
               </button>
-              <button class="action-btn delete-btn" data-user-id="${
-                user.user_id
+              <button class="action-btn delete-btn" data-order-id="${
+                order.order_id
               }">
                 <i class="fas fa-trash-alt"></i> Delete
               </button>
-              ${
-                user.discriminator !== "admin"
-                  ? `<button class="action-btn inspect-btn" data-user-id="${user.user_id}">
-                      <i class="fas fa-eye"></i> Inspect
-                    </button>`
-                  : ""
-              }
             </td>
           `;
-          usersTableBody.appendChild(row);
+          ordersTableBody.appendChild(row);
         });
 
-        // Add event listeners to edit buttons
         document.querySelectorAll(".edit-btn").forEach((button) => {
           button.addEventListener("click", (e) => {
-            const userId = e.target.closest(".edit-btn").dataset.userId;
-            const user = users.find((u) => u.user_id == userId);
-            openEditModal(user);
+            const orderId = e.target.closest(".edit-btn").dataset.orderId;
+            const order = orders.find((o) => o.order_id == orderId);
+            openEditModal(order);
           });
         });
 
-        // Add event listeners to delete buttons
         document.querySelectorAll(".delete-btn").forEach((button) => {
           button.addEventListener("click", (e) => {
-            const userId = e.target.closest(".delete-btn").dataset.userId;
-            const user = users.find((u) => u.user_id == userId);
-            openDeleteModal(user);
-          });
-        });
-
-        // Add event listeners to inspect buttons
-        document.querySelectorAll(".inspect-btn").forEach((button) => {
-          button.addEventListener("click", (e) => {
-            const userId = e.target.closest(".inspect-btn").dataset.userId;
-            const user = users.find((u) => u.user_id == userId);
-            inspectUser(user);
+            const orderId = e.target.closest(".delete-btn").dataset.orderId;
+            const order = orders.find((o) => o.order_id == orderId);
+            openDeleteModal(order);
           });
         });
       }
 
-      // Open edit modal with user data
-      function openEditModal(user) {
-        document.querySelector("#edit-user-id").value = user.user_id;
-        document.querySelector("#edit-name").value = user.name || "";
-        document.querySelector("#edit-username").value = user.username || "";
-        document.querySelector("#edit-discriminator").value =
-          user.discriminator || "";
-        document.querySelector("#edit-email").value = user.email || "";
-        document.querySelector("#edit-phone").value = user.phone || "";
-        document.querySelector("#edit-address").value = user.address || "";
-        document.querySelector("#edit-jobtype").value =
-          user.jobtype
-            .split(" ")
-            .map((k, i) =>
-              i === 0 ? k : k.charAt(0).toLowerCase() + k.slice(1)
-            )
-            .join("_") || "";
-        document.querySelector("#edit-hourly-rate").value =
-          user.hourly_rate || "";
-
-        // Show/hide staff fields based on role
-        editStaffFields.classList.toggle(
-          "visible",
-          user.discriminator === "staff"
-        );
+      // Open edit modal with order data
+      function openEditModal(order) {
+        document.querySelector("#edit-order-id").value = order.order_id;
+        document.querySelector("#edit-vehicle-id").value = order.vehicle_id;
+        document.querySelector("#edit-customer-id").value = order.customer_id;
+        document.querySelector("#edit-request-id").value = order.request_id;
+        document.querySelector("#edit-required-staff-type").value =
+          order.required_staff_type || "";
+        document.querySelector("#edit-status").value = order.status;
+        document.querySelector("#edit-order-time").value = order.order_time
+          ? order.order_time.replace(" ", "T")
+          : "";
+        document.querySelector("#edit-finish-time").value = order.finish_time
+          ? order.finish_time.replace(" ", "T")
+          : "";
+        document.querySelector("#edit-remarks").value = order.remarks || "";
         editModal.classList.add("visible");
       }
 
-      // Open add user modal
+      // Open add order modal
       function openAddModal() {
         addForm.reset();
-        addStaffFields.classList.remove("visible");
         addModal.classList.add("visible");
       }
 
       // Open delete confirmation modal
-      function openDeleteModal(user) {
-        userToDelete = user;
+      function openDeleteModal(order) {
+        orderToDelete = order;
         deleteModal.classList.add("visible");
       }
 
@@ -1115,35 +1019,33 @@
         editModal.classList.remove("visible");
         addModal.classList.remove("visible");
         deleteModal.classList.remove("visible");
-        userToDelete = null;
+        orderToDelete = null;
       }
 
-      // Search users
-      function searchUsers() {
+      // Search orders
+      function searchOrders() {
         const searchTerm = searchInput.value.toLowerCase();
 
         if (!searchTerm) {
-          filteredUsers = [...users];
+          filteredOrders = [...orders];
           refreshTable();
           return;
         }
 
-        filteredUsers = users.filter(
-          (user) =>
-            (user.name && user.name.toLowerCase().includes(searchTerm)) ||
-            (user.username &&
-              user.username.toLowerCase().includes(searchTerm)) ||
-            (user.email && user.email.toLowerCase().includes(searchTerm)) ||
-            (user.phone && user.phone.includes(searchTerm)) ||
-            (user.address && user.address.toLowerCase().includes(searchTerm)) ||
-            (user.jobtype && user.jobtype.toLowerCase().includes(searchTerm))
+        filteredOrders = orders.filter(
+          (order) =>
+            order.order_id.toString().includes(searchTerm) ||
+            order.vehicle_id.toString().includes(searchTerm) ||
+            order.customer_id.toString().includes(searchTerm) ||
+            order.request_id.toString().includes(searchTerm) ||
+            (order.remarks && order.remarks.toLowerCase().includes(searchTerm))
         );
 
         refreshTable();
       }
 
-      // Sort users
-      function sortUsers(column) {
+      // Sort orders
+      function sortOrders(column) {
         if (sortColumn === column) {
           sortOrder = sortOrder === "asc" ? "desc" : "asc";
         } else {
@@ -1151,11 +1053,10 @@
           sortOrder = "asc";
         }
 
-        filteredUsers.sort((a, b) => {
+        filteredOrders.sort((a, b) => {
           let valA = a[column];
           let valB = b[column];
 
-          // Handle empty values
           if (valA === undefined || valA === null) valA = "";
           if (valB === undefined || valB === null) valB = "";
 
@@ -1172,18 +1073,31 @@
         refreshTable();
       }
 
-      // Update user
-      async function updateUser(userId, updatedUser) {
-        if (
-          updatedUser["jobtype"] != null &&
-          updatedUser["jobtype"] != undefined
-        ) {
-          updatedUser["jobtype"] = updatedUser["jobtype"]
-            .split("_")
-            .map((k) => k.charAt(0).toUpperCase() + k.slice(1))
-            .join(" ");
+      // Update order (placeholder, assuming an API endpoint exists)
+      async function updateOrder(orderId, updatedOrder) {
+        const req_url = `${API_HOST}/api/admin/repair-orders/${orderId}`;
+        try {
+          const resp = await fetch(req_url, {
+            method: "PUT",
+            headers: {
+              "Content-type": "application/json",
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+            body: JSON.stringify(updatedOrder),
+          });
+
+          if (!resp.ok) throw new Error("Failed to update order");
+          await fetchOrders();
+          return true;
+        } catch (error) {
+          console.error("Error updating order:", error);
+          return false;
         }
-        const req_url = `${API_HOST}/api/admin/update-user-profile/${userId}`;
+      }
+
+      // Create new order (placeholder, assuming an API endpoint exists)
+      async function createOrder(newOrder) {
+        const req_url = `${API_HOST}/api/admin/repair-orders`;
         try {
           const resp = await fetch(req_url, {
             method: "POST",
@@ -1191,48 +1105,21 @@
               "Content-type": "application/json",
               Authorization: `Bearer ${localStorage.getItem("token")}`,
             },
-            body: JSON.stringify({
-              ...updatedUser,
-            }),
+            body: JSON.stringify(newOrder),
           });
 
-          if (!resp.ok) return false;
-          await resp.json();
-          await fetch_users(); // Refresh user data after update
+          if (!resp.ok) throw new Error("Failed to create order");
+          await fetchOrders();
           return true;
         } catch (error) {
-          console.error("Error updating user:", error);
+          console.error("Error creating order:", error);
           return false;
         }
       }
 
-      // Create new user
-      async function createUser(newUser) {
-        const req_url = `${API_HOST}/api/admin/create-user`;
-        try {
-          const resp = await fetch(req_url, {
-            method: "POST",
-            headers: {
-              "Content-type": "application/json",
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-            body: JSON.stringify({
-              ...newUser,
-            }),
-          });
-
-          if (!resp.ok) return false;
-          await fetch_users(); // Refresh user data after creation
-          return true;
-        } catch (error) {
-          console.error("Error creating user:", error);
-          return false;
-        }
-      }
-
-      // Delete user
-      async function deleteUser(userId) {
-        const req_url = `${API_HOST}/api/admin/delete-user/${userId}`;
+      // Delete order (placeholder, assuming an API endpoint exists)
+      async function deleteOrder(orderId) {
+        const req_url = `${API_HOST}/api/admin/repair-order/${orderId}`;
         try {
           const resp = await fetch(req_url, {
             method: "DELETE",
@@ -1241,21 +1128,20 @@
             },
           });
 
-          if (!resp.ok) return false;
-          await fetch_users(); // Refresh user data after deletion
+          if (!resp.ok) throw new Error("Failed to delete order");
+          await fetchOrders();
           return true;
         } catch (error) {
-          console.error("Error deleting user:", error);
+          console.error("Error deleting order:", error);
           return false;
         }
       }
 
       // Event Listeners
       document.addEventListener("DOMContentLoaded", () => {
-        fetch_users();
+        fetchOrders();
         fetchStaffTypes();
 
-        // Modal close events
         document.querySelectorAll(".close-btn").forEach((btn) => {
           btn.addEventListener("click", closeAllModals);
         });
@@ -1264,120 +1150,108 @@
           btn.addEventListener("click", closeAllModals);
         });
 
-        // Toggle staff fields based on role selection
-        addDiscriminator.addEventListener("change", (e) => {
-          addStaffFields.classList.toggle(
-            "visible",
-            e.target.value === "staff"
-          );
-          const jobTypeSelect = document.getElementById("add-jobtype");
-          const hourlyRateInput = document.getElementById("add-hourly-rate");
-          jobTypeSelect.required = e.target.value === "staff";
-          hourlyRateInput.required = e.target.value === "staff";
-        });
-
-        editDiscriminator.addEventListener("change", (e) => {
-          editStaffFields.classList.toggle(
-            "visible",
-            e.target.value === "staff"
-          );
-        });
-
-        // Edit form submission
         editForm.addEventListener("submit", async (e) => {
           e.preventDefault();
-          const userId = document.querySelector("#edit-user-id").value;
-          const updatedUser = {
-            name: document.querySelector("#edit-name").value,
-            username: document.querySelector("#edit-username").value,
-            discriminator: document.querySelector("#edit-discriminator").value,
-            email: document.querySelector("#edit-email").value,
-            phone: document.querySelector("#edit-phone").value,
-            address: document.querySelector("#edit-address").value,
+          const orderId = document.querySelector("#edit-order-id").value;
+          const updatedOrder = {
+            vehicle_id: parseInt(
+              document.querySelector("#edit-vehicle-id").value
+            ),
+            customer_id: parseInt(
+              document.querySelector("#edit-customer-id").value
+            ),
+            request_id: parseInt(
+              document.querySelector("#edit-request-id").value
+            ),
+            required_staff_type:
+              document.querySelector("#edit-required-staff-type").value || null,
+            status: document.querySelector("#edit-status").value,
+            order_time:
+              document
+                .querySelector("#edit-order-time")
+                .value.replace("T", " ") || null,
+            finish_time:
+              document
+                .querySelector("#edit-finish-time")
+                .value.replace("T", " ") || null,
+            remarks: document.querySelector("#edit-remarks").value || null,
           };
 
-          if (updatedUser.discriminator === "staff") {
-            updatedUser.jobtype = document.querySelector("#edit-jobtype").value;
-            updatedUser.hourly_rate =
-              document.querySelector("#edit-hourly-rate").value;
-          } else {
-            updatedUser.jobtype = null;
-            updatedUser.hourly_rate = null;
-          }
-
-          const success = await updateUser(userId, updatedUser);
+          const success = await updateOrder(orderId, updatedOrder);
           if (success) {
             closeAllModals();
           } else {
-            alert("Failed to update, please try again later.");
+            alert("Failed to update order, please try again later.");
           }
         });
 
-        // Add form submission
         addForm.addEventListener("submit", async (e) => {
           e.preventDefault();
-          const newUser = {
-            name: document.querySelector("#add-name").value,
-            username: document.querySelector("#add-username").value,
-            discriminator: document.querySelector("#add-discriminator").value,
-            email: document.querySelector("#add-email").value,
-            password: document.querySelector("#add-password").value,
-            phone: document.querySelector("#add-phone").value,
-            address: document.querySelector("#add-address").value,
+          const newOrder = {
+            vehicle_id: parseInt(
+              document.querySelector("#add-vehicle-id").value
+            ),
+            customer_id: parseInt(
+              document.querySelector("#add-customer-id").value
+            ),
+            request_id: parseInt(
+              document.querySelector("#add-request-id").value
+            ),
+            required_staff_type:
+              document.querySelector("#add-required-staff-type").value || null,
+            status: document.querySelector("#add-status").value,
+            order_time:
+              document
+                .querySelector("#add-order-time")
+                .value.replace("T", " ") || null,
+            finish_time:
+              document
+                .querySelector("#add-finish-time")
+                .value.replace("T", " ") || null,
+            remarks: document.querySelector("#add-remarks").value || null,
           };
 
-          if (newUser.discriminator === "staff") {
-            newUser.jobtype = document.querySelector("#add-jobtype").value;
-            newUser.hourly_rate =
-              document.querySelector("#add-hourly-rate").value;
-          }
-
-          const success = await createUser(newUser);
+          const success = await createOrder(newOrder);
           if (success) {
             closeAllModals();
           } else {
-            alert("Failed to create user, please try again later.");
+            alert("Failed to create order, please try again later.");
           }
         });
 
-        // Delete confirmation
         document
           .getElementById("confirm-delete-btn")
           .addEventListener("click", async () => {
-            if (userToDelete) {
-              const success = await deleteUser(userToDelete.user_id);
+            if (orderToDelete) {
+              const success = await deleteOrder(orderToDelete.order_id);
               if (success) {
                 closeAllModals();
+              } else {
+                alert("Failed to delete order, please try again later.");
               }
             }
           });
 
-        // Search functionality
-        searchBtn.addEventListener("click", searchUsers);
+        searchBtn.addEventListener("click", searchOrders);
         searchInput.addEventListener("keyup", (e) => {
           if (e.key === "Enter") {
-            searchUsers();
+            searchOrders();
           }
         });
 
-        // Table sorting
         document
-          .querySelectorAll("#users-table th[data-column]")
+          .querySelectorAll("#orders-table th[data-column]")
           .forEach((th) => {
             th.addEventListener("click", () => {
               const column = th.dataset.column;
-              sortUsers(column);
+              sortOrders(column);
             });
           });
 
-        // Refresh button
-        refreshBtn.addEventListener("click", fetch_users);
-
-        // New user button
-        newUserBtn.addEventListener("click", openAddModal);
+        refreshBtn.addEventListener("click", fetchOrders);
+        newOrderBtn.addEventListener("click", openAddModal);
       });
 
-      // Close modal when clicking outside
       window.addEventListener("click", (e) => {
         if (e.target.classList.contains("modal")) {
           closeAllModals();
