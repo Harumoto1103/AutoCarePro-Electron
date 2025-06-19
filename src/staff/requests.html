@@ -377,7 +377,13 @@
         });
 
         submit_order.addEventListener("click", async () => {
-          if (Object.keys(required_staff_types).length === 0) {
+          let isAllFalse = true;
+          Object.keys(required_staff_types).forEach((type) => {
+            if (required_staff_types[type]) {
+              isAllFalse = false;
+            }
+          });
+          if (Object.keys(required_staff_types).length === 0 || isAllFalse) {
             alert(
               "Attention",
               "At least one type of worker should involve!",
