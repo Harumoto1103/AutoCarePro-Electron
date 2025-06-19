@@ -107,155 +107,161 @@
   <script src="../js/sections.js"></script>
   <script src="../js/config.js"></script>
   <script>
-    verify_token("../index.html");
-    fetch_profile();
+    const init = async () => {
+      await verify_token("../index.html");
+      await fetch_profile();
 
-    const user_profile = JSON.parse(localStorage.getItem("user_profile"));
-    document.querySelector("#username").innerHTML = user_profile["username"];
+      const user_profile = JSON.parse(localStorage.getItem("user_profile"));
+      document.querySelector("#username").innerHTML = user_profile["username"];
 
-    const fetch_car_brands = async () => {
-      const req_url = `${API_HOST}/api/customer/vehicle/brands`;
-      const resp = await fetch(req_url, {
-        method: "GET",
-        headers: {
-          "Content-type": "application/json",
-          Authorization: `bearer ${localStorage.getItem("token")}`,
-        },
-      });
+      const fetch_car_brands = async () => {
+        const req_url = `${API_HOST}/api/customer/vehicle/brands`;
+        const resp = await fetch(req_url, {
+          method: "GET",
+          headers: {
+            "Content-type": "application/json",
+            Authorization: `bearer ${localStorage.getItem("token")}`,
+          },
+        });
 
-      const json = await resp.json();
-      console.log(json);
+        const json = await resp.json();
+        console.log(json);
 
-      const brands_select = document.querySelector("#brands");
-      json["brands"].forEach((brand) => {
-        brands_select.innerHTML += `
+        const brands_select = document.querySelector("#brands");
+        json["brands"].forEach((brand) => {
+          brands_select.innerHTML += `
         <option value="${brand.toLowerCase()}">${brand}</option>
         `;
-      });
-    };
-
-    const fetch_car_types = async () => {
-      const req_url = `${API_HOST}/api/customer/vehicle/types`;
-      const resp = await fetch(req_url, {
-        method: "GET",
-        headers: {
-          "Content-type": "application/json",
-          Authorization: `bearer ${localStorage.getItem("token")}`,
-        },
-      });
-
-      const json = await resp.json();
-      console.log(json);
-
-      const brands_select = document.querySelector("#types");
-      json["types"].forEach((type) => {
-        brands_select.innerHTML += `
-        <option value="${type.toLowerCase()}">${type}</option>
-        `;
-      });
-    };
-
-    const fetch_car_colors = async () => {
-      const req_url = `${API_HOST}/api/customer/vehicle/colors`;
-      const resp = await fetch(req_url, {
-        method: "GET",
-        headers: {
-          "Content-type": "application/json",
-          Authorization: `bearer ${localStorage.getItem("token")}`,
-        },
-      });
-
-      const json = await resp.json();
-      console.log(json);
-
-      const brands_select = document.querySelector("#colors");
-      json["colors"].forEach((color) => {
-        brands_select.innerHTML += `
-        <option value="${color.toLowerCase()}">${color}</option>
-        `;
-      });
-    };
-
-    fetch_car_brands();
-    fetch_car_types();
-    fetch_car_colors();
-
-    document.querySelector("form")[0].addEventListener("submit", (event) => {
-      event.preventDefault();
-    });
-
-    const add_vehicle = async (data) => {
-      const req_url = `${API_HOST}/api/customer/vehicle/add`;
-      const resp = await fetch(req_url, {
-        method: "POST",
-        headers: {
-          "Content-type": "application/json",
-          Authorization: `bearer ${localStorage.getItem("token")}`,
-        },
-        body: JSON.stringify(data),
-      });
-      const status = resp.status;
-      const json = await resp.json();
-
-      if (json["status"] != "success") {
-        alert("Faile to add vehicle!", json["message"], "Confirm", () => {});
-      } else {
-        alert("Success", "Vehicle added!", "Confirm", () => {
-          location.reload();
         });
-      }
-    };
-
-    document.querySelector("#add-btn").addEventListener("click", (event) => {
-      event.preventDefault();
-
-      const numberPlate = document.querySelector("#number-plate");
-      const brand = document.querySelector("#brands");
-      const type = document.querySelector("#types");
-      const color = document.querySelector("#colors");
-      const model = document.querySelector("#model");
-      const remarks = document.querySelector("#remarks");
-
-      const data = {
-        customer_id: localStorage.getItem("user_id"),
-        number_plate: numberPlate.value,
-        brand: brand.value,
-        type: type.value,
-        color: color.value,
-        model: model.value,
-        remarks: remarks.value,
       };
 
-      add_vehicle(data);
-    });
+      const fetch_car_types = async () => {
+        const req_url = `${API_HOST}/api/customer/vehicle/types`;
+        const resp = await fetch(req_url, {
+          method: "GET",
+          headers: {
+            "Content-type": "application/json",
+            Authorization: `bearer ${localStorage.getItem("token")}`,
+          },
+        });
 
-    document.querySelector("#cancel").addEventListener("click", () => {
-      location.href = "cars.html";
-    });
+        const json = await resp.json();
+        console.log(json);
 
-    document.querySelector("#nav-user").addEventListener("click", (event) => {
-      const dropdown = document.querySelector("#nav-dropdown");
-      console.log(dropdown.style);
-      if (dropdown.style.display == "none") {
-        dropdown.style.display = "block";
-        setTimeout(() => {
-          dropdown.style.opacity = "1";
-        }, 100);
-      } else {
-        dropdown.style.opacity = "0";
-        setTimeout(() => {
-          dropdown.style.display = "none";
-        }, 100);
-      }
-    });
+        const brands_select = document.querySelector("#types");
+        json["types"].forEach((type) => {
+          brands_select.innerHTML += `
+        <option value="${type.toLowerCase()}">${type}</option>
+        `;
+        });
+      };
 
-    document.querySelector("#logout").addEventListener("click", () => {
-      localStorage.clear();
-      location.href = "../index.html";
-    });
+      const fetch_car_colors = async () => {
+        const req_url = `${API_HOST}/api/customer/vehicle/colors`;
+        const resp = await fetch(req_url, {
+          method: "GET",
+          headers: {
+            "Content-type": "application/json",
+            Authorization: `bearer ${localStorage.getItem("token")}`,
+          },
+        });
 
-    document.querySelector("#profile").addEventListener("click", () => {
-      location.href = "profile.html";
+        const json = await resp.json();
+        console.log(json);
+
+        const brands_select = document.querySelector("#colors");
+        json["colors"].forEach((color) => {
+          brands_select.innerHTML += `
+        <option value="${color.toLowerCase()}">${color}</option>
+        `;
+        });
+      };
+
+      await fetch_car_brands();
+      await fetch_car_types();
+      await fetch_car_colors();
+
+      document.querySelector("form")[0].addEventListener("submit", (event) => {
+        event.preventDefault();
+      });
+
+      const add_vehicle = async (data) => {
+        const req_url = `${API_HOST}/api/customer/vehicle/add`;
+        const resp = await fetch(req_url, {
+          method: "POST",
+          headers: {
+            "Content-type": "application/json",
+            Authorization: `bearer ${localStorage.getItem("token")}`,
+          },
+          body: JSON.stringify(data),
+        });
+        const status = resp.status;
+        const json = await resp.json();
+
+        if (json["status"] != "success") {
+          alert("Faile to add vehicle!", json["message"], "Confirm", () => {});
+        } else {
+          alert("Success", "Vehicle added!", "Confirm", () => {
+            location.reload();
+          });
+        }
+      };
+
+      document.querySelector("#add-btn").addEventListener("click", (event) => {
+        event.preventDefault();
+
+        const numberPlate = document.querySelector("#number-plate");
+        const brand = document.querySelector("#brands");
+        const type = document.querySelector("#types");
+        const color = document.querySelector("#colors");
+        const model = document.querySelector("#model");
+        const remarks = document.querySelector("#remarks");
+
+        const data = {
+          customer_id: localStorage.getItem("user_id"),
+          number_plate: numberPlate.value,
+          brand: brand.value,
+          type: type.value,
+          color: color.value,
+          model: model.value,
+          remarks: remarks.value,
+        };
+
+        add_vehicle(data);
+      });
+
+      document.querySelector("#cancel").addEventListener("click", () => {
+        location.href = "cars.html";
+      });
+
+      document.querySelector("#nav-user").addEventListener("click", (event) => {
+        const dropdown = document.querySelector("#nav-dropdown");
+        console.log(dropdown.style);
+        if (dropdown.style.display == "none") {
+          dropdown.style.display = "block";
+          setTimeout(() => {
+            dropdown.style.opacity = "1";
+          }, 100);
+        } else {
+          dropdown.style.opacity = "0";
+          setTimeout(() => {
+            dropdown.style.display = "none";
+          }, 100);
+        }
+      });
+
+      document.querySelector("#logout").addEventListener("click", () => {
+        localStorage.clear();
+        location.href = "../index.html";
+      });
+
+      document.querySelector("#profile").addEventListener("click", () => {
+        location.href = "profile.html";
+      });
+    };
+
+    document.addEventListener("DOMContentLoaded", () => {
+      init();
     });
   </script>
 </html>

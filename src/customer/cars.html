@@ -45,39 +45,40 @@
   <script src="../js/sections.js"></script>
   <script src="../js/config.js"></script>
   <script>
-    verify_token("../index.html");
-    fetch_profile();
+    const init = async () => {
+      await verify_token("../index.html");
+      await fetch_profile();
 
-    const user_profile = JSON.parse(localStorage.getItem("user_profile"));
-    document.querySelector("#username").innerHTML = user_profile["username"];
+      const user_profile = JSON.parse(localStorage.getItem("user_profile"));
+      document.querySelector("#username").innerHTML = user_profile["username"];
 
-    const fetch_cars = async () => {
-      const req_url = `${API_HOST}/api/customer/${localStorage.getItem(
-        "user_id"
-      )}/vehicles`;
-      const resp = await fetch(req_url, {
-        method: "GET",
-        headers: {
-          "Content-type": "application/json",
-          Authorization: `bearer ${localStorage.getItem("token")}`,
-        },
-      });
+      const fetch_cars = async () => {
+        const req_url = `${API_HOST}/api/customer/${localStorage.getItem(
+          "user_id"
+        )}/vehicles`;
+        const resp = await fetch(req_url, {
+          method: "GET",
+          headers: {
+            "Content-type": "application/json",
+            Authorization: `bearer ${localStorage.getItem("token")}`,
+          },
+        });
 
-      const status = resp.status;
-      const json = await resp.json();
-      console.log(json);
+        const status = resp.status;
+        const json = await resp.json();
+        console.log(json);
 
-      if (json["status"] != "failure") {
-        if (json["vehicles"][0] != undefined) {
-          document.querySelector("#no-cars").remove();
-        } else {
-          document.querySelector("#no-cars").innerHTML =
-            "No registered vehicles.";
+        if (json["status"] != "failure") {
+          if (json["vehicles"][0] != undefined) {
+            document.querySelector("#no-cars").remove();
+          } else {
+            document.querySelector("#no-cars").innerHTML =
+              "No registered vehicles.";
+          }
         }
-      }
 
-      json.vehicles.forEach((vehicle) => {
-        document.querySelector("#cars-container").innerHTML += `
+        json.vehicles.forEach((vehicle) => {
+          document.querySelector("#cars-container").innerHTML += `
             <div class="vehicle">
                 <div class="vehicle-image">
                     <img src="${vehicle.image}" />
@@ -88,8 +89,8 @@
                     </div>
                     <div class="vehicle-model">
                         ${vehicle.brand}, ${vehicle.type} | ${vehicle.color}, ${
-          vehicle.model
-        }
+            vehicle.model
+          }
                     </div>
                     <div class="vehicle-remarks">
                         ${
@@ -103,42 +104,47 @@
                 </div>
             </div>
         `;
+        });
+      };
+
+      await fetch_cars();
+
+      document.querySelector("#add-btn").addEventListener("click", () => {
+        location.href = "add-car.html";
+      });
+
+      document.querySelector("#cancel").addEventListener("click", () => {
+        location.href = "index.html";
+      });
+
+      document.querySelector("#nav-user").addEventListener("click", (event) => {
+        const dropdown = document.querySelector("#nav-dropdown");
+        console.log(dropdown.style);
+        if (dropdown.style.display == "none") {
+          dropdown.style.display = "block";
+          setTimeout(() => {
+            dropdown.style.opacity = "1";
+          }, 100);
+        } else {
+          dropdown.style.opacity = "0";
+          setTimeout(() => {
+            dropdown.style.display = "none";
+          }, 100);
+        }
+      });
+
+      document.querySelector("#logout").addEventListener("click", () => {
+        localStorage.clear();
+        location.href = "../index.html";
+      });
+
+      document.querySelector("#profile").addEventListener("click", () => {
+        location.href = "profile.html";
       });
     };
 
-    fetch_cars();
-
-    document.querySelector("#add-btn").addEventListener("click", () => {
-      location.href = "add-car.html";
-    });
-
-    document.querySelector("#cancel").addEventListener("click", () => {
-      location.href = "index.html";
-    });
-
-    document.querySelector("#nav-user").addEventListener("click", (event) => {
-      const dropdown = document.querySelector("#nav-dropdown");
-      console.log(dropdown.style);
-      if (dropdown.style.display == "none") {
-        dropdown.style.display = "block";
-        setTimeout(() => {
-          dropdown.style.opacity = "1";
-        }, 100);
-      } else {
-        dropdown.style.opacity = "0";
-        setTimeout(() => {
-          dropdown.style.display = "none";
-        }, 100);
-      }
-    });
-
-    document.querySelector("#logout").addEventListener("click", () => {
-      localStorage.clear();
-      location.href = "../index.html";
-    });
-
-    document.querySelector("#profile").addEventListener("click", () => {
-      location.href = "profile.html";
+    document.addEventListener("DOMContentLoaded", () => {
+      init();
     });
   </script>
 </html>

@@ -128,80 +128,81 @@
   <script src="../js/sections.js"></script>
   <script src="../js/config.js"></script>
   <script>
-    // Get order_id from URL parameters
-    const urlParams = new URLSearchParams(window.location.search);
-    const orderId = urlParams.get("order_id");
+    const init = async () => {
+      // Get order_id from URL parameters
+      const urlParams = new URLSearchParams(window.location.search);
+      const orderId = urlParams.get("order_id");
 
-    if (!orderId) {
-      alert("Error", "No order ID provided");
-      location.href = "customer-cars.html";
-    }
+      if (!orderId) {
+        alert("Error", "No order ID provided");
+        location.href = "customer-cars.html";
+      }
 
-    // Display order ID
-    document.querySelector("#order-id-display").textContent = orderId;
-    document.querySelector("#order-info").style.display = "block";
+      // Display order ID
+      document.querySelector("#order-id-display").textContent = orderId;
+      document.querySelector("#order-info").style.display = "block";
 
-    verify_token("../index.html");
-    fetch_profile();
+      await verify_token("../index.html");
+      await fetch_profile();
 
-    const user_profile = JSON.parse(localStorage.getItem("user_profile"));
-    document.querySelector("#username").innerHTML = user_profile["username"];
+      const user_profile = JSON.parse(localStorage.getItem("user_profile"));
+      document.querySelector("#username").innerHTML = user_profile["username"];
 
-    const formatDateTime = (dateTimeString) => {
-      const date = new Date(dateTimeString);
-      const options = {
-        year: "numeric",
-        month: "short",
-        day: "2-digit",
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: true,
+      const formatDateTime = (dateTimeString) => {
+        const date = new Date(dateTimeString);
+        const options = {
+          year: "numeric",
+          month: "short",
+          day: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: true,
+        };
+        return date.toLocaleDateString("en-US", options);
       };
-      return date.toLocaleDateString("en-US", options);
-    };
 
-    const fetch_repair_logs = async () => {
-      const req_url = `${API_HOST}/api/customer/${localStorage.getItem(
-        "user_id"
-      )}/repair-order/${orderId}/repair-logs`;
+      const fetch_repair_logs = async () => {
+        const req_url = `${API_HOST}/api/customer/${localStorage.getItem(
+          "user_id"
+        )}/repair-order/${orderId}/repair-logs`;
 
-      try {
-        const resp = await fetch(req_url, {
-          method: "GET",
-          headers: {
-            "Content-type": "application/json",
-            Authorization: `bearer ${localStorage.getItem("token")}`,
-          },
-        });
-
-        const status = resp.status;
-        const json = await resp.json();
-        console.log("Repair logs response:", json);
-
-        const logsContainer = document.querySelector("#logs-container");
-        const noLogsElement = document.querySelector("#no-logs");
-
-        if (
-          json["status"] === "success" &&
-          json["repair_logs"] &&
-          json["repair_logs"].length > 0
-        ) {
-          // Remove loading message
-          if (noLogsElement) {
-            noLogsElement.remove();
-          }
-
-          // 按时间倒序排列（最新的日志排在最前面）
-          const sortedLogs = json["repair_logs"].sort((a, b) => {
-            return new Date(b.log_time) - new Date(a.log_time);
+        try {
+          const resp = await fetch(req_url, {
+            method: "GET",
+            headers: {
+              "Content-type": "application/json",
+              Authorization: `bearer ${localStorage.getItem("token")}`,
+            },
           });
 
-          // Display logs
-          sortedLogs.forEach((log) => {
-            const logElement = document.createElement("div");
-            logElement.className = "log-item";
+          const status = resp.status;
+          const json = await resp.json();
+          console.log("Repair logs response:", json);
 
-            logElement.innerHTML = `
+          const logsContainer = document.querySelector("#logs-container");
+          const noLogsElement = document.querySelector("#no-logs");
+
+          if (
+            json["status"] === "success" &&
+            json["repair_logs"] &&
+            json["repair_logs"].length > 0
+          ) {
+            // Remove loading message
+            if (noLogsElement) {
+              noLogsElement.remove();
+            }
+
+            // 按时间倒序排列（最新的日志排在最前面）
+            const sortedLogs = json["repair_logs"].sort((a, b) => {
+              return new Date(b.log_time) - new Date(a.log_time);
+            });
+
+            // Display logs
+            sortedLogs.forEach((log) => {
+              const logElement = document.createElement("div");
+              logElement.className = "log-item";
+
+              logElement.innerHTML = `
               <div class="log-header">
                 <div class="log-id">Log #${log.log_id}</div>
                 <div class="log-time">${formatDateTime(log.log_time)}</div>
@@ -214,64 +215,70 @@
               }
             `;
 
-            logsContainer.appendChild(logElement);
-          });
-        } else {
-          // No logs found or error
-          if (noLogsElement) {
-            if (json["status"] === "failure") {
-              noLogsElement.innerHTML =
-                json["message"] || "Failed to load repair logs.";
-            } else {
-              noLogsElement.innerHTML = "No repair logs found for this order.";
+              logsContainer.appendChild(logElement);
+            });
+          } else {
+            // No logs found or error
+            if (noLogsElement) {
+              if (json["status"] === "failure") {
+                noLogsElement.innerHTML =
+                  json["message"] || "Failed to load repair logs.";
+              } else {
+                noLogsElement.innerHTML =
+                  "No repair logs found for this order.";
+              }
             }
           }
+        } catch (error) {
+          console.error("Error fetching repair logs:", error);
+          const noLogsElement = document.querySelector("#no-logs");
+          if (noLogsElement) {
+            noLogsElement.innerHTML =
+              "Error loading repair logs. Please try again.";
+          }
         }
-      } catch (error) {
-        console.error("Error fetching repair logs:", error);
-        const noLogsElement = document.querySelector("#no-logs");
-        if (noLogsElement) {
-          noLogsElement.innerHTML =
-            "Error loading repair logs. Please try again.";
-        }
-      }
-    };
+      };
 
-    // Fetch logs when page loads
-    fetch_repair_logs();
+      // Fetch logs when page loads
+      await fetch_repair_logs();
 
-    // Event listeners
-    /* document.querySelector("#back-btn").addEventListener("click", () => {
+      // Event listeners
+      /* document.querySelector("#back-btn").addEventListener("click", () => {
       location.href = "customer-cars.html";
     }); */
 
-    document.querySelector("#cancel").addEventListener("click", () => {
-      location.href = "index.html";
-    });
+      document.querySelector("#cancel").addEventListener("click", () => {
+        location.href = "index.html";
+      });
 
-    document.querySelector("#nav-user").addEventListener("click", (event) => {
-      const dropdown = document.querySelector("#nav-dropdown");
-      console.log(dropdown.style);
-      if (dropdown.style.display == "none") {
-        dropdown.style.display = "block";
-        setTimeout(() => {
-          dropdown.style.opacity = "1";
-        }, 100);
-      } else {
-        dropdown.style.opacity = "0";
-        setTimeout(() => {
-          dropdown.style.display = "none";
-        }, 100);
-      }
-    });
+      document.querySelector("#nav-user").addEventListener("click", (event) => {
+        const dropdown = document.querySelector("#nav-dropdown");
+        console.log(dropdown.style);
+        if (dropdown.style.display == "none") {
+          dropdown.style.display = "block";
+          setTimeout(() => {
+            dropdown.style.opacity = "1";
+          }, 100);
+        } else {
+          dropdown.style.opacity = "0";
+          setTimeout(() => {
+            dropdown.style.display = "none";
+          }, 100);
+        }
+      });
 
-    document.querySelector("#logout").addEventListener("click", () => {
-      localStorage.clear();
-      location.href = "../index.html";
-    });
+      document.querySelector("#logout").addEventListener("click", () => {
+        localStorage.clear();
+        location.href = "../index.html";
+      });
 
-    document.querySelector("#profile").addEventListener("click", () => {
-      location.href = "profile.html";
+      document.querySelector("#profile").addEventListener("click", () => {
+        location.href = "profile.html";
+      });
+    };
+
+    document.addEventListener("DOMContentLoaded", () => {
+      init();
     });
   </script>
 </html>

@@ -5,6 +5,10 @@
     <link rel="stylesheet" href="../css/universal.css" />
     <link rel="stylesheet" href="../css/customer-cars.css" />
     <link rel="stylesheet" href="../css/alert.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"
+    />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>AutoCare Pro - Feedbacks</title>
   </head>
@@ -24,7 +28,7 @@
         </div>
       </div>
     </div>
-    <div class="container">
+    <div class="container animate__animated animate__fadeIn">
       <div class="cancel" id="cancel">✖︎</div>
       <div class="container-title">
         <div class="container-title-text">My Feedbacks</div>
@@ -43,64 +47,65 @@
   <script src="../js/sections.js"></script>
   <script src="../js/config.js"></script>
   <script>
-    verify_token("../index.html");
-    fetch_profile();
+    const init = async () => {
+      await verify_token("../index.html");
+      await fetch_profile();
 
-    const params = getUrlParams();
-    const order_id = params["order_id"];
+      const params = getUrlParams();
+      const order_id = params["order_id"];
 
-    const user_profile = JSON.parse(localStorage.getItem("user_profile"));
-    document.querySelector("#username").innerHTML = user_profile["username"];
+      const user_profile = JSON.parse(localStorage.getItem("user_profile"));
+      document.querySelector("#username").innerHTML = user_profile["username"];
 
-    const fetch_cars = async () => {
-      const req_url = `${API_HOST}/api/customer/${localStorage.getItem(
-        "user_id"
-      )}/vehicles`;
-      const resp = await fetch(req_url, {
-        method: "GET",
-        headers: {
-          "Content-type": "application/json",
-          Authorization: `bearer ${localStorage.getItem("token")}`,
-        },
-      });
+      const fetch_cars = async () => {
+        const req_url = `${API_HOST}/api/customer/${localStorage.getItem(
+          "user_id"
+        )}/vehicles`;
+        const resp = await fetch(req_url, {
+          method: "GET",
+          headers: {
+            "Content-type": "application/json",
+            Authorization: `bearer ${localStorage.getItem("token")}`,
+          },
+        });
 
-      const status = resp.status;
-      const json = await resp.json();
+        const status = resp.status;
+        const json = await resp.json();
 
-      return json;
-    };
-    const fetch_requests = async () => {
-      const req_url = `${API_HOST}/api/customer/${localStorage.getItem(
-        "user_id"
-      )}/repair-order/${order_id}/feedbacks`;
-      const resp = await fetch(req_url, {
-        method: "GET",
-        headers: {
-          "Content-type": "application/json",
-          Authorization: `bearer ${localStorage.getItem("token")}`,
-        },
-      });
+        return json;
+      };
+      const fetch_requests = async () => {
+        const req_url = `${API_HOST}/api/customer/${localStorage.getItem(
+          "user_id"
+        )}/repair-order/${order_id}/feedbacks`;
+        const resp = await fetch(req_url, {
+          method: "GET",
+          headers: {
+            "Content-type": "application/json",
+            Authorization: `bearer ${localStorage.getItem("token")}`,
+          },
+        });
 
-      const status = resp.status;
-      const json = await resp.json();
-      console.log(json);
+        const status = resp.status;
+        const json = await resp.json();
+        console.log(json);
 
-      if (json["status"] != "failure") {
-        if (json["feedbacks"][0] != undefined) {
-          document.querySelector("#no-cars").remove();
+        if (json["status"] != "failure") {
+          if (json["feedbacks"][0] != undefined) {
+            document.querySelector("#no-cars").remove();
+          } else {
+            document.querySelector("#no-cars").innerHTML =
+              "No existing requests or orders.";
+          }
         } else {
           document.querySelector("#no-cars").innerHTML =
             "No existing requests or orders.";
         }
-      } else {
-        document.querySelector("#no-cars").innerHTML =
-          "No existing requests or orders.";
-      }
-      const vehicles = await fetch_cars();
-      console.log(vehicles);
+        const vehicles = await fetch_cars();
+        console.log(vehicles);
 
-      json.feedbacks.forEach((feedback) => {
-        /*let number_plate = "";
+        json.feedbacks.forEach((feedback) => {
+          /*let number_plate = "";
         vehicles.vehicles.forEach((vehicle) => {
           if (vehicle.vehicle_id === repair_request.vehicle_id) {
             console.log(vehicle);
@@ -109,8 +114,8 @@
         });
 
         console.log(number_plate);*/
-        /*if (repair_request.status === "pending") {*/
-        document.querySelector("#cars-container").innerHTML += `
+          /*if (repair_request.status === "pending") {*/
+          document.querySelector("#cars-container").innerHTML += `
                 <div class="vehicle">
                     <div class="vehicle-image">
                         <img src="../images/request-icon.png" />
@@ -128,43 +133,48 @@
                     </div>
                 </div>
             `;
-        /* }*/
+          /* }*/
+        });
+      };
+
+      await fetch_requests();
+
+      document.querySelector("#add-btn").addEventListener("click", () => {
+        location.href = "#";
+      });
+
+      document.querySelector("#cancel").addEventListener("click", () => {
+        location.href = "repair.html";
+      });
+
+      document.querySelector("#nav-user").addEventListener("click", (event) => {
+        const dropdown = document.querySelector("#nav-dropdown");
+        console.log(dropdown.style);
+        if (dropdown.style.display == "none") {
+          dropdown.style.display = "block";
+          setTimeout(() => {
+            dropdown.style.opacity = "1";
+          }, 100);
+        } else {
+          dropdown.style.opacity = "0";
+          setTimeout(() => {
+            dropdown.style.display = "none";
+          }, 100);
+        }
+      });
+
+      document.querySelector("#logout").addEventListener("click", () => {
+        localStorage.clear();
+        location.href = "../index.html";
+      });
+
+      document.querySelector("#profile").addEventListener("click", () => {
+        location.href = "profile.html";
       });
     };
 
-    fetch_requests();
-
-    document.querySelector("#add-btn").addEventListener("click", () => {
-      location.href = "#";
-    });
-
-    document.querySelector("#cancel").addEventListener("click", () => {
-      location.href = "repair.html";
-    });
-
-    document.querySelector("#nav-user").addEventListener("click", (event) => {
-      const dropdown = document.querySelector("#nav-dropdown");
-      console.log(dropdown.style);
-      if (dropdown.style.display == "none") {
-        dropdown.style.display = "block";
-        setTimeout(() => {
-          dropdown.style.opacity = "1";
-        }, 100);
-      } else {
-        dropdown.style.opacity = "0";
-        setTimeout(() => {
-          dropdown.style.display = "none";
-        }, 100);
-      }
-    });
-
-    document.querySelector("#logout").addEventListener("click", () => {
-      localStorage.clear();
-      location.href = "../index.html";
-    });
-
-    document.querySelector("#profile").addEventListener("click", () => {
-      location.href = "profile.html";
+    document.addEventListener("DOMContentLoaded", () => {
+      init();
     });
   </script>
 </html>

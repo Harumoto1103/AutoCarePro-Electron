@@ -9,6 +9,10 @@
       rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
     />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"
+    />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>AutoCare Pro - My Cars</title>
   </head>
@@ -28,7 +32,7 @@
         </div>
       </div>
     </div>
-    <form class="container">
+    <form class="container animate__animated animate__fadeIn">
       <div class="cancel" id="cancel">✖︎</div>
       <div class="container-title">
         <div class="container-title-text">Add Request</div>
@@ -65,125 +69,133 @@
   <script src="../js/sections.js"></script>
   <script src="../js/config.js"></script>
   <script>
-    verify_token("../index.html");
-    fetch_profile();
+    const init = async () => {
+      await verify_token("../index.html");
+      await fetch_profile();
 
-    const user_profile = JSON.parse(localStorage.getItem("user_profile"));
-    document.querySelector("#username").innerHTML = user_profile["username"];
+      console.log("Initializing Repair Request Page");
 
-    document.querySelector("form")[0].addEventListener("submit", (event) => {
-      event.preventDefault();
-    });
+      const user_profile = JSON.parse(localStorage.getItem("user_profile"));
+      document.querySelector("#username").innerHTML = user_profile["username"];
 
-    const fetch_cars = async () => {
-      const req_url = `${API_HOST}/api/customer/${localStorage.getItem(
-        "user_id"
-      )}/vehicles`;
-      const resp = await fetch(req_url, {
-        method: "GET",
-        headers: {
-          "Content-type": "application/json",
-          Authorization: `bearer ${localStorage.getItem("token")}`,
-        },
+      document.querySelector("form")[0].addEventListener("submit", (event) => {
+        event.preventDefault();
       });
 
-      const status = resp.status;
-      const json = await resp.json();
-      console.log(json);
+      const fetch_cars = async () => {
+        const req_url = `${API_HOST}/api/customer/${localStorage.getItem(
+          "user_id"
+        )}/vehicles`;
+        const resp = await fetch(req_url, {
+          method: "GET",
+          headers: {
+            "Content-type": "application/json",
+            Authorization: `bearer ${localStorage.getItem("token")}`,
+          },
+        });
 
-      if (json["status"] != "success") {
-        alert(
-          "Failed to load vehicles",
-          "Failed to load your registered vehicles, please try again later.",
-          "Confirm",
-          () => {
-            location.href = "index.html";
-          }
-        );
-      } else {
-        json["vehicles"].forEach((vehicle) => {
-          document.querySelector("#vehicles").innerHTML += `
+        const status = resp.status;
+        const json = await resp.json();
+        console.log(json);
+
+        if (json["status"] != "success") {
+          alert(
+            "Failed to load vehicles",
+            "Failed to load your registered vehicles, please try again later.",
+            "Confirm",
+            () => {
+              location.href = "index.html";
+            }
+          );
+        } else {
+          json["vehicles"].forEach((vehicle) => {
+            document.querySelector("#vehicles").innerHTML += `
                 <option name="${vehicle.vehicle_id}">${vehicle.license_plate}</option>
             `;
-        });
-      }
-    };
+          });
+        }
+      };
 
-    fetch_cars();
+      await fetch_cars();
 
-    document.querySelector("#cancel").addEventListener("click", () => {
-      location.href = "repair.html";
-    });
-
-    document.querySelector("#nav-user").addEventListener("click", (event) => {
-      const dropdown = document.querySelector("#nav-dropdown");
-      console.log(dropdown.style);
-      if (dropdown.style.display == "none") {
-        dropdown.style.display = "block";
-        setTimeout(() => {
-          dropdown.style.opacity = "1";
-        }, 100);
-      } else {
-        dropdown.style.opacity = "0";
-        setTimeout(() => {
-          dropdown.style.display = "none";
-        }, 100);
-      }
-    });
-
-    const submit_request = async () => {
-      const vehicle_id = document
-        .querySelector("#vehicles")
-        .options[
-          document.querySelector("#vehicles").selectedIndex
-        ].getAttribute("name");
-      const description = document.querySelector("#description");
-
-      const req_url = `${API_HOST}/api/customer/${localStorage.getItem(
-        "user_id"
-      )}/create-repair-requests`;
-      const resp = await fetch(req_url, {
-        method: "POST",
-        headers: {
-          "Content-type": "application/json",
-          Authorization: `bearer ${localStorage.getItem("token")}`,
-        },
-        body: JSON.stringify({
-          vehicle_id: vehicle_id,
-          description: description.value,
-        }),
+      document.querySelector("#cancel").addEventListener("click", () => {
+        location.href = "repair.html";
       });
 
-      const status = resp.status;
-      const json = await resp.json();
+      document.querySelector("#nav-user").addEventListener("click", (event) => {
+        const dropdown = document.querySelector("#nav-dropdown");
+        console.log(dropdown.style);
+        if (dropdown.style.display == "none") {
+          dropdown.style.display = "block";
+          setTimeout(() => {
+            dropdown.style.opacity = "1";
+          }, 100);
+        } else {
+          dropdown.style.opacity = "0";
+          setTimeout(() => {
+            dropdown.style.display = "none";
+          }, 100);
+        }
+      });
 
-      if (json["status"] != "success") {
-        alert(
-          "Error",
-          "Failed to submit request, please try again later.",
-          "Confirm",
-          () => {}
-        );
-      } else {
-        alert("Success", "Request submitted.", "Confirm", () => {
-          location.reload();
+      const submit_request = async () => {
+        const vehicle_id = document
+          .querySelector("#vehicles")
+          .options[
+            document.querySelector("#vehicles").selectedIndex
+          ].getAttribute("name");
+        const description = document.querySelector("#description");
+
+        const req_url = `${API_HOST}/api/customer/${localStorage.getItem(
+          "user_id"
+        )}/create-repair-requests`;
+        const resp = await fetch(req_url, {
+          method: "POST",
+          headers: {
+            "Content-type": "application/json",
+            Authorization: `bearer ${localStorage.getItem("token")}`,
+          },
+          body: JSON.stringify({
+            vehicle_id: vehicle_id,
+            description: description.value,
+          }),
         });
-      }
-      console.log(json);
+
+        const status = resp.status;
+        const json = await resp.json();
+
+        if (json["status"] != "success") {
+          alert(
+            "Error",
+            "Failed to submit request, please try again later.",
+            "Confirm",
+            () => {}
+          );
+        } else {
+          alert("Success", "Request submitted.", "Confirm", () => {
+            location.reload();
+          });
+        }
+        console.log(json);
+      };
+
+      document.querySelector("#logout").addEventListener("click", () => {
+        localStorage.clear();
+        location.href = "../index.html";
+      });
+
+      document.querySelector("#req-btn").addEventListener("click", (event) => {
+        event.preventDefault();
+        submit_request();
+      });
+
+      document.querySelector("#profile").addEventListener("click", () => {
+        location.href = "profile.html";
+      });
     };
 
-    document.querySelector("#logout").addEventListener("click", () => {
-      localStorage.clear();
-      location.href = "../index.html";
-    });
-
-    document.querySelector("#req-btn").addEventListener("click", (event) => {
-      event.preventDefault();
-      submit_request();
-    });
-
-    document.querySelector("#profile").addEventListener("click", () => {
-      location.href = "profile.html";
+    document.addEventListener("DOMContentLoaded", async () => {
+      await init();
     });
   </script>
 </html>

@@ -34,82 +34,88 @@
   <script src="../js/sections.js"></script>
   <script src="../js/config.js"></script>
   <script>
-    verify_token("../index.html");
+    const init = async () => {
+      await verify_token("../index.html");
 
-    const customerSections = [
-      {
-        sectionImage: "../images/car-icon.png",
-        sectionTitle: "My Cars",
-        sectionMessage: "Manage your cars",
-        sectionId: "my-cars",
-        toPage: "cars.html",
-        animation: "animate__animated animate__fadeInTopLeft",
-      },
-      {
-        sectionImage: "../images/repair-icon.png",
-        sectionTitle: "Repair Services",
-        sectionMessage: "Mange your repair services",
-        sectionId: "repair-services",
-        toPage: "repair.html",
-        animation: "animate__animated animate__fadeInTopRight",
-      },
-      {
-        sectionImage: "../images/feedback-icon.png",
-        sectionTitle: "Discussion",
-        sectionMessage: "Coming soon",
-        sectionId: "feedbacks",
-        toPage: "#",
-        animation: "animate__animated animate__fadeInBottomLeft",
-      },
-      {
-        sectionImage: "../images/cloud-icon.png",
-        sectionTitle: "Cloud Services",
-        sectionMessage: "Coming Soon",
-        sectionId: "cloud-services",
-        toPage: "#",
-        animation: "animate__animated animate__fadeInBottomRight",
-      },
-    ];
-    const sectionContainer = document.getElementById("section-container");
-    customerSections.forEach((section) => {
-      appendSection(
-        sectionContainer,
-        section.sectionImage,
-        section.sectionTitle,
-        section.sectionMessage,
-        section.sectionId,
-        section.toPage,
-        section.animation
-      );
+      const customerSections = [
+        {
+          sectionImage: "../images/car-icon.png",
+          sectionTitle: "My Cars",
+          sectionMessage: "Manage your cars",
+          sectionId: "my-cars",
+          toPage: "cars.html",
+          animation: "animate__animated animate__fadeInTopLeft",
+        },
+        {
+          sectionImage: "../images/repair-icon.png",
+          sectionTitle: "Repair Services",
+          sectionMessage: "Mange your repair services",
+          sectionId: "repair-services",
+          toPage: "repair.html",
+          animation: "animate__animated animate__fadeInTopRight",
+        },
+        {
+          sectionImage: "../images/feedback-icon.png",
+          sectionTitle: "Discussion",
+          sectionMessage: "Coming soon",
+          sectionId: "feedbacks",
+          toPage: "#",
+          animation: "animate__animated animate__fadeInBottomLeft",
+        },
+        {
+          sectionImage: "../images/cloud-icon.png",
+          sectionTitle: "Cloud Services",
+          sectionMessage: "Coming Soon",
+          sectionId: "cloud-services",
+          toPage: "#",
+          animation: "animate__animated animate__fadeInBottomRight",
+        },
+      ];
+      const sectionContainer = document.getElementById("section-container");
+      customerSections.forEach((section) => {
+        appendSection(
+          sectionContainer,
+          section.sectionImage,
+          section.sectionTitle,
+          section.sectionMessage,
+          section.sectionId,
+          section.toPage,
+          section.animation
+        );
+      });
+
+      document.querySelector("#nav-user").addEventListener("click", (event) => {
+        const dropdown = document.querySelector("#nav-dropdown");
+        console.log(dropdown.style);
+        if (dropdown.style.display == "none") {
+          dropdown.style.display = "block";
+          setTimeout(() => {
+            dropdown.style.opacity = "1";
+          }, 100);
+        } else {
+          dropdown.style.opacity = "0";
+          setTimeout(() => {
+            dropdown.style.display = "none";
+          }, 100);
+        }
+      });
+
+      document.querySelector("#logout").addEventListener("click", () => {
+        localStorage.clear();
+        location.href = "../index.html";
+      });
+
+      document.querySelector("#profile").addEventListener("click", () => {
+        location.href = "profile.html";
+      });
+
+      await fetch_profile();
+      const user_profile = JSON.parse(localStorage.getItem("user_profile"));
+      document.querySelector("#username").innerHTML = user_profile["username"];
+    };
+
+    document.addEventListener("DOMContentLoaded", () => {
+      init();
     });
-
-    document.querySelector("#nav-user").addEventListener("click", (event) => {
-      const dropdown = document.querySelector("#nav-dropdown");
-      console.log(dropdown.style);
-      if (dropdown.style.display == "none") {
-        dropdown.style.display = "block";
-        setTimeout(() => {
-          dropdown.style.opacity = "1";
-        }, 100);
-      } else {
-        dropdown.style.opacity = "0";
-        setTimeout(() => {
-          dropdown.style.display = "none";
-        }, 100);
-      }
-    });
-
-    document.querySelector("#logout").addEventListener("click", () => {
-      localStorage.clear();
-      location.href = "../index.html";
-    });
-
-    document.querySelector("#profile").addEventListener("click", () => {
-      location.href = "profile.html";
-    });
-
-    fetch_profile();
-    const user_profile = JSON.parse(localStorage.getItem("user_profile"));
-    document.querySelector("#username").innerHTML = user_profile["username"];
   </script>
 </html>

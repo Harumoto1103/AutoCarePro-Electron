@@ -5,6 +5,10 @@
     <link rel="stylesheet" href="../css/universal.css" />
     <link rel="stylesheet" href="../css/customer-cars.css" />
     <link rel="stylesheet" href="../css/alert.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"
+    />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>AutoCare Pro - Repair Services</title>
   </head>
@@ -24,7 +28,7 @@
         </div>
       </div>
     </div>
-    <div class="container">
+    <div class="container animate__animated animate__fadeIn">
       <div class="cancel" id="cancel">✖︎</div>
       <div class="container-title">
         <div class="container-title-text">Repair Record</div>
@@ -46,162 +50,166 @@
   <script src="../js/sections.js"></script>
   <script src="../js/config.js"></script>
   <script>
-    const contextMenu = document.querySelector("#context-menu");
-    const targets = document.getElementsByClassName("vehicle");
-    let writeFeedback = document.querySelector("#write-feedback");
-    let viewFeedbacks = document.querySelector("#view-feedbacks");
-    let viewLogs = document.querySelector("#view-logs");
+    const init = async () => {
+      document.querySelector("#cancel").addEventListener("click", () => {
+        location.href = "index.html";
+      });
+      const contextMenu = document.querySelector("#context-menu");
+      const targets = document.getElementsByClassName("vehicle");
+      let writeFeedback = document.querySelector("#write-feedback");
+      let viewFeedbacks = document.querySelector("#view-feedbacks");
+      let viewLogs = document.querySelector("#view-logs");
 
-    const removeListeners = (element) => {
-      const newElement = element.cloneNode(true);
-      console.log(newElement, element);
-      element.parentNode.replaceChild(newElement, element);
-      return newElement;
-    };
+      const removeListeners = (element) => {
+        const newElement = element.cloneNode(true);
+        console.log(newElement, element);
+        element.parentNode.replaceChild(newElement, element);
+        return newElement;
+      };
 
-    document.addEventListener("click", (event) => {
-      contextMenu.style.display = "none";
-    });
+      document.addEventListener("click", (event) => {
+        contextMenu.style.display = "none";
+      });
 
-    document.addEventListener("contextmenu", (event) => {
-      let flag = false;
-      let final_target = null;
-      /*
+      document.addEventListener("contextmenu", (event) => {
+        let flag = false;
+        let final_target = null;
+        /*
       targets.forEach((target) => {
         if (target.contains(event.target)) flag = true;
       }); */
-      for (let i = 0; i < targets.length; i++) {
-        console.log(event.target, targets[i]);
-        if (targets[i].contains(event.target)) {
-          flag = true;
-          final_target = targets[i];
+        for (let i = 0; i < targets.length; i++) {
+          console.log(event.target, targets[i]);
+          if (targets[i].contains(event.target)) {
+            flag = true;
+            final_target = targets[i];
+          }
         }
-      }
 
-      console.log(flag, final_target);
-      if (flag) {
-        event.preventDefault();
-        contextMenu.style.display = "block";
-        console.log(event.pageX, event.pageY);
-        contextMenu.style.left = `${event.pageX}px`;
-        contextMenu.style.top = `${event.pageY}px`;
+        console.log(flag, final_target);
+        if (flag) {
+          event.preventDefault();
+          contextMenu.style.display = "block";
+          console.log(event.pageX, event.pageY);
+          contextMenu.style.left = `${event.pageX}px`;
+          contextMenu.style.top = `${event.pageY}px`;
 
-        writeFeedback = removeListeners(writeFeedback);
-        viewFeedbacks = removeListeners(viewFeedbacks);
-        viewLogs = removeListeners(viewLogs);
+          writeFeedback = removeListeners(writeFeedback);
+          viewFeedbacks = removeListeners(viewFeedbacks);
+          viewLogs = removeListeners(viewLogs);
 
-        writeFeedback.addEventListener("click", () => {
-          console.log("Write feedback triggered.");
-          // return;
-          console.log(event.target);
-          console.log(final_target.getAttribute("ord_id"));
-          if (final_target.getAttribute("ord_id") == null) {
-            alert(
-              "Attention",
-              "You cannot write a feedback for a pending request."
-            );
-            return;
-          }
-          const order_id = final_target.getAttribute("ord_id");
-          const number_plate = final_target.getAttribute("number_plate");
-          const desc = final_target.getAttribute("desc");
-          location.href = `add-feedback.html?order_id=${order_id}&number_plate=${number_plate}&remarks=${desc}`;
-        });
+          writeFeedback.addEventListener("click", () => {
+            console.log("Write feedback triggered.");
+            // return;
+            console.log(event.target);
+            console.log(final_target.getAttribute("ord_id"));
+            if (final_target.getAttribute("ord_id") == null) {
+              alert(
+                "Attention",
+                "You cannot write a feedback for a pending request."
+              );
+              return;
+            }
+            const order_id = final_target.getAttribute("ord_id");
+            const number_plate = final_target.getAttribute("number_plate");
+            const desc = final_target.getAttribute("desc");
+            location.href = `add-feedback.html?order_id=${order_id}&number_plate=${number_plate}&remarks=${desc}`;
+          });
 
-        viewFeedbacks.addEventListener("click", () => {
-          console.log("View feedbacks triggered");
-          // return;
-          if (final_target.getAttribute("ord_id") == null) {
-            alert(
-              "Attention",
-              "You cannot view feedbacks for a pending request."
-            );
-            return;
-          }
-          const order_id = final_target.getAttribute("ord_id");
-          location.href = `feedback.html?order_id=${order_id}`;
-        });
+          viewFeedbacks.addEventListener("click", () => {
+            console.log("View feedbacks triggered");
+            // return;
+            if (final_target.getAttribute("ord_id") == null) {
+              alert(
+                "Attention",
+                "You cannot view feedbacks for a pending request."
+              );
+              return;
+            }
+            const order_id = final_target.getAttribute("ord_id");
+            location.href = `feedback.html?order_id=${order_id}`;
+          });
 
-        viewLogs.addEventListener("click", () => {
-          console.log("View logs triggered");
-          if (final_target.getAttribute("ord_id") == null) {
-            alert("Attention", "You cannot view logs for a pending request.");
-            return;
-          }
-          const order_id = final_target.getAttribute("ord_id");
-          location.href = `logs.html?order_id=${order_id}`;
-        });
-      } else {
-        contextMenu.style.display = "none";
-      }
-    });
-
-    verify_token("../index.html");
-    fetch_profile();
-
-    const user_profile = JSON.parse(localStorage.getItem("user_profile"));
-    document.querySelector("#username").innerHTML = user_profile["username"];
-
-    const fetch_cars = async () => {
-      const req_url = `${API_HOST}/api/customer/${localStorage.getItem(
-        "user_id"
-      )}/vehicles`;
-      const resp = await fetch(req_url, {
-        method: "GET",
-        headers: {
-          "Content-type": "application/json",
-          Authorization: `bearer ${localStorage.getItem("token")}`,
-        },
+          viewLogs.addEventListener("click", () => {
+            console.log("View logs triggered");
+            if (final_target.getAttribute("ord_id") == null) {
+              alert("Attention", "You cannot view logs for a pending request.");
+              return;
+            }
+            const order_id = final_target.getAttribute("ord_id");
+            location.href = `logs.html?order_id=${order_id}`;
+          });
+        } else {
+          contextMenu.style.display = "none";
+        }
       });
 
-      const status = resp.status;
-      const json = await resp.json();
+      verify_token("../index.html");
+      fetch_profile();
 
-      return json;
-    };
+      const user_profile = JSON.parse(localStorage.getItem("user_profile"));
+      document.querySelector("#username").innerHTML = user_profile["username"];
 
-    const fetch_requests = async () => {
-      const req_url = `${API_HOST}/api/customer/${localStorage.getItem(
-        "user_id"
-      )}/repair-requests`;
-      const resp = await fetch(req_url, {
-        method: "GET",
-        headers: {
-          "Content-type": "application/json",
-          Authorization: `bearer ${localStorage.getItem("token")}`,
-        },
-      });
+      const fetch_cars = async () => {
+        const req_url = `${API_HOST}/api/customer/${localStorage.getItem(
+          "user_id"
+        )}/vehicles`;
+        const resp = await fetch(req_url, {
+          method: "GET",
+          headers: {
+            "Content-type": "application/json",
+            Authorization: `bearer ${localStorage.getItem("token")}`,
+          },
+        });
 
-      const status = resp.status;
-      const json = await resp.json();
-      console.log(json);
+        const status = resp.status;
+        const json = await resp.json();
 
-      if (json["status"] != "failure") {
-        if (json["repair_requests"][0] != undefined) {
-          document.querySelector("#no-cars").remove();
+        return json;
+      };
+
+      const fetch_requests = async () => {
+        const req_url = `${API_HOST}/api/customer/${localStorage.getItem(
+          "user_id"
+        )}/repair-requests`;
+        const resp = await fetch(req_url, {
+          method: "GET",
+          headers: {
+            "Content-type": "application/json",
+            Authorization: `bearer ${localStorage.getItem("token")}`,
+          },
+        });
+
+        const status = resp.status;
+        const json = await resp.json();
+        console.log(json);
+
+        if (json["status"] != "failure") {
+          if (json["repair_requests"][0] != undefined) {
+            document.querySelector("#no-cars").remove();
+          } else {
+            document.querySelector("#no-cars").innerHTML =
+              "No existing requests or orders.";
+          }
         } else {
           document.querySelector("#no-cars").innerHTML =
             "No existing requests or orders.";
         }
-      } else {
-        document.querySelector("#no-cars").innerHTML =
-          "No existing requests or orders.";
-      }
-      const vehicles = await fetch_cars();
-      console.log(vehicles);
+        const vehicles = await fetch_cars();
+        console.log(vehicles);
 
-      json.repair_requests.forEach((repair_request) => {
-        let number_plate = "";
-        vehicles.vehicles.forEach((vehicle) => {
-          if (vehicle.vehicle_id === repair_request.vehicle_id) {
-            console.log(vehicle);
-            number_plate = vehicle.license_plate;
-          }
-        });
+        json.repair_requests.forEach((repair_request) => {
+          let number_plate = "";
+          vehicles.vehicles.forEach((vehicle) => {
+            if (vehicle.vehicle_id === repair_request.vehicle_id) {
+              console.log(vehicle);
+              number_plate = vehicle.license_plate;
+            }
+          });
 
-        console.log(number_plate);
-        if (repair_request.status === "pending") {
-          document.querySelector("#cars-container").innerHTML += `
+          console.log(number_plate);
+          if (repair_request.status === "pending") {
+            document.querySelector("#cars-container").innerHTML += `
                 <div class="vehicle" style="cursor: context-menu" req_id="${repair_request.request_id}">
                     <div class="vehicle-image">
                         <img src="../images/request-icon.png" />
@@ -219,57 +227,57 @@
                     </div>
                 </div>
             `;
-        }
-      });
-    };
+          }
+        });
+      };
 
-    const fetch_orders = async () => {
-      const req_url = `${API_HOST}/api/customer/${localStorage.getItem(
-        "user_id"
-      )}/repair-orders`;
-      const resp = await fetch(req_url, {
-        method: "GET",
-        headers: {
-          "Content-type": "application/json",
-          Authorization: `bearer ${localStorage.getItem("token")}`,
-        },
-      });
+      const fetch_orders = async () => {
+        const req_url = `${API_HOST}/api/customer/${localStorage.getItem(
+          "user_id"
+        )}/repair-orders`;
+        const resp = await fetch(req_url, {
+          method: "GET",
+          headers: {
+            "Content-type": "application/json",
+            Authorization: `bearer ${localStorage.getItem("token")}`,
+          },
+        });
 
-      const status = resp.status;
-      const json = await resp.json();
-      console.log("Orders:", json);
+        const status = resp.status;
+        const json = await resp.json();
+        console.log("Orders:", json);
 
-      if (json["status"] != "failure") {
-        if (json["repair_orders"][0] != undefined) {
-          /*try {
+        if (json["status"] != "failure") {
+          if (json["repair_orders"][0] != undefined) {
+            /*try {
             if (document.querySelector("#no-cars") != undefined)
               document.querySelector("#no-cars").remove();
           } catch {
             console.log("Already removed.");
           }*/
+          } else {
+            document.querySelector("#no-cars").innerHTML =
+              "No existing requests or orders.";
+          }
         } else {
           document.querySelector("#no-cars").innerHTML =
             "No existing requests or orders.";
         }
-      } else {
-        document.querySelector("#no-cars").innerHTML =
-          "No existing requests or orders.";
-      }
-      const vehicles = await fetch_cars();
-      // console.log(vehicles);
+        const vehicles = await fetch_cars();
+        // console.log(vehicles);
 
-      json.repair_orders.forEach((repair_order) => {
-        let number_plate = "";
-        vehicles.vehicles.forEach((vehicle) => {
-          if (vehicle.vehicle_id === repair_order.vehicle_id) {
-            console.log(vehicle);
-            number_plate = vehicle.license_plate;
-          }
-        });
+        json.repair_orders.forEach((repair_order) => {
+          let number_plate = "";
+          vehicles.vehicles.forEach((vehicle) => {
+            if (vehicle.vehicle_id === repair_order.vehicle_id) {
+              console.log(vehicle);
+              number_plate = vehicle.license_plate;
+            }
+          });
 
-        console.log(number_plate);
-        if (repair_order.status != false) {
-          document.querySelector("#cars-container").innerHTML += `
+          console.log(number_plate);
+          if (repair_order.status != false) {
+            document.querySelector("#cars-container").innerHTML += `
                 <div class="vehicle" style="cursor: context-menu" ord_id="${repair_order.order_id}" number_plate="${number_plate}" desc="${repair_order.remarks}">
                     <div class="vehicle-image">
                         <img src="../images/in-progress.png" />
@@ -287,46 +295,47 @@
                     </div>
                 </div>
             `;
+          }
+        });
+      };
+
+      (async () => {
+        await fetch_requests();
+        await fetch_orders();
+      })();
+
+      document.querySelector("#add-btn").addEventListener("click", () => {
+        location.href = "repair-request.html";
+      });
+
+      document.querySelector("#nav-user").addEventListener("click", (event) => {
+        const dropdown = document.querySelector("#nav-dropdown");
+        console.log(dropdown.style);
+        if (dropdown.style.display == "none") {
+          dropdown.style.display = "block";
+          setTimeout(() => {
+            dropdown.style.opacity = "1";
+          }, 100);
+        } else {
+          dropdown.style.opacity = "0";
+          setTimeout(() => {
+            dropdown.style.display = "none";
+          }, 100);
         }
+      });
+
+      document.querySelector("#logout").addEventListener("click", () => {
+        localStorage.clear();
+        location.href = "../index.html";
+      });
+
+      document.querySelector("#profile").addEventListener("click", () => {
+        location.href = "profile.html";
       });
     };
 
-    (async () => {
-      await fetch_requests();
-      await fetch_orders();
-    })();
-
-    document.querySelector("#add-btn").addEventListener("click", () => {
-      location.href = "repair-request.html";
-    });
-
-    document.querySelector("#cancel").addEventListener("click", () => {
-      location.href = "index.html";
-    });
-
-    document.querySelector("#nav-user").addEventListener("click", (event) => {
-      const dropdown = document.querySelector("#nav-dropdown");
-      console.log(dropdown.style);
-      if (dropdown.style.display == "none") {
-        dropdown.style.display = "block";
-        setTimeout(() => {
-          dropdown.style.opacity = "1";
-        }, 100);
-      } else {
-        dropdown.style.opacity = "0";
-        setTimeout(() => {
-          dropdown.style.display = "none";
-        }, 100);
-      }
-    });
-
-    document.querySelector("#logout").addEventListener("click", () => {
-      localStorage.clear();
-      location.href = "../index.html";
-    });
-
-    document.querySelector("#profile").addEventListener("click", () => {
-      location.href = "profile.html";
+    document.addEventListener("DOMContentLoaded", () => {
+      init();
     });
   </script>
 </html>
