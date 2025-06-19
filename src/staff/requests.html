@@ -345,55 +345,19 @@
     <script src="../js/config.js"></script>
     <script src="../js/alert.js"></script>
     <script>
-      const requestsContainer = document.querySelector("#requests-container");
-      let required_staff_types = {};
+      const init = async () => {
+        const requestsContainer = document.querySelector("#requests-container");
+        let required_staff_types = {};
 
-      const submit_order = document.getElementById("generate_btn");
-      const cancel_order = document.getElementById("cancel_btn");
+        const submit_order = document.getElementById("generate_btn");
+        const cancel_order = document.getElementById("cancel_btn");
 
-      cancel_order.addEventListener("click", () => {
-        location.reload();
-      });
-
-      const update_status = async (request_id, update_status) => {
-        const req_url = `${API_HOST}/api/staff/repair-request/${request_id}/update-status`;
-        const resp = await fetch(req_url, {
-          method: "POST",
-          headers: {
-            "Content-type": "application/json",
-            Authorization: `bearer ${localStorage.getItem("token")}`,
-          },
-          body: JSON.stringify({
-            new_status: update_status,
-          }),
+        cancel_order.addEventListener("click", () => {
+          location.reload();
         });
 
-        const json = await resp.json();
-        if (json["status"] !== "success") {
-          alert("Error", "Failed to update request!", "Confirm", () => {});
-        } else {
-          alert("Success", "Updated request status!", "Confirm", () => {
-            document.getElementById("cancel_btn").click();
-          });
-        }
-      };
-
-      submit_order.addEventListener("click", async () => {
-        if (Object.keys(required_staff_types).length === 0) {
-          alert(
-            "Attention",
-            "At least one type of worker should involve!",
-            "Confirm",
-            () => {}
-          );
-          return;
-        }
-        const requestId = document
-          .getElementById("order-window")
-          .getAttribute("request_id");
-        for (const type of Object.keys(required_staff_types)) {
-          if (!required_staff_types[type]) continue;
-          const req_url = `${API_HOST}/api/staff/repair-request/${requestId}/generate-order`;
+        const update_status = async (request_id, update_status) => {
+          const req_url = `${API_HOST}/api/staff/repair-request/${request_id}/update-status`;
           const resp = await fetch(req_url, {
             method: "POST",
             headers: {
@@ -401,59 +365,96 @@
               Authorization: `bearer ${localStorage.getItem("token")}`,
             },
             body: JSON.stringify({
-              required_staff_type: type,
-              remarks: document.getElementById("order-desc").value,
+              new_status: update_status,
             }),
           });
+
           const json = await resp.json();
           if (json["status"] !== "success") {
+            alert("Error", "Failed to update request!", "Confirm", () => {});
+          } else {
+            alert("Success", "Updated request status!", "Confirm", () => {
+              document.getElementById("cancel_btn").click();
+            });
+          }
+        };
+
+        submit_order.addEventListener("click", async () => {
+          if (Object.keys(required_staff_types).length === 0) {
             alert(
-              "Error",
-              `Error occurred while generating new orders: ${json["detail"]}; Generating for ${type}`,
+              "Attention",
+              "At least one type of worker should involve!",
               "Confirm",
               () => {}
             );
             return;
           }
-        }
-        update_status(requestId, "order_created");
-      });
-
-      const generate_order_form = (request_id, detail) => {
-        document.getElementById("order-window").classList.add("visible");
-        document.getElementById("order-desc").value = detail;
-        document
-          .getElementById("order-window")
-          .setAttribute("request_id", request_id);
-      };
-
-      const fetch_requests = async () => {
-        const req_url = `${API_HOST}/api/staff/repair-requests`;
-        const resp = await fetch(req_url, {
-          method: "GET",
-          headers: {
-            "Content-type": "application/json",
-            Authorization: `bearer ${localStorage.getItem("token")}`,
-          },
+          const requestId = document
+            .getElementById("order-window")
+            .getAttribute("request_id");
+          for (const type of Object.keys(required_staff_types)) {
+            if (!required_staff_types[type]) continue;
+            const req_url = `${API_HOST}/api/staff/repair-request/${requestId}/generate-order`;
+            const resp = await fetch(req_url, {
+              method: "POST",
+              headers: {
+                "Content-type": "application/json",
+                Authorization: `bearer ${localStorage.getItem("token")}`,
+              },
+              body: JSON.stringify({
+                required_staff_type: type,
+                remarks: document.getElementById("order-desc").value,
+              }),
+            });
+            const json = await resp.json();
+            if (json["status"] !== "success") {
+              alert(
+                "Error",
+                `Error occurred while generating new orders: ${json["detail"]}; Generating for ${type}`,
+                "Confirm",
+                () => {}
+              );
+              return;
+            }
+          }
+          update_status(requestId, "order_created");
         });
 
-        const json = await resp.json();
-        if (json.repair_requests.length === 0) {
-          requestsContainer.innerHTML = `
+        const generate_order_form = (request_id, detail) => {
+          document.getElementById("order-window").classList.add("visible");
+          document.getElementById("order-desc").value = detail;
+          document
+            .getElementById("order-window")
+            .setAttribute("request_id", request_id);
+        };
+
+        const fetch_requests = async () => {
+          const req_url = `${API_HOST}/api/staff/repair-requests`;
+          const resp = await fetch(req_url, {
+            method: "GET",
+            headers: {
+              "Content-type": "application/json",
+              Authorization: `bearer ${localStorage.getItem("token")}`,
+            },
+          });
+
+          const json = await resp.json();
+          if (json.repair_requests.length === 0) {
+            requestsContainer.innerHTML = `
             <div style="text-align: center; padding: 40px; color: var(--gray);">
               <i class="fas fa-tools" style="font-size: 48px; margin-bottom: 20px;"></i>
               <h3>No requests found</h3>
               <p>Try refreshing or check back later</p>
             </div>
           `;
-          return;
-        }
-        json.repair_requests.forEach((request) => {
-          if (request.status === "order_created") return;
-          const requestTime = new Date(
-            request.request_time
-          ).toLocaleDateString();
-          requestsContainer.innerHTML += `
+            return;
+          }
+          json.repair_requests.forEach((request) => {
+            if (request.status === "order_created") return;
+            const requestTime = new Date(
+              request.request_time
+            ).toLocaleDateString();
+            requestsContainer.innerHTML += `
             <div class="request">
               <div class="request-image">
                 <img src="${request.vehicle.image}" alt="Vehicle" />
@@ -474,49 +475,54 @@
               </div>
             </div>
           `;
-        });
-      };
-
-      fetch_requests();
-
-      const fetch_staff_types = async () => {
-        const req_url = `${API_HOST}/api/staff/staff-types`;
-        const resp = await fetch(req_url, {
-          method: "GET",
-          headers: {
-            "Content-type": "application/json",
-            Authorization: `bearer ${localStorage.getItem("token")}`,
-          },
-        });
-
-        const json = await resp.json();
-        const staffsContainer = document.querySelector("#staffs-container");
-        json["staff-types"].forEach((staff_type) => {
-          const formattedType = staff_type
-            .split("_")
-            .map(
-              (part) =>
-                part.charAt(0).toUpperCase() + part.slice(1).toLowerCase()
-            )
-            .join(" ");
-          const staffSelector = document.createElement("div");
-          staffSelector.className = "staff-selector";
-          staffSelector.id = formattedType;
-          staffSelector.textContent = formattedType;
-          staffSelector.addEventListener("click", () => {
-            if (required_staff_types[formattedType] === undefined) {
-              required_staff_types[formattedType] = true;
-            } else {
-              required_staff_types[formattedType] =
-                !required_staff_types[formattedType];
-            }
-            staffSelector.classList.toggle("staff-selector-active");
           });
-          staffsContainer.appendChild(staffSelector);
-        });
+        };
+
+        await fetch_requests();
+
+        const fetch_staff_types = async () => {
+          const req_url = `${API_HOST}/api/staff/staff-types`;
+          const resp = await fetch(req_url, {
+            method: "GET",
+            headers: {
+              "Content-type": "application/json",
+              Authorization: `bearer ${localStorage.getItem("token")}`,
+            },
+          });
+
+          const json = await resp.json();
+          const staffsContainer = document.querySelector("#staffs-container");
+          json["staff-types"].forEach((staff_type) => {
+            const formattedType = staff_type
+              .split("_")
+              .map(
+                (part) =>
+                  part.charAt(0).toUpperCase() + part.slice(1).toLowerCase()
+              )
+              .join(" ");
+            const staffSelector = document.createElement("div");
+            staffSelector.className = "staff-selector";
+            staffSelector.id = formattedType;
+            staffSelector.textContent = formattedType;
+            staffSelector.addEventListener("click", () => {
+              if (required_staff_types[formattedType] === undefined) {
+                required_staff_types[formattedType] = true;
+              } else {
+                required_staff_types[formattedType] =
+                  !required_staff_types[formattedType];
+              }
+              staffSelector.classList.toggle("staff-selector-active");
+            });
+            staffsContainer.appendChild(staffSelector);
+          });
+        };
+
+        await fetch_staff_types();
       };
 
-      fetch_staff_types();
+      document.addEventListener("DOMContentLoaded", () => {
+        init();
+      });
     </script>
     <script src="https://unpkg.com/simplebar@latest/dist/simplebar.min.js"></script>
   </body>
