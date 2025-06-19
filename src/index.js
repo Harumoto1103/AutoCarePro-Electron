@@ -16,6 +16,7 @@ const createWindow = () => {
       nodeIntegration: false,
       contextIsolation: true,
     },
+    focusable: true,
   });
 
   // and load the index.html of the app.
