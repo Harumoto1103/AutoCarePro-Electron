@@ -175,6 +175,11 @@
         color: var(--success);
       }
 
+      .stat-icon.rate {
+        background: rgba(114, 9, 183, 0.15);
+        color: var(--secondary);
+      }
+
       .stat-value {
         font-size: 32px;
         font-weight: 700;
@@ -316,6 +321,15 @@
           <div class="stat-value" id="total-hours">0.0</div>
           <div class="stat-title">Total Hours Worked</div>
         </div>
+        <div class="stat-card">
+          <div class="stat-header">
+            <div class="stat-icon rate">
+              <i class="fas fa-money-bill-wave"></i>
+            </div>
+          </div>
+          <div class="stat-value" id="hourly-rate">0.00</div>
+          <div class="stat-title">Hourly Rate</div>
+        </div>
       </div>
 
       <h2>Monthly Salary</h2>
@@ -334,6 +348,14 @@
       const init = async () => {
         // Assume staffId is stored in localStorage
         const staffId = localStorage.getItem("user_id") || "1"; // Default to '1' for testing
+        const userProfile = JSON.parse(localStorage.getItem("user_profile"));
+        const hourlyRate = userProfile?.hourly_rate;
+        if (typeof hourlyRate === "number") {
+          document.getElementById("hourly-rate").textContent =
+            hourlyRate.toFixed(2);
+        } else {
+          document.getElementById("hourly-rate").textContent = "N/A";
+        }
 
         // Fetch staff income data
         const fetchStaffIncome = async () => {
