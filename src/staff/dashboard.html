@@ -6,6 +6,10 @@
     <title>Staff Dashboard</title>
     <link
       rel="stylesheet"
+      href="https://unpkg.com/simplebar@latest/dist/simplebar.css"
+    />
+    <link
+      rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     />
     <link
@@ -271,7 +275,7 @@
       }
     </style>
   </head>
-  <body>
+  <body data-simplebar="">
     <div class="container" data-simplebar>
       <header>
         <div class="logo">
@@ -331,34 +335,38 @@
 
     <script src="../js/config.js"></script>
     <script>
-      // Assume staffId is stored in localStorage
-      const staffId = localStorage.getItem("user_id") || "1"; // Default to '1' for testing
+      const init = async () => {
+        // Assume staffId is stored in localStorage
+        const staffId = localStorage.getItem("user_id") || "1"; // Default to '1' for testing
 
-      // Fetch staff income data
-      const fetchStaffIncome = async () => {
-        try {
-          const resp = await fetch(`${API_HOST}/api/staff/${staffId}/income`, {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-          });
-          if (!resp.ok) throw new Error("Failed to fetch staff income");
-          const data = await resp.json();
-          document.getElementById("total-income").textContent =
-            data.total_income.toFixed(2);
-          document.getElementById("total-hours").textContent =
-            data.total_hours_worked.toFixed(1);
+        // Fetch staff income data
+        const fetchStaffIncome = async () => {
+          try {
+            const resp = await fetch(
+              `${API_HOST}/api/staff/${staffId}/income`,
+              {
+                method: "GET",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${localStorage.getItem("token")}`,
+                },
+              }
+            );
+            if (!resp.ok) throw new Error("Failed to fetch staff income");
+            const data = await resp.json();
+            document.getElementById("total-income").textContent =
+              data.total_income.toFixed(2);
+            document.getElementById("total-hours").textContent =
+              data.total_hours_worked.toFixed(1);
 
-          const assignmentList = document.getElementById("assignmentList");
-          if (!data.assignments || data.assignments.length === 0) {
-            assignmentList.innerHTML =
-              '<div class="no-feedback">No assignments found.</div>';
-          } else {
-            const assignmentHTML = data.assignments
-              .map(
-                (assignment) => `
+            const assignmentList = document.getElementById("assignmentList");
+            if (!data.assignments || data.assignments.length === 0) {
+              assignmentList.innerHTML =
+                '<div class="no-feedback">No assignments found.</div>';
+            } else {
+              const assignmentHTML = data.assignments
+                .map(
+                  (assignment) => `
               <div class="feedback-item">
                 <h3>Assignment ID: ${assignment.assignment_id}</h3>
                 <p>Order ID: ${assignment.order_id}</p>
@@ -367,118 +375,124 @@
                 <p>Assignment Fee: ${assignment.assignment_fee.toFixed(2)}</p>
               </div>
             `
-              )
-              .join("");
-            assignmentList.innerHTML = assignmentHTML;
-          }
-        } catch (error) {
-          console.error(error);
-          alert("Error loading staff income");
-        }
-      };
-
-      // Fetch monthly salary data
-      const fetchStaffSalaryByMonth = async (year) => {
-        try {
-          const params = new URLSearchParams({ only_completed: true });
-          if (year) params.append("year", year);
-          const resp = await fetch(
-            `${API_HOST}/api/staff/${staffId}/salary-by-month?${params.toString()}`,
-            {
-              method: "GET",
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${localStorage.getItem("token")}`,
-              },
+                )
+                .join("");
+              assignmentList.innerHTML = assignmentHTML;
             }
-          );
-          if (!resp.ok)
-            throw new Error("Failed to fetch staff salary by month");
-          const data = await resp.json();
-          const labels = data.monthly_salary.map((item) => item.month);
-          const incomeData = data.monthly_salary.map(
-            (item) => item.total_income
-          );
-          const hoursData = data.monthly_salary.map((item) => item.total_hours);
+          } catch (error) {
+            console.error(error);
+            alert("Error loading staff income");
+          }
+        };
 
-          // Destroy existing chart if it exists
-          Chart.getChart("monthlySalaryChart")?.destroy();
+        // Fetch monthly salary data
+        const fetchStaffSalaryByMonth = async (year) => {
+          try {
+            const params = new URLSearchParams({ only_completed: true });
+            if (year) params.append("year", year);
+            const resp = await fetch(
+              `${API_HOST}/api/staff/${staffId}/salary-by-month?${params.toString()}`,
+              {
+                method: "GET",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${localStorage.getItem("token")}`,
+                },
+              }
+            );
+            if (!resp.ok)
+              throw new Error("Failed to fetch staff salary by month");
+            const data = await resp.json();
+            const labels = data.monthly_salary.map((item) => item.month);
+            const incomeData = data.monthly_salary.map(
+              (item) => item.total_income
+            );
+            const hoursData = data.monthly_salary.map(
+              (item) => item.total_hours
+            );
 
-          new Chart(document.getElementById("monthlySalaryChart"), {
-            type: "bar",
-            data: {
-              labels,
-              datasets: [
-                {
-                  label: "Total Income",
-                  data: incomeData,
-                  backgroundColor: "#4F46E5",
-                  yAxisID: "y",
+            // Destroy existing chart if it exists
+            Chart.getChart("monthlySalaryChart")?.destroy();
+
+            new Chart(document.getElementById("monthlySalaryChart"), {
+              type: "bar",
+              data: {
+                labels,
+                datasets: [
+                  {
+                    label: "Total Income",
+                    data: incomeData,
+                    backgroundColor: "#4F46E5",
+                    yAxisID: "y",
+                  },
+                  {
+                    label: "Total Hours",
+                    data: hoursData,
+                    backgroundColor: "#10B981",
+                    yAxisID: "y1",
+                  },
+                ],
+              },
+              options: {
+                responsive: true,
+                plugins: {
+                  title: {
+                    display: true,
+                    text: "Monthly Salary and Hours Worked",
+                  },
                 },
-                {
-                  label: "Total Hours",
-                  data: hoursData,
-                  backgroundColor: "#10B981",
-                  yAxisID: "y1",
-                },
-              ],
-            },
-            options: {
-              responsive: true,
-              plugins: {
-                title: {
-                  display: true,
-                  text: "Monthly Salary and Hours Worked",
+                scales: {
+                  y: {
+                    beginAtZero: true,
+                    position: "left",
+                    title: { display: true, text: "Total Income" },
+                  },
+                  y1: {
+                    beginAtZero: true,
+                    position: "right",
+                    title: { display: true, text: "Total Hours" },
+                    grid: { drawOnChartArea: false },
+                  },
                 },
               },
-              scales: {
-                y: {
-                  beginAtZero: true,
-                  position: "left",
-                  title: { display: true, text: "Total Income" },
-                },
-                y1: {
-                  beginAtZero: true,
-                  position: "right",
-                  title: { display: true, text: "Total Hours" },
-                  grid: { drawOnChartArea: false },
-                },
-              },
-            },
-          });
-        } catch (error) {
-          console.error(error);
-          alert("Error loading monthly salary data");
+            });
+          } catch (error) {
+            console.error(error);
+            alert("Error loading monthly salary data");
+          }
+        };
+
+        // Populate year dropdown
+        const yearSelect = document.getElementById("year-select");
+        const currentYear = new Date().getFullYear();
+        for (let year = currentYear - 5; year <= currentYear; year++) {
+          const option = document.createElement("option");
+          option.value = year;
+          option.textContent = year;
+          yearSelect.appendChild(option);
         }
-      };
+        yearSelect.value = currentYear;
 
-      // Populate year dropdown
-      const yearSelect = document.getElementById("year-select");
-      const currentYear = new Date().getFullYear();
-      for (let year = currentYear - 5; year <= currentYear; year++) {
-        const option = document.createElement("option");
-        option.value = year;
-        option.textContent = year;
-        yearSelect.appendChild(option);
-      }
-      yearSelect.value = currentYear;
+        // Apply filter button
+        document
+          .getElementById("apply-filter-btn")
+          .addEventListener("click", () => {
+            const year = yearSelect.value;
+            fetchStaffSalaryByMonth(year);
+          });
 
-      // Apply filter button
-      document
-        .getElementById("apply-filter-btn")
-        .addEventListener("click", () => {
-          const year = yearSelect.value;
-          fetchStaffSalaryByMonth(year);
+        // Refresh button
+        document.getElementById("refresh-btn").addEventListener("click", () => {
+          location.reload();
         });
 
-      // Refresh button
-      document.getElementById("refresh-btn").addEventListener("click", () => {
-        location.reload();
-      });
+        // Initial data load
+        await fetchStaffIncome();
+        await fetchStaffSalaryByMonth();
+      };
 
-      // Initial data load
-      fetchStaffIncome();
-      fetchStaffSalaryByMonth();
+      document.addEventListener("DOMContentLoaded", init);
     </script>
+    <script src="https://unpkg.com/simplebar@latest/dist/simplebar.min.js"></script>
   </body>
 </html>

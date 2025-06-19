@@ -12,6 +12,10 @@
       rel="stylesheet"
       href="https://unpkg.com/simplebar@latest/dist/simplebar.css"
     />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/simplebar@latest/dist/simplebar.css"
+    />
     <script src="https://unpkg.com/simplebar@latest/dist/simplebar.min.js"></script>
     <!-- or -->
     <link
@@ -224,7 +228,11 @@
   <body>
     <div class="container" data-simplebar>
       <h2><i class="fas fa-wrench"></i> Repair Orders</h2>
-      <div class="repair-order-container" id="repairOrderContainer"></div>
+      <div
+        class="repair-order-container"
+        id="repairOrderContainer"
+        data-simplebar=""
+      ></div>
     </div>
 
     <script src="../js/alert.js"></script>
@@ -354,5 +362,6 @@
       // Initialize loading
       document.addEventListener("DOMContentLoaded", init);
     </script>
+    <script src="https://unpkg.com/simplebar@latest/dist/simplebar.min.js"></script>
   </body>
 </html>

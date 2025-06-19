@@ -8,6 +8,10 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/simplebar@latest/dist/simplebar.css"
+    />
     <!-- <link rel="stylesheet" href="../css/universal.css" /> -->
     <link rel="stylesheet" href="../css/alert.css" />
     <style>
@@ -312,7 +316,11 @@
   </head>
   <body>
     <h2><i class="fas fa-tools"></i> Unprocessed Requests</h2>
-    <div class="requests-container" id="requests-container"></div>
+    <div
+      class="requests-container"
+      id="requests-container"
+      data-simplebar
+    ></div>
     <div class="modal" id="order-window">
       <div class="order-window">
         <h2><i class="fas fa-file-alt"></i> Generate Order</h2>
@@ -510,5 +518,6 @@
 
       fetch_staff_types();
     </script>
+    <script src="https://unpkg.com/simplebar@latest/dist/simplebar.min.js"></script>
   </body>
 </html>
