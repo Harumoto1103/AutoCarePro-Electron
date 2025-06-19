@@ -28,7 +28,7 @@ const createWindow = () => {
 ipcMain.on("switch-to-bigger", () => {
   const mainWindow = BrowserWindow.getFocusedWindow();
   if (mainWindow) {
-    mainWindow.setSize(1200, 800);
+    mainWindow.setSize(1374, 821);
   }
 });
 
