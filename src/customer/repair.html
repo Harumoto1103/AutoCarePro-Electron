@@ -4,6 +4,10 @@
     <meta charset="UTF-8" />
     <link rel="stylesheet" href="../css/universal.css" />
     <link rel="stylesheet" href="../css/customer-cars.css" />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/simplebar@latest/dist/simplebar.css"
+    />
     <link rel="stylesheet" href="../css/alert.css" />
     <link
       rel="stylesheet"
@@ -36,7 +40,7 @@
           <div class="title-button" id="add-btn">＋New Requests</div>
         </div>
       </div>
-      <div class="cars-container" id="cars-container">
+      <div class="cars-container" id="cars-container" data-simplebar>
         <div class="no-cars" id="no-cars">Loading...</div>
       </div>
     </div>
@@ -338,4 +342,5 @@
       init();
     });
   </script>
+  <script src="https://unpkg.com/simplebar@latest/dist/simplebar.min.js"></script>
 </html>
