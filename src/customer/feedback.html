@@ -7,6 +7,10 @@
     <link rel="stylesheet" href="../css/alert.css" />
     <link
       rel="stylesheet"
+      href="https://unpkg.com/simplebar@latest/dist/simplebar.css"
+    />
+    <link
+      rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"
     />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -28,7 +32,7 @@
         </div>
       </div>
     </div>
-    <div class="container animate__animated animate__fadeIn">
+    <div class="container animate__animated animate__fadeIn" data-simplebar>
       <div class="cancel" id="cancel">✖︎</div>
       <div class="container-title">
         <div class="container-title-text">My Feedbacks</div>
@@ -38,7 +42,7 @@
           </div>
         </div>
       </div>
-      <div class="cars-container" id="cars-container">
+      <div class="cars-container" id="cars-container" data-simplebar>
         <div class="no-cars" id="no-cars">Loading...</div>
       </div>
     </div>
@@ -177,4 +181,5 @@
       init();
     });
   </script>
+  <script src="https://unpkg.com/simplebar@latest/dist/simplebar.min.js"></script>
 </html>

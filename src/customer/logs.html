@@ -6,6 +6,10 @@
     <link rel="stylesheet" href="../css/customer-cars.css" />
     <link rel="stylesheet" href="../css/alert.css" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/simplebar@latest/dist/simplebar.css"
+    />
     <title>AutoCare Pro - Repair Logs</title>
     <style>
       .log-item {
@@ -105,7 +109,7 @@
         </div>
       </div>
     </div>
-    <div class="container">
+    <div class="container" data-simplebar>
       <div class="cancel" id="cancel">✖︎</div>
       <div class="container-title">
         <div class="container-title-text">Repair Logs</div>
@@ -119,7 +123,7 @@
         <p>Viewing repair logs for this order</p>
       </div>
 
-      <div class="cars-container" id="logs-container">
+      <div class="cars-container" id="logs-container" data-simplebar>
         <div class="no-logs" id="no-logs">Loading logs...</div>
       </div>
     </div>
@@ -281,4 +285,5 @@
       init();
     });
   </script>
+  <script src="https://unpkg.com/simplebar@latest/dist/simplebar.min.js"></script>
 </html>

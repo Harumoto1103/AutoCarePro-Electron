@@ -7,6 +7,10 @@
     <link rel="stylesheet" href="../css/alert.css" />
     <link
       rel="stylesheet"
+      href="https://unpkg.com/simplebar@latest/dist/simplebar.css"
+    />
+    <link
+      rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
     />
     <link
@@ -32,7 +36,7 @@
         </div>
       </div>
     </div>
-    <form class="container animate__animated animate__fadeIn">
+    <form class="container animate__animated animate__fadeIn" data-simplebar>
       <div class="cancel" id="cancel">✖︎</div>
       <div class="container-title">
         <div class="container-title-text">Add Request</div>
@@ -198,4 +202,5 @@
       await init();
     });
   </script>
+  <script src="https://unpkg.com/simplebar@latest/dist/simplebar.min.js"></script>
 </html>
