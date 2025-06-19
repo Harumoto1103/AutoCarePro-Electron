@@ -856,7 +856,11 @@
               );
 
               if (!name || isNaN(price) || isNaN(quantity)) {
-                alert("Please fill in complete material information");
+                alert(
+                  "Attention",
+                  "Please fill in complete material information",
+                  "Confirm"
+                );
                 return;
               }
 
@@ -871,7 +875,11 @@
               // Post Remark
               const error_report = (response_ok) => {
                 if (response_ok) {
-                  alert("Progress recorded successfully!");
+                  alert(
+                    "Success",
+                    "Progress recorded successfully!",
+                    "Confirm"
+                  );
                   document
                     .getElementById("progressModal")
                     .classList.remove("visible");
@@ -945,7 +953,7 @@
               }
             } catch (error) {
               console.error("Submission error:", error);
-              alert("Request failed");
+              alert("Error", "Request failed", "Confirm");
             }
           });
 
@@ -960,7 +968,7 @@
             );
 
             if (isNaN(timeWorked) || timeWorked < 0) {
-              alert("Please enter a valid time worked");
+              alert("Error", "Please enter a valid time worked", "Confirm");
               return;
             }
 
@@ -990,8 +998,10 @@
               } else {
                 const errorData = await response.json();
                 alert(
+                  "Error",
                   errorData.detail ||
-                    "Failed to update assignment time, please try again"
+                    "Failed to update assignment time, please try again",
+                  "Confirm"
                 );
               }
             } catch (error) {
@@ -1018,7 +1028,11 @@
               );
 
               if (isNaN(timeWorked) || timeWorked < 0) {
-                alert("Please enter valid time worked for all assignments");
+                alert(
+                  "Error",
+                  "Please enter valid time worked for all assignments",
+                  "Confirm"
+                );
                 return;
               }
 
@@ -1042,7 +1056,11 @@
               );
 
               if (response.ok) {
-                alert("Repair order completed successfully!");
+                alert(
+                  "Success",
+                  "Repair order completed successfully!",
+                  "Confirm"
+                );
                 document
                   .getElementById("completeModal")
                   .classList.remove("visible");
@@ -1050,13 +1068,15 @@
               } else {
                 const errorData = await response.json();
                 alert(
+                  "Error",
                   errorData.detail ||
-                    "Failed to complete order, please try again"
+                    "Failed to complete order, please try again",
+                  "Confirm"
                 );
               }
             } catch (error) {
               console.error("Completion error:", error);
-              alert("Request failed");
+              alert("Error", "Request failed:" + error, "Confirm");
             }
           });
 
@@ -1065,7 +1085,10 @@
           const assignmentId = event.target.dataset.id;
           if (
             confirm(
-              `Are you sure you want to accept Assignment #${assignmentId}?`
+              "Attention",
+              `Trying to accept Assignment #${assignmentId}.`,
+              "Confirm",
+              () => {}
             )
           ) {
             try {
@@ -1097,7 +1120,7 @@
               }
             } catch (error) {
               console.error("Error:", error);
-              alert("Request processing failed");
+              alert("Error", "Request processing failed: " + error, "Confirm");
             }
           }
         };
@@ -1107,7 +1130,9 @@
           const assignmentId = event.target.dataset.id;
           if (
             confirm(
-              `Are you sure you want to decline Assignment #${assignmentId}?`
+              "Attention",
+              `You are trying to decline Assignment #${assignmentId}.`,
+              "Confirm"
             )
           ) {
             try {
@@ -1124,14 +1149,22 @@
               );
 
               if (response.ok) {
-                alert("Assignment declined successfully!");
+                alert(
+                  "Success",
+                  "Assignment declined successfully!",
+                  "Confirm"
+                );
                 fetch_assignments();
               } else {
-                alert("Operation failed, please try again later");
+                alert(
+                  "Error",
+                  "Operation failed, please try again later",
+                  "Confirm"
+                );
               }
             } catch (error) {
               console.error("Error:", error);
-              alert("Request processing failed");
+              alert("Error", "Request processing failed: " + error, "Confirm");
             }
           }
         };
