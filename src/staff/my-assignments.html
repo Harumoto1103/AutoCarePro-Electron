@@ -1107,7 +1107,8 @@
               } else {
                 alert(
                   "Error",
-                  "Operation failed, please try again later",
+                  "Operation failed, please try again later:" +
+                    (await response.json()).detail,
                   "Confirm"
                 );
               }
