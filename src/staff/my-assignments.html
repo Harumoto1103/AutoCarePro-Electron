@@ -1083,14 +1083,7 @@
         // Handle accept assignment
         const handle_accept = async (event) => {
           const assignmentId = event.target.dataset.id;
-          if (
-            confirm(
-              "Attention",
-              `Trying to accept Assignment #${assignmentId}.`,
-              "Confirm",
-              () => {}
-            )
-          ) {
+          if (confirm(`Are you trying accept Assignment #${assignmentId}?`)) {
             try {
               const response = await fetch(
                 `${API_HOST}/api/staff/${localStorage.getItem(
@@ -1129,11 +1122,7 @@
         const handle_decline = async (event) => {
           const assignmentId = event.target.dataset.id;
           if (
-            confirm(
-              "Attention",
-              `You are trying to decline Assignment #${assignmentId}.`,
-              "Confirm"
-            )
+            confirm(`Are you trying to decline Assignment #${assignmentId}?`)
           ) {
             try {
               const response = await fetch(
